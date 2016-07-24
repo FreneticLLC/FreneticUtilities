@@ -41,8 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FDSFile.cs" />
+    <Compile Include="FDSData.cs" />
+    <Compile Include="FDSParseException.cs" />
+    <Compile Include="FDSSection.cs" />
     <Compile Include="FDSUtility.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

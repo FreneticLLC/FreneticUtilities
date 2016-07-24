@@ -23,13 +23,14 @@ FreneticDataSyntax is in VERY EARLY development. Meaning, it's not even worth us
 - FDS reads line endings properly, and outputs with the correct system line endings (except when configured to use a specific ending).
 - FDS supports 32-bit integers, 64-bit integers ("longs"), 32-bit floats, 64-bit floats ("doubles"), textual strings, binary arrays.
 - FDS is case sensitive, but supports case-insensitive reads.
-- FDS supports newlines in text via `\n`, and backslashes via `\\`. Also available: `\r` (carriage return), `\t` (tab), and `\d` (dot).
+- FDS supports newlines in text via `\n`, and backslashes via `\\`. Also available: `\r` (carriage return), `\t` (tab), `\d` (dot), `\c` (colon), `\e` (equals sign), `\x` (nothing, to allow spaces at start or end of text).
 - FDS **DOES NOT** currently support:
 	- Lists of binary information.
 	- Multi-line keys.
 	- Automatic serialization of non-basic types.
 	- Comments at end-of-file.
 	- Files or data bigger than your RAM.
+	- Empty key labels.
 
 ### Example
 
