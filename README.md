@@ -39,21 +39,25 @@ The following is an example of FDS syntax:
 ```FDS
 # MyFDSFile.fds
 my root section 1:
-	# This represents some data.
-	my_sub_section:
-	    # The key is set with a value of 3.
-		my numeric key: 3
-		my decimal number key: 3.14159
-	my other section:
-		my first string key: alpha
-		my second string key: Wow what a system!
+    # This represents some data.
+    my_sub_section:
+        # The key is set with a value of 3.
+        my numeric key: 3
+        my decimal number key: 3.14159
+    my other section:
+        my first string key: alpha
+        my second string key: Wow what a system!
 my second root section:
-	# contains UTF-8 text: Hello world, and all who inhabit it!
-	my binary key= SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
-	my list key:
-	- 1
-	- two
-	- three makes it complete!
+    # contains UTF-8 text: Hello world, and all who inhabit it!
+    my binary key= SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
+	# This is a list.
+    my list key:
+	# This will be correct integer type.
+    - 1
+	# This will be text.
+    - two
+	# Wrap up with more text.
+    - three makes it complete!
 ```
 
 ### Licensing pre-note:

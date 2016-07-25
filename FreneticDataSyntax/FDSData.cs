@@ -26,6 +26,15 @@ namespace FreneticDataSyntax
         /// <returns>The resultant data.</returns>
         public string Outputable()
         {
+            if (Internal is List<FDSData>)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (FDSData dat in (List<FDSData>)Internal)
+                {
+                    sb.Append(dat.Outputable()).Append("|");
+                }
+                return sb.ToString();
+            }
             if (Internal is byte[])
             {
                 return Convert.ToBase64String((byte[])Internal, Base64FormattingOptions.None);

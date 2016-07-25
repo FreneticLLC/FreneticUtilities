@@ -26,6 +26,7 @@ namespace FreneticDataSyntax
             string[] data = contents.SplitFast('\n');
             int pspaces = 0;
             string secwaiting = null;
+            List<FDSData> clist = null;
             for (int i = 0; i < data.Length; i++)
             {
                 string line = data[i];
@@ -66,6 +67,28 @@ namespace FreneticDataSyntax
                         Exception(i, line, "Spaced incorrectly. Spacing length is less than previous spacing length, but does not match the spacing value of any known section");
                     }
                 }
+                if (datum[0] == '-')
+                {
+                    string clistline = datum.Substring(1).TrimStart(' ');
+                    if (clist == null)
+                    {
+                        if (spaces >= pspaces && secwaiting != null)
+                        {
+                            clist = new List<FDSData>();
+                            csection.SetRootData(FDSUtility.UnEscapeKey(secwaiting), new FDSData() { PrecedingComments = new List<string>(seccomments), Internal = clist });
+                            seccomments.Clear();
+                            secwaiting = null;
+                        }
+                        else
+                        {
+                            Exception(i, line, "Line purpose unknown, attempted list entry when not building a list");
+                        }
+                    }
+                    clist.Add(new FDSData() { PrecedingComments = new List<string>(ccomments), Internal = FDSUtility.InterpretType(FDSUtility.UnEscape(clistline)) });
+                    ccomments.Clear();
+                    continue;
+                }
+                clist = null;
                 string startofline = "";
                 string endofline = "";
                 char type = '\0';
@@ -119,7 +142,7 @@ namespace FreneticDataSyntax
                     }
                     else
                     {
-                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData() { PrecedingComments = new List<string>(ccomments), Internal = FDSUtility.InterpretType(endofline) });
+                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData() { PrecedingComments = new List<string>(ccomments), Internal = FDSUtility.InterpretType(FDSUtility.UnEscape(endofline)) });
                         ccomments.Clear();
                     }
                 }
@@ -202,6 +225,21 @@ namespace FreneticDataSyntax
                 else if (dat.Internal is byte[])
                 {
                     sb.Append("= ").Append(dat.Outputable()).Append(newline);
+                }
+                else if (dat.Internal is List<FDSData>)
+                {
+                    List<FDSData> datums = (List<FDSData>)dat.Internal;
+                    sb.Append(":").Append(newline);
+                    foreach (FDSData cdat in datums)
+                    {
+                        foreach (string com in cdat.PrecedingComments)
+                        {
+                            FDSUtility.AppendSpaces(sb, spacing);
+                            sb.Append("#").Append(com).Append(newline);
+                        }
+                        FDSUtility.AppendSpaces(sb, spacing);
+                        sb.Append("- ").Append(FDSUtility.Escape(cdat.Outputable())).Append(newline);
+                    }
                 }
                 else
                 {
