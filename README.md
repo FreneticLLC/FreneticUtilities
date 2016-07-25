@@ -7,7 +7,7 @@ This is a C#/.NET reference implementation of an FDS parser.
 
 ### Status
 
-FreneticDataSyntax is in VERY EARLY development. Meaning, it's not even worth using in its present state. Please do watch/star/follow/whatever the development to see it progress!
+FreneticDataSyntax is young but capable. It fully supports reading and re-saving the example FDS file below. Some features are untested or not yet available.
 
 ### Some information (unordered)
 

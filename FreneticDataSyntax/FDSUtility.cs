@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace FreneticDataSyntax
 {
@@ -10,6 +11,31 @@ namespace FreneticDataSyntax
     /// </summary>
     public static class FDSUtility
     {
+        /// <summary>
+        /// The UTF-8 encoding used by FDS.
+        /// </summary>
+        public static Encoding UTF8 = new UTF8Encoding(false);
+
+        /// <summary>
+        /// Reads a file into an FDS Section. Throws normal exceptions on any issue.
+        /// </summary>
+        /// <param name="fname">The name of the file to read.</param>
+        /// <returns>An FDS Section containing the same data as the file.</returns>
+        public static FDSSection ReadFile(string fname)
+        {
+            return new FDSSection(UTF8.GetString(File.ReadAllBytes(fname)));
+        }
+
+        /// <summary>
+        /// Saves an FDS Section into a file. Throws normal exceptions on any issue.
+        /// </summary>
+        /// <param name="section">The data to save.</param>
+        /// <param name="fname">The name of the file to read.</param>
+        public static void SaveToFile(this FDSSection section, string fname)
+        {
+            File.WriteAllBytes(fname, UTF8.GetBytes(section.SaveToString()));
+        }
+
         /// <summary>
         /// Cleans file line endings, tabs, and any other data that may cause issues.
         /// </summary>
