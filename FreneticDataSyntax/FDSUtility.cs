@@ -138,12 +138,25 @@ namespace FreneticDataSyntax
         /// Appends a number of spaces to a string builder.
         /// </summary>
         /// <param name="sb">The string builder.</param>
-        /// <param name="spaces">The spaces.</param>
+        /// <param name="spaces">The number of spaces.</param>
         public static void AppendSpaces(StringBuilder sb, int spaces)
         {
             for (int i = 0; i < spaces; i++)
             {
                 sb.Append(' ');
+            }
+        }
+
+        /// <summary>
+        /// Appends a number of tabs to a string builder.
+        /// </summary>
+        /// <param name="sb">The string builder.</param>
+        /// <param name="spaces">The number of tabs.</param>
+        public static void AppendTabs(StringBuilder sb, int spaces)
+        {
+            for (int i = 0; i < spaces; i++)
+            {
+                sb.Append('\t');
             }
         }
     }

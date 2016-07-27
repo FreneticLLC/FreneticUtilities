@@ -198,10 +198,10 @@ namespace FreneticDataSyntax
         /// <summary>
         /// Converts this FDSSection to a textual representation of itself.
         /// </summary>
-        /// <param name="spacing">How many spaces to start with. Generally do not set this.</param>
+        /// <param name="tabulation">How many tabs to start with. Generally do not set this.</param>
         /// <param name="newline">What string to use as a new line. Generally do not set this.</param>
         /// <returns>The string.</returns>
-        public string SaveToString(int spacing = 0, string newline = null)
+        public string SaveToString(int tabulation = 0, string newline = null)
         {
             if (newline == null)
             {
@@ -213,14 +213,14 @@ namespace FreneticDataSyntax
                 FDSData dat = Data[key];
                 foreach (string str in dat.PrecedingComments)
                 {
-                    FDSUtility.AppendSpaces(sb, spacing);
+                    FDSUtility.AppendTabs(sb, tabulation);
                     sb.Append("#").Append(str).Append(newline);
                 }
-                FDSUtility.AppendSpaces(sb, spacing);
+                FDSUtility.AppendTabs(sb, tabulation);
                 sb.Append(FDSUtility.EscapeKey(key));
                 if (dat.Internal is FDSSection)
                 {
-                    sb.Append(":").Append(newline).Append(((FDSSection)dat.Internal).SaveToString(spacing + 4, newline));
+                    sb.Append(":").Append(newline).Append(((FDSSection)dat.Internal).SaveToString(tabulation + 1, newline));
                 }
                 else if (dat.Internal is byte[])
                 {
@@ -234,10 +234,10 @@ namespace FreneticDataSyntax
                     {
                         foreach (string com in cdat.PrecedingComments)
                         {
-                            FDSUtility.AppendSpaces(sb, spacing);
+                            FDSUtility.AppendTabs(sb, tabulation);
                             sb.Append("#").Append(com).Append(newline);
                         }
-                        FDSUtility.AppendSpaces(sb, spacing);
+                        FDSUtility.AppendTabs(sb, tabulation);
                         sb.Append("- ").Append(FDSUtility.Escape(cdat.Outputable())).Append(newline);
                     }
                 }
