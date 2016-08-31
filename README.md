@@ -7,11 +7,12 @@ This is a C#/.NET reference implementation of an FDS parser.
 
 ### Status
 
-FreneticDataSyntax is young but capable. It fully supports reading and re-saving the example FDS file below. Some features are untested or not yet available.
+FreneticDataSyntax is young but capable. It fully supports reading and re-saving the example FDS file below, as well as interaction with it via API methods. Some features are untested or not yet available.
 
 ### Some information (unordered)
 
-- FDS supports tabs as a representative of 4 spaces.
+- FDS supports (and encourages) tabs as a representative of 4 spaces.
+	- This trims a few bytes and allows users to freely control how they view an FDS file.
 - FDS is neat, clean, and user friendly.
 - FDS preserves list order, but not section order.
 - FDS preserves preceding comments (Comments that come before a data section).
@@ -24,6 +25,8 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
 - FDS supports 32-bit integers, 64-bit integers ("longs"), 32-bit floats, 64-bit floats ("doubles"), textual strings, binary arrays.
 - FDS is case sensitive, but supports case-insensitive reads.
 - FDS supports newlines in text via `\n`, and backslashes via `\\`. Also available: `\r` (carriage return), `\t` (tab), `\d` (dot), `\c` (colon), `\e` (equals sign), `\x` (nothing, to allow spaces at start or end of text).
+- FDS has a developer-friendly API for interfacing with FDS data and data sections.
+- FDS has a developer-unfriendly secondary API for interfacing with raw underlying data as well.
 - FDS **DOES NOT** currently support:
 	- Lists of binary information.
 	- Multi-line keys.

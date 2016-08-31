@@ -185,6 +185,380 @@ namespace FreneticDataSyntax
         public Dictionary<string, FDSData> DataLowered = new Dictionary<string, FDSData>();
 
         /// <summary>
+        /// Gets a string from the section. Can stringify non-string values.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <returns>The data found, or the default.</returns>
+        public List<string> GetStringList(string key)
+        {
+            List<FDSData> dat = GetDataList(key);
+            if (dat == null)
+            {
+                return null;
+            }
+            List<string> newlist = new List<string>(dat.Count);
+            for (int i = 0; i < dat.Count; i++)
+            {
+                newlist.Add(dat[i].Internal.ToString());
+            }
+            return newlist;
+        }
+
+        /// <summary>
+        /// Gets a string from the section. Can stringify non-string values.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <returns>The data found, or the default.</returns>
+        public List<FDSData> GetDataList(string key)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
+            {
+                return null;
+            }
+            object o = got.Internal;
+            if (o is List<FDSData>)
+            {
+                return (List<FDSData>)o;
+            }
+            else
+            {
+                return new List<FDSData>() { got };
+            }
+        }
+
+        /// <summary>
+        /// Gets a string from the section. Can stringify non-string values.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public string GetString(string key, string def = null)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
+            {
+                return def;
+            }
+            object o = got.Internal;
+            if (o is string)
+            {
+                return (string)o;
+            }
+            else
+            {
+                return o.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets an optional float from the section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public float? GetFloat(string key, float? def = null)
+        {
+            return (float?)GetDouble(key, def);
+        }
+
+        /// <summary>
+        /// Gets an optional double from the section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public double? GetDouble(string key, double? def = null)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
+            {
+                return def;
+            }
+            object o = got.Internal;
+            if (o is double)
+            {
+                return (double)o;
+            }
+            else if (o is float)
+            {
+                return (float)o;
+            }
+            else
+            {
+                double d;
+                if (double.TryParse(o.ToString(), out d))
+                {
+                    return d;
+                }
+                return def;
+            }
+        }
+
+        /// <summary>
+        /// Gets an optional int from the section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public int? GetInt(string key, int? def = null)
+        {
+            return (int?)GetLong(key);
+        }
+
+        /// <summary>
+        /// Gets an optional long from the section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public long? GetLong(string key, long? def = null)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
+            {
+                return def;
+            }
+            object o = got.Internal;
+            if (o is long)
+            {
+                return (long)o;
+            }
+            else if (o is int)
+            {
+                return (int)o;
+            }
+            else
+            {
+                long l;
+                if (long.TryParse(o.ToString(), out l))
+                {
+                    return l;
+                }
+                return def;
+            }
+        }
+
+        /// <summary>
+        /// Gets an object from the section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public object GetObject(string key, object def = null)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
+            {
+                return def;
+            }
+            return got.Internal;
+        }
+
+        /// <summary>
+        /// Sets data to the section.
+        /// May throw an FDSInputException if Set failed!
+        /// </summary>
+        /// <param name="key">The key to set data from.</param>
+        /// <param name="input">The key to set data to.</param>
+        public void Set(string key, object input)
+        {
+            SetData(key, new FDSData() { Internal = input, PrecedingComments = new List<string>() });
+        }
+
+        /// <summary>
+        /// Sets data to the section.
+        /// May throw an FDSInputException if SetData failed!
+        /// </summary>
+        /// <param name="key">The key to set data from.</param>
+        /// <param name="data">The key to set data to.</param>
+        public void SetData(string key, FDSData data)
+        {
+            int lind = key.LastIndexOf('.');
+            if (lind < 0)
+            {
+                SetRootData(key, data);
+                return;
+            }
+            if (lind == key.Length - 1)
+            {
+                throw new FDSInputException("Invalid SetData key: Ends in a dot!");
+            }
+
+            FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
+            sec.SetRootData(key.Substring(lind + 1), data);
+        }
+
+        /// <summary>
+        /// Defaults data to the section (IE, sets it if not present!)
+        /// </summary>
+        /// <param name="key">The key to set data from.</param>
+        /// <param name="input">The key to set data to.</param>
+        public void Default(string key, object input)
+        {
+            DefaultData(key, new FDSData() { Internal = input, PrecedingComments = new List<string>() });
+        }
+
+        /// <summary>
+        /// Defaults data to the section (IE, sets it if not present!)
+        /// </summary>
+        /// <param name="key">The key to set data from.</param>
+        /// <param name="data">The key to set data to.</param>
+        public void DefaultData(string key, FDSData data)
+        {
+            int lind = key.LastIndexOf('.');
+            if (lind < 0)
+            {
+                if (GetRootData(key) == null)
+                {
+                    SetRootData(key, data);
+                }
+                return;
+            }
+            if (lind == key.Length - 1)
+            {
+                throw new FDSInputException("Invalid SetData key: Ends in a dot!");
+            }
+
+            FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
+            if (sec.GetRootData(key) == null)
+            {
+                sec.SetRootData(key.Substring(lind + 1), data);
+            }
+        }
+
+        /// <summary>
+        /// Checks if a key exists in the FDS section.
+        /// </summary>
+        /// <param name="key">The key to check for.</param>
+        /// <returns>Whether the key is present.</returns>
+        public bool HasKey(string key)
+        {
+            return GetData(key) != null;
+        }
+
+        /// <summary>
+        /// Gets data from the section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <returns>The data found, or null.</returns>
+        public FDSData GetData(string key)
+        {
+            int lind = key.LastIndexOf('.');
+            if (lind < 0)
+            {
+                return GetRootData(key);
+            }
+            if (lind == key.Length - 1)
+            {
+                return null;
+            }
+            FDSSection sec = GetSection(key.Substring(0, lind));
+            if (sec == null)
+            {
+                return null;
+            }
+            return sec.GetRootData(key.Substring(lind + 1));
+        }
+
+        /// <summary>
+        /// Gets data from the section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <returns>The data found, or null.</returns>
+        public FDSData GetDataLowered(string key)
+        {
+            key = key.ToLowerFast();
+            int lind = key.LastIndexOf('.');
+            if (lind < 0)
+            {
+                return GetRootDataLowered(key);
+            }
+            if (lind == key.Length - 1)
+            {
+                return null;
+            }
+            FDSSection sec = GetSectionInternal(key.Substring(0, lind), true, true);
+            if (sec == null)
+            {
+                return null;
+            }
+            return sec.GetRootDataLowered(key.Substring(lind + 1));
+        }
+
+        /// <summary>
+        /// Gets a sub-section of this FDS section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key of the section.</param>
+        /// <returns>The subsection.</returns>
+        public FDSSection GetSection(string key)
+        {
+            return GetSectionInternal(key, true, false);
+        }
+
+        /// <summary>
+        /// Gets a sub-section of this FDS section.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key of the section.</param>
+        /// <returns>The subsection.</returns>
+        public FDSSection GetSectionLowered(string key)
+        {
+            return GetSectionInternal(key.ToLowerFast(), true, true);
+        }
+
+        /// <summary>
+        /// Gets a sub-section of this FDS section.
+        /// </summary>
+        /// <param name="key">The key of the section.</param>
+        /// <param name="allowNull">Whether to allow null returns, otherwise enforce the section's existence. If true, can throw an FDSInputException!</param>
+        /// <param name="lowered">Whether to read lowercase section names. If set, expects lowercased input key!</param>
+        /// <returns>The subsection.</returns>
+        private FDSSection GetSectionInternal(string key, bool allowNull, bool lowered)
+        {
+            if (key == null || key.Length == 0)
+            {
+                return this;
+            }
+            string[] dat = key.SplitFast('.');
+            FDSSection current = this;
+            for (int i = 0; i < dat.Length; i++)
+            {
+                FDSData fdat = lowered ? current.GetRootDataLowered(dat[i]) : current.GetRootData(dat[i]);
+                if (fdat != null && fdat.Internal is FDSSection)
+                {
+                    current = (FDSSection)fdat.Internal;
+                }
+                else
+                {
+                    if (allowNull)
+                    {
+                        return null;
+                    }
+                    if (fdat != null)
+                    {
+                        throw new FDSInputException("Key contains non-section contents!");
+                    }
+                    FDSSection temp = new FDSSection();
+                    current.SetRootData(dat[i], new FDSData() { Internal = temp, PrecedingComments = new List<string>() });
+                    current = temp;
+                }
+            }
+            return current;
+        }
+
+        /// <summary>
         /// Sets data direct on the root level.
         /// </summary>
         /// <param name="key">The key to set data to.</param>
@@ -193,6 +567,39 @@ namespace FreneticDataSyntax
         {
             Data[key] = data;
             DataLowered[key.ToLowerFast()] = data;
+        }
+
+        /// <summary>
+        /// Gets data direct from the root level.
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <returns>The data found, or null.</returns>
+        public FDSData GetRootData(string key)
+        {
+            FDSData temp;
+            if (Data.TryGetValue(key, out temp))
+            {
+                return temp;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets data direct from the root level.
+        /// Returns null if not found.
+        /// Assumes input is already lowercase!
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <returns>The data found, or null.</returns>
+        public FDSData GetRootDataLowered(string key)
+        {
+            FDSData temp;
+            if (DataLowered.TryGetValue(key, out temp))
+            {
+                return temp;
+            }
+            return null;
         }
 
         /// <summary>
