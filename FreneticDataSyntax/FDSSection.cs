@@ -429,9 +429,10 @@ namespace FreneticDataSyntax
             }
 
             FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
-            if (sec.GetRootData(key) == null)
+            string k = key.Substring(lind + 1);
+            if (sec.GetRootData(k) == null)
             {
-                sec.SetRootData(key.Substring(lind + 1), data);
+                sec.SetRootData(k, data);
             }
         }
 
