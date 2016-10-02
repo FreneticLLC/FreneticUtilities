@@ -613,7 +613,7 @@ namespace FreneticDataSyntax
         {
             if (newline == null)
             {
-                newline = Environment.NewLine;
+                newline = "\n";
             }
             StringBuilder sb = new StringBuilder();
             foreach (string key in Data.Keys)
