@@ -1,7 +1,7 @@
 FreneticDataSyntax
 ------------------
 
-Frenetic Data Syntax is a data syntax designed by FreneticXYZ as a replacement for data syntaxes or object notations such as JSON or YAML.
+Frenetic Data Syntax is a data syntax designed by FreneticLLC as a replacement for data syntaxes or object notations such as JSON or YAML.
 
 This is a C#/.NET reference implementation of an FDS parser.
 
@@ -77,7 +77,7 @@ You can do basically whatever you want, except you may not hold any developer li
 
 The MIT License (MIT)
 
-Copyright (c) 2016 Frenetic XYZ
+Copyright (c) 2016-2017 Frenetic LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
