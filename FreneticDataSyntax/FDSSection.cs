@@ -18,8 +18,7 @@ namespace FreneticDataSyntax
         {
             StartingLine = 1;
             contents = FDSUtility.CleanFileData(contents);
-            Dictionary<int, FDSSection> spacedsections = new Dictionary<int, FDSSection>();
-            spacedsections[0] = this;
+            Dictionary<int, FDSSection> spacedsections = new Dictionary<int, FDSSection>() { { 0, this } };
             List<string> ccomments = new List<string>();
             List<string> seccomments = new List<string>();
             FDSSection csection = this;
@@ -50,8 +49,7 @@ namespace FreneticDataSyntax
                 }
                 if (spaces < pspaces)
                 {
-                    FDSSection temp;
-                    if (spacedsections.TryGetValue(spaces, out temp))
+                    if (spacedsections.TryGetValue(spaces, out FDSSection temp))
                     {
                         csection = temp;
                         foreach (int test in new List<int>(spacedsections.Keys))
@@ -291,8 +289,7 @@ namespace FreneticDataSyntax
             }
             else
             {
-                double d;
-                if (double.TryParse(o.ToString(), out d))
+                if (double.TryParse(o.ToString(), out double d))
                 {
                     return d;
                 }
@@ -309,7 +306,7 @@ namespace FreneticDataSyntax
         /// <returns>The data found, or the default.</returns>
         public int? GetInt(string key, int? def = null)
         {
-            return (int?)GetLong(key);
+            return (int?)GetLong(key, def);
         }
 
         /// <summary>
@@ -337,8 +334,7 @@ namespace FreneticDataSyntax
             }
             else
             {
-                long l;
-                if (long.TryParse(o.ToString(), out l))
+                if (long.TryParse(o.ToString(), out long l))
                 {
                     return l;
                 }
@@ -578,8 +574,7 @@ namespace FreneticDataSyntax
         /// <returns>The data found, or null.</returns>
         public FDSData GetRootData(string key)
         {
-            FDSData temp;
-            if (Data.TryGetValue(key, out temp))
+            if (Data.TryGetValue(key, out FDSData temp))
             {
                 return temp;
             }
@@ -595,8 +590,7 @@ namespace FreneticDataSyntax
         /// <returns>The data found, or null.</returns>
         public FDSData GetRootDataLowered(string key)
         {
-            FDSData temp;
-            if (DataLowered.TryGetValue(key, out temp))
+            if (DataLowered.TryGetValue(key, out FDSData temp))
             {
                 return temp;
             }
@@ -634,9 +628,8 @@ namespace FreneticDataSyntax
                 {
                     sb.Append("= ").Append(dat.Outputable()).Append(newline);
                 }
-                else if (dat.Internal is List<FDSData>)
+                else if (dat.Internal is List<FDSData> datums)
                 {
-                    List<FDSData> datums = (List<FDSData>)dat.Internal;
                     sb.Append(":").Append(newline);
                     foreach (FDSData cdat in datums)
                     {
