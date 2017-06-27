@@ -39,6 +39,10 @@ namespace FreneticDataSyntax
             {
                 return Convert.ToBase64String((byte[])Internal, Base64FormattingOptions.None);
             }
+            if (Internal is bool)
+            {
+                return ((bool)Internal) ? "true" : "false";
+            }
             return FDSUtility.Escape(Internal.ToString());
         }
     }

@@ -228,8 +228,33 @@ namespace FreneticDataSyntax
         }
 
         /// <summary>
+        /// Gets a bool from the section.
+        /// Returns def if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public bool? GetBool(string key, bool? def = null)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
+            {
+                return def;
+            }
+            object o = got.Internal;
+            if (o is bool)
+            {
+                return (bool)o;
+            }
+            else
+            {
+                return o.ToString().ToLowerFast() == "true";
+            }
+        }
+
+        /// <summary>
         /// Gets a string from the section. Can stringify non-string values.
-        /// Returns null if not found.
+        /// Returns def if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
         /// <param name="def">The default object.</param>
@@ -254,7 +279,7 @@ namespace FreneticDataSyntax
 
         /// <summary>
         /// Gets an optional float from the section.
-        /// Returns null if not found.
+        /// Returns def if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
         /// <param name="def">The default object.</param>
@@ -266,7 +291,7 @@ namespace FreneticDataSyntax
 
         /// <summary>
         /// Gets an optional double from the section.
-        /// Returns null if not found.
+        /// Returns def if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
         /// <param name="def">The default object.</param>
@@ -299,7 +324,7 @@ namespace FreneticDataSyntax
 
         /// <summary>
         /// Gets an optional int from the section.
-        /// Returns null if not found.
+        /// Returns def if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
         /// <param name="def">The default object.</param>
@@ -311,7 +336,7 @@ namespace FreneticDataSyntax
 
         /// <summary>
         /// Gets an optional long from the section.
-        /// Returns null if not found.
+        /// Returns def if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
         /// <param name="def">The default object.</param>
@@ -344,7 +369,7 @@ namespace FreneticDataSyntax
 
         /// <summary>
         /// Gets an object from the section.
-        /// Returns null if not found.
+        /// Returns def if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
         /// <param name="def">The default object.</param>
