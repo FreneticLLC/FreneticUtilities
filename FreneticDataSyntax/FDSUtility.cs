@@ -18,6 +18,7 @@ namespace FreneticDataSyntax
 
         /// <summary>
         /// Reads a file into an FDS Section. Throws normal exceptions on any issue.
+        /// NOTE: May be removed or switched for journalling logic in the future.
         /// </summary>
         /// <param name="fname">The name of the file to read.</param>
         /// <returns>An FDS Section containing the same data as the file.</returns>
@@ -28,6 +29,7 @@ namespace FreneticDataSyntax
 
         /// <summary>
         /// Saves an FDS Section into a file. Throws normal exceptions on any issue.
+        /// NOTE: May be removed or switched for journalling logic in the future.
         /// </summary>
         /// <param name="section">The data to save.</param>
         /// <param name="fname">The name of the file to read.</param>
