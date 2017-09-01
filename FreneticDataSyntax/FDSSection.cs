@@ -70,7 +70,9 @@ namespace FreneticDataSyntax
                     }
                     else
                     {
-                        Exception(i, line, "Spaced incorrectly. Spacing length is less than previous spacing length, but does not match the spacing value of any known section");
+                        Exception(i, line, "Spaced incorrectly. Spacing length is less than previous spacing length,"
+                            + "but does not match the spacing value of any known section, valid: "
+                            + string.Join(" / ", spacedsections.Keys) + ", found: " + spaces + ", was: " + pspaces);
                     }
                 }
                 if (datum[0] == '-')
