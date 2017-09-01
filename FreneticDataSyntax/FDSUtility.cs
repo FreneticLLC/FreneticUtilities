@@ -131,13 +131,11 @@ namespace FreneticDataSyntax
         /// <returns>The correctly typed result.</returns>
         public static object InterpretType(string input)
         {
-            long aslong;
-            if (long.TryParse(input, out aslong) && aslong.ToString() == input)
+            if (long.TryParse(input, out long aslong) && aslong.ToString() == input)
             {
                 return aslong;
             }
-            double asdouble;
-            if (double.TryParse(input, out asdouble) && asdouble.ToString() == input)
+            if (double.TryParse(input, out double asdouble) && asdouble.ToString() == input)
             {
                 return asdouble;
             }

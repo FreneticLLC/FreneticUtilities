@@ -16,6 +16,7 @@ namespace FreneticDataSyntax
     /// <summary>
     /// Represents an exception throw while parsing FDS contents.
     /// </summary>
+    [Serializable]
     public class FDSParseException : Exception
     {
         /// <summary>
