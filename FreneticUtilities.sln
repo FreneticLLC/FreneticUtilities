@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticDataSyntax", "FreneticDataSyntax\FreneticDataSyntax.csproj", "{1DB47D6A-4225-4F25-8559-2C6292496953}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreneticUtilities", "FreneticUtilities\FreneticUtilities.csproj", "{1DB47D6A-4225-4F25-8559-2C6292496953}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
