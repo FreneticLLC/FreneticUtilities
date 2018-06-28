@@ -39,7 +39,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 StringBuilder sb = new StringBuilder();
                 foreach (FDSData dat in (List<FDSData>)Internal)
                 {
-                    sb.Append(dat.Outputable()).Append("|");
+                    sb.Append(dat.Outputable()).Append('|');
                 }
                 return sb.ToString();
             }

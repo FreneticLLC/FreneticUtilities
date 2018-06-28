@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
@@ -650,10 +651,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 FDSData dat = Data[key];
                 foreach (string str in dat.PrecedingComments)
                 {
-                    FDSUtility.AppendTabs(sb, tabulation);
+                    sb.Append('\t', tabulation);
                     sb.Append("#").Append(str).Append(newline);
                 }
-                FDSUtility.AppendTabs(sb, tabulation);
+                sb.Append('\t', tabulation);
                 sb.Append(FDSUtility.EscapeKey(key));
                 if (dat.Internal is FDSSection)
                 {
@@ -670,10 +671,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                     {
                         foreach (string com in cdat.PrecedingComments)
                         {
-                            FDSUtility.AppendTabs(sb, tabulation);
+                            sb.Append('\t', tabulation);
                             sb.Append("#").Append(com).Append(newline);
                         }
-                        FDSUtility.AppendTabs(sb, tabulation);
+                        sb.Append('\t', tabulation);
                         sb.Append("- ").Append(FDSUtility.Escape(cdat.Outputable())).Append(newline);
                     }
                 }

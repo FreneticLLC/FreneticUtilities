@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
@@ -20,30 +21,25 @@ namespace FreneticUtilities.FreneticDataSyntax
     public static class FDSUtility
     {
         /// <summary>
-        /// The UTF-8 encoding used by FDS.
-        /// </summary>
-        public static Encoding UTF8 = new UTF8Encoding(false);
-
-        /// <summary>
-        /// Reads a file into an FDS Section. Throws normal exceptions on any issue.
+        /// Reads a file into an <see cref="FDSSection"/>. Throws normal exceptions on any issue.
         /// NOTE: May be removed or switched for journalling logic in the future.
         /// </summary>
         /// <param name="fname">The name of the file to read.</param>
-        /// <returns>An FDS Section containing the same data as the file.</returns>
+        /// <returns>An <see cref="FDSSection"/> containing the same data as the file (if successfully read).</returns>
         public static FDSSection ReadFile(string fname)
         {
-            return new FDSSection(UTF8.GetString(File.ReadAllBytes(fname)));
+            return new FDSSection(StringConversionHelper.UTF8Encoding.GetString(File.ReadAllBytes(fname)));
         }
 
         /// <summary>
-        /// Saves an FDS Section into a file. Throws normal exceptions on any issue.
+        /// Saves an <see cref="FDSSection"/> into a file. Throws normal exceptions on any issue.
         /// NOTE: May be removed or switched for journalling logic in the future.
         /// </summary>
         /// <param name="section">The data to save.</param>
         /// <param name="fname">The name of the file to read.</param>
         public static void SaveToFile(this FDSSection section, string fname)
         {
-            File.WriteAllBytes(fname, UTF8.GetBytes(section.SaveToString()));
+            File.WriteAllBytes(fname, StringConversionHelper.UTF8Encoding.GetBytes(section.SaveToString()));
         }
 
         /// <summary>
@@ -55,38 +51,31 @@ namespace FreneticUtilities.FreneticDataSyntax
         {
             if (contents.Contains("\r\n"))
             {
+                // Windows to Unix
                 contents = contents.Replace("\r", "");
             }
             else
             {
+                // Old Mac to Unix (leaves Unix form unaltered)
                 contents = contents.Replace('\r', '\n');
             }
-            return contents.Replace("\t", "    ");
-        }
-
-        /// <summary>
-        /// Rapidly lowercases an ASCII string.
-        /// </summary>
-        /// <param name="str">The original string.</param>
-        /// <returns>The lowercased variant.</returns>
-        public static string ToLowerFast(string str)
-        {
-            return str.ToLowerFast();
+            return contents.Replace("\t", "    "); // 4 spaces
         }
 
         /// <summary>
         /// Escapes a string for output.
+        /// <para>Only good for values. For keys, use <see cref="EscapeKey(string)"/>.</para>
         /// </summary>
         /// <param name="str">The string to escape.</param>
         /// <returns>The escaped string.</returns>
         public static string Escape(string str)
         {
             str = str.Replace("\\", "\\\\").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\r", "\\r");
-            if (str.EndsWith(" "))
+            if (str.EndWithFast(' '))
             {
                 str = str + "\\x";
             }
-            if (str.StartsWith(" "))
+            if (str.StartsWithFast(' '))
             {
                 str = "\\x" + str;
             }
@@ -105,6 +94,7 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>
         /// UnEscapes a string for output.
+        /// <para>Only good for values. For keys, use <see cref="UnEscapeKey(string)"/>.</para>
         /// </summary>
         /// <param name="str">The string to unescape.</param>
         /// <returns>The unescaped string.</returns>
@@ -139,33 +129,15 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return asdouble;
             }
+            if (input == "true")
+            {
+                return true;
+            }
+            if (input == "false")
+            {
+                return false;
+            }
             return input;
-        }
-
-        /// <summary>
-        /// Appends a number of spaces to a string builder.
-        /// </summary>
-        /// <param name="sb">The string builder.</param>
-        /// <param name="spaces">The number of spaces.</param>
-        public static void AppendSpaces(StringBuilder sb, int spaces)
-        {
-            for (int i = 0; i < spaces; i++)
-            {
-                sb.Append(' ');
-            }
-        }
-
-        /// <summary>
-        /// Appends a number of tabs to a string builder.
-        /// </summary>
-        /// <param name="sb">The string builder.</param>
-        /// <param name="spaces">The number of tabs.</param>
-        public static void AppendTabs(StringBuilder sb, int spaces)
-        {
-            for (int i = 0; i < spaces; i++)
-            {
-                sb.Append('\t');
-            }
         }
     }
 }

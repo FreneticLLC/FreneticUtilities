@@ -51,7 +51,10 @@
     <Compile Include="FreneticDataSyntax\FDSParseException.cs" />
     <Compile Include="FreneticDataSyntax\FDSSection.cs" />
     <Compile Include="FreneticDataSyntax\FDSUtility.cs" />
-    <Compile Include="Helpers.cs" />
+    <Compile Include="FreneticExtensions\EnumerableExtensions.cs" />
+    <Compile Include="FreneticExtensions\EnumHelper.cs" />
+    <Compile Include="FreneticExtensions\StringConversionHelper.cs" />
+    <Compile Include="FreneticExtensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
