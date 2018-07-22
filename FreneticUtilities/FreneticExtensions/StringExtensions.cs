@@ -147,7 +147,10 @@ namespace FreneticUtilities.FreneticExtensions
         /// <param name="input">The input string.</param>
         /// <param name="charToCount">The character to count.</param>
         /// <returns>The number of times the character is in the string (0 if none).</returns>
+#if NET45
+        // TODO: .NET Standard? Or: Test how much effect using this actually has.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static int CountCharacter(this string input, char charToCount)
         {
             int finalCount = 0;
