@@ -19,6 +19,8 @@ namespace FreneticUtilities.FreneticDataSyntax
     /// </summary>
     public class FDSSection
     {
+        // TODO: Clean code base! Current code contains a lot of poorly named variables and messy code.
+
         /// <summary>
         /// Constructs the FDS Section from textual data.
         /// </summary>
@@ -192,6 +194,15 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// Lowercase-stored data for this section.
         /// </summary>
         public Dictionary<string, FDSData> DataLowered = new Dictionary<string, FDSData>();
+
+        /// <summary>
+        /// Returns the set of all keys at the root of this section.
+        /// </summary>
+        /// <returns>All keys.</returns>
+        public IEnumerable<string> GetRootKeys()
+        {
+            return Data.Keys;
+        }
 
         /// <summary>
         /// Gets a string from the section. Can stringify non-string values.
@@ -373,6 +384,39 @@ namespace FreneticUtilities.FreneticDataSyntax
                 if (long.TryParse(o.ToString(), out long l))
                 {
                     return l;
+                }
+                return def;
+            }
+        }
+
+        /// <summary>
+        /// Gets an optional ulong from the section.
+        /// Returns def if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public ulong? GetUlong(string key, ulong? def = null)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
+            {
+                return def;
+            }
+            object o = got.Internal;
+            if (o is ulong oul)
+            {
+                return oul;
+            }
+            else if (o is uint oui)
+            {
+                return oui;
+            }
+            else
+            {
+                if (ulong.TryParse(o.ToString(), out ulong ul))
+                {
+                    return ul;
                 }
                 return def;
             }
