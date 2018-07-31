@@ -21,6 +21,22 @@ namespace FreneticUtilities.FreneticDataSyntax
     public static class FDSUtility
     {
         /// <summary>
+        /// The default splitter character for section paths.
+        /// To change to or a custom default, use <see cref="DefaultSectionPathSplit"/>.
+        /// To change for a specific section, use <see cref="FDSSection.SectionPathSplit"/>.
+        /// This is a dot value.
+        /// </summary>
+        public const char DEFAULT_SECTION_PATH_SPLIT = '.';
+
+        /// <summary>
+        /// The default splitter character for section paths.
+        /// For the internal unmodified default, use <see cref="DEFAULT_SECTION_PATH_SPLIT"/>.
+        /// To change for a specific section, use <see cref="FDSSection.SectionPathSplit"/>.
+        /// This is initially a dot value. Altering this may cause issues (in particular with escaping) depending on the chosen value.
+        /// </summary>
+        public static char DefaultSectionPathSplit = DEFAULT_SECTION_PATH_SPLIT;
+
+        /// <summary>
         /// Reads a file into an <see cref="FDSSection"/>. Throws normal exceptions on any issue.
         /// NOTE: May be removed or switched for journalling logic in the future.
         /// </summary>

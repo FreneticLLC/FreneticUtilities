@@ -196,6 +196,13 @@ namespace FreneticUtilities.FreneticDataSyntax
         public Dictionary<string, FDSData> DataLowered = new Dictionary<string, FDSData>();
 
         /// <summary>
+        /// The section path splitter for this section.
+        /// Will initially hold a value obtained from <see cref="FDSUtility.DefaultSectionPathSplit"/> at instance construction time.
+        /// That field is initially a dot value. Altering that default or this value may cause issues (in particular with escaping) depending on the chosen value.
+        /// </summary>
+        public char SectionPathSplit = FDSUtility.DefaultSectionPathSplit;
+
+        /// <summary>
         /// Returns the set of all keys at the root of this section.
         /// </summary>
         /// <returns>All keys.</returns>
@@ -458,7 +465,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="data">The key to set data to.</param>
         public void SetData(string key, FDSData data)
         {
-            int lind = key.LastIndexOf('.');
+            int lind = key.LastIndexOf(SectionPathSplit);
             if (lind < 0)
             {
                 SetRootData(key, data);
@@ -466,7 +473,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             if (lind == key.Length - 1)
             {
-                throw new FDSInputException("Invalid SetData key: Ends in a dot!");
+                throw new FDSInputException("Invalid SetData key: Ends in a path splitter!");
             }
 
             FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
@@ -490,7 +497,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="data">The key to set data to.</param>
         public void DefaultData(string key, FDSData data)
         {
-            int lind = key.LastIndexOf('.');
+            int lind = key.LastIndexOf(SectionPathSplit);
             if (lind < 0)
             {
                 if (GetRootData(key) == null)
@@ -501,7 +508,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             if (lind == key.Length - 1)
             {
-                throw new FDSInputException("Invalid SetData key: Ends in a dot!");
+                throw new FDSInputException("Invalid SetData key: Ends in a path splitter!");
             }
 
             FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
@@ -530,7 +537,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The data found, or null.</returns>
         public FDSData GetData(string key)
         {
-            int lind = key.LastIndexOf('.');
+            int lind = key.LastIndexOf(SectionPathSplit);
             if (lind < 0)
             {
                 return GetRootData(key);
@@ -556,7 +563,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         public FDSData GetDataLowered(string key)
         {
             key = key.ToLowerFast();
-            int lind = key.LastIndexOf('.');
+            int lind = key.LastIndexOf(SectionPathSplit);
             if (lind < 0)
             {
                 return GetRootDataLowered(key);
@@ -608,7 +615,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return this;
             }
-            string[] dat = key.SplitFast('.');
+            string[] dat = key.SplitFast(SectionPathSplit);
             FDSSection current = this;
             for (int i = 0; i < dat.Length; i++)
             {

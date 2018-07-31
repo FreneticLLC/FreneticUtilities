@@ -5,13 +5,13 @@
     <OutputType>Library</OutputType>
     <RootNamespace>FreneticUtilities</RootNamespace>
     <AssemblyName>FreneticUtilities</AssemblyName>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <DocumentationFile>bin\Release\FreneticUtilities.xml</DocumentationFile>
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilities</Product>
     <Copyright>Copyright (C) Frenetic LLC 2016-2018</Copyright>
+    <Configurations>Debug;Release;ReleaseNet461</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -19,6 +19,7 @@
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>full</DebugType>
@@ -26,5 +27,14 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseNet461'">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <TargetFrameworks>net461</TargetFrameworks>
   </PropertyGroup>
 </Project>
