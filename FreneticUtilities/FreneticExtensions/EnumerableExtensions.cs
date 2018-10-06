@@ -58,5 +58,24 @@ namespace FreneticUtilities.FreneticExtensions
             }
             return resultDictionary;
         }
+
+        /// <summary>
+        /// Stops an enumerable processing when a function returns true for an item.
+        /// </summary>
+        /// <typeparam name="T">List item type.</typeparam>
+        /// <param name="list">Item list.</param>
+        /// <param name="stopFunction">Function that controls when to stop (true return = stop, false return = continue).</param>
+        /// <returns>The list again.</returns>
+        public static IEnumerable<T> StopWhen<T>(this IEnumerable<T> list, Func<T, bool> stopFunction)
+        {
+            foreach (T currentItem in list)
+            {
+                if (stopFunction(currentItem))
+                {
+                    yield break;
+                }
+                yield return currentItem;
+            }
+        }
     }
 }
