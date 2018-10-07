@@ -25,7 +25,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// </summary>
         /// <param name="input">The input stream.</param>
         /// <returns>All lines of text, separated.</returns>
-        public static IEnumerable<string> Lines(this Stream input)
+        public static IEnumerable<string> AllLinesOfText(this Stream input)
         {
             using (StreamReader reader = new StreamReader(input))
             {
