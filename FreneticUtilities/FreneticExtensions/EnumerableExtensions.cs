@@ -77,5 +77,25 @@ namespace FreneticUtilities.FreneticExtensions
                 yield return currentItem;
             }
         }
+
+        /// <summary>
+        /// Gets a value from a Dictionary, or creates a new value (and adds it to the dictionary).
+        /// </summary>
+        /// <typeparam name="TKey">The key type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="dictionary">The dictionary.</param>
+        /// <param name="key">The key to search for.</param>
+        /// <param name="createFunction">A function to create a value.</param>
+        /// <returns>The value from the dictionary or the newly created value.</returns>
+        public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> createFunction)
+        {
+            if (dictionary.TryGetValue(key, out TValue toReturn))
+            {
+                return toReturn;
+            }
+            TValue created = createFunction();
+            dictionary.Add(key, created);
+            return created;
+        }
     }
 }
