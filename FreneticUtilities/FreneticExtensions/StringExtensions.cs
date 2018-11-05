@@ -41,6 +41,18 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Returns whether the string has a specific character at a specific index.
+        /// </summary>
+        /// <param name="input">The input string.</param>
+        /// <param name="index">The index to check.</param>
+        /// <param name="character">The character to check against.</param>
+        /// <returns>True if that index equals that character, otherwise false.</returns>
+        public static bool IndexEquals(this string input, int index, char character)
+        {
+            return input.Length > index && index > 0 && input[index] == character;
+        }
+
+        /// <summary>
         /// Returns whether the string starts with a null character.
         /// </summary>
         /// <param name="input">The input string.</param>

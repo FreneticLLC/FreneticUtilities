@@ -12,6 +12,23 @@ namespace FreneticUtilities.FreneticExtensions
     public static class EnumerableExtensions
     {
         /// <summary>
+        /// Generates a new dictionary with keys and values swapped around.
+        /// </summary>
+        /// <typeparam name="TKey">The original key type.</typeparam>
+        /// <typeparam name="TValue">The original value type.</typeparam>
+        /// <param name="dictionary">The original dictionary.</param>
+        /// <returns>The new dictionary.</returns>
+        public static Dictionary<TValue, TKey> SwapKeyValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            Dictionary<TValue, TKey> toReturn = new Dictionary<TValue, TKey>(dictionary.Count);
+            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+            {
+                toReturn.Add(pair.Value, pair.Key);
+            }
+            return toReturn;
+        }
+
+        /// <summary>
         /// Creates a dictionary mapping the keys array to the values array, such that keys[i] maps to values[i], for all integer "i" in range.
         /// <para>This will throw an <see cref="ArgumentException"/> if there are duplicate keys, or the two lists do not have the same size.</para>
         /// </summary>
