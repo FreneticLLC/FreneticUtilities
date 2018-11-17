@@ -25,6 +25,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// Array of booleans, sized as <see cref="MIN_NON_ASCII"/>, such that "Chars[c]" where 'c' is any ASCII character is the validity of that character.
         /// </summary>
         public bool[] Chars = new bool[MIN_NON_ASCII];
+
         /// <summary>
         /// Construct the matcher from a string of valid symbols.
         /// </summary>
