@@ -24,6 +24,16 @@ namespace FreneticUtilities.FreneticDataSyntax
         public List<string> PrecedingComments;
 
         /// <summary>
+        /// Adds a preceding comment to this data piece.
+        /// </summary>
+        /// <param name="comment">The comment to add.</param>
+        public void AddComment(string comment)
+        {
+            comment = comment.Replace("\r", "");
+            PrecedingComments.AddRange(comment.Split('\n').Select(str => str.TrimEnd()));
+        }
+
+        /// <summary>
         /// The internal represented data.
         /// </summary>
         public object Internal;
