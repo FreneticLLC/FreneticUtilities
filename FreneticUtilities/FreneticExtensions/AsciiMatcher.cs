@@ -84,5 +84,41 @@ namespace FreneticUtilities.FreneticExtensions
             }
             return true;
         }
+
+        /// <summary>
+        /// Returns the string with only matching characters included (and non-matches removed).
+        /// </summary>
+        /// <param name="s">The original string.</param>
+        /// <returns>The trimmed string.</returns>
+        public string TrimToMatches(string s)
+        {
+            StringBuilder newString = new StringBuilder(s.Length);
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (IsMatch(s[i]))
+                {
+                    newString.Append(s[i]);
+                }
+            }
+            return newString.ToString();
+        }
+
+        /// <summary>
+        /// Returns the string with only non-matching characters included (and matches removed).
+        /// </summary>
+        /// <param name="s">The original string.</param>
+        /// <returns>The trimmed string.</returns>
+        public string TrimToNonMatches(string s)
+        {
+            StringBuilder newString = new StringBuilder(s.Length);
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (!IsMatch(s[i]))
+                {
+                    newString.Append(s[i]);
+                }
+            }
+            return newString.ToString();
+        }
     }
 }
