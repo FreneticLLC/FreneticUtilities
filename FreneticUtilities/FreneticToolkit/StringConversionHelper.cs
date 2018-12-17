@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using FreneticUtilities.FreneticExtensions;
 
-namespace FreneticUtilities.FreneticExtensions
+namespace FreneticUtilities.FreneticToolkit
 {
     /// <summary>
     /// A special helper for converting <see cref="string"/> input to and from various types.

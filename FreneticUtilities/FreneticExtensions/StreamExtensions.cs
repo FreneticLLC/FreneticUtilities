@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 namespace FreneticUtilities.FreneticExtensions
 {
     /// <summary>
-    /// Helper extensions for <see cref="System.IO.Stream"/>.
+    /// Helper extensions for <see cref="Stream"/>.
     /// </summary>
     public static class StreamExtensions
     {

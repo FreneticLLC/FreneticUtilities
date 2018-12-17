@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {

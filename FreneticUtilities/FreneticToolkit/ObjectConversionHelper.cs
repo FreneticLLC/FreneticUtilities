@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
 
-namespace FreneticUtilities.FreneticExtensions
+namespace FreneticUtilities.FreneticToolkit
 {
     /// <summary>
     /// A special helper for converting arbitrary Object input to and from various types.
@@ -19,7 +19,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <param name="input">The string to get the value from.</param>
         /// <param name="defaultValue">The default value to use.</param>
         /// <returns>a nullable long-integer value.</returns>
-        public static long? StringToLong(Object input, long? defaultValue = null)
+        public static long? ObjectToLong(Object input, long? defaultValue = null)
         {
             switch (input)
             {
@@ -61,7 +61,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <param name="input">The string to get the value from.</param>
         /// <param name="defaultValue">The default value to use.</param>
         /// <returns>a nullable unsigned long-integer value.</returns>
-        public static ulong? StringToULong(Object input, ulong? defaultValue = null)
+        public static ulong? ObjectToULong(Object input, ulong? defaultValue = null)
         {
             switch (input)
             {

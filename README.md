@@ -7,6 +7,7 @@ Frenetic Utilities is a collection of general C# utilities and documents made by
 
 - [Frenetic Data Syntax](FreneticDataSyntax.md): a data syntax designed as a replacement for data syntaxes or object notations such as JSON or YAML.
 - [Frenetic Extensions](FreneticExtensions.md): a collection of extensions and utilities for use with general C# operation, such as a pure-ASCII `ToLowerFast` string extension method.
+- [Frenetic Toolkit](FreneticToolkit.md): a collection of general utilities for use a variety of cases, such as common data type conversion tools.
 
 ## Additional Documents
 

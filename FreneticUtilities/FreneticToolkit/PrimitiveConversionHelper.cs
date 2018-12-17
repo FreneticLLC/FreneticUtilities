@@ -7,7 +7,7 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-namespace FreneticUtilities.FreneticExtensions
+namespace FreneticUtilities.FreneticToolkit
 {
     /// <summary>
     /// Helper class for primitive conversion.

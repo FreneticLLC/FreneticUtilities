@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Reflection.Emit;
+using FreneticUtilities.FreneticExtensions;
 
-namespace FreneticUtilities.FreneticExtensions
+namespace FreneticUtilities.FreneticToolkit
 {
     /// <summary>
     /// Helper for <see cref="Enum"/> types.
@@ -113,9 +114,9 @@ namespace FreneticUtilities.FreneticExtensions
             // long EnumToLong(T val) { return (long)val; }
             DynamicMethod method = new DynamicMethod("EnumToLong", typeof(long), new Type[] { typeof(T) }, typeof(EnumHelper<T>).Module, true);
             ILGenerator ilgen = method.GetILGenerator();
-            ilgen.Emit(OpCodes.Ldarg_0);
-            ilgen.Emit(OpCodes.Conv_I8);
-            ilgen.Emit(OpCodes.Ret);
+            ilgen.Emit(OpCodes.Ldarg_0); // Load arg 0 (flag)
+            ilgen.Emit(OpCodes.Conv_I8); // Convert it to an int64 (long)
+            ilgen.Emit(OpCodes.Ret); // Return the long
             return (Func<T, long>)method.CreateDelegate(typeof(Func<T, long>));
         }
 
@@ -128,12 +129,12 @@ namespace FreneticUtilities.FreneticExtensions
             // bool FlagTester(T one, T two) { return (one & two) == two; }
             DynamicMethod method = new DynamicMethod("FlagTester", typeof(bool), new Type[] { typeof(T), typeof(T) }, typeof(EnumHelper<T>).Module, true);
             ILGenerator ilgen = method.GetILGenerator();
-            ilgen.Emit(OpCodes.Ldarg_0);
-            ilgen.Emit(OpCodes.Ldarg_1);
-            ilgen.Emit(OpCodes.And);
-            ilgen.Emit(OpCodes.Ldarg_1);
-            ilgen.Emit(OpCodes.Ceq);
-            ilgen.Emit(OpCodes.Ret);
+            ilgen.Emit(OpCodes.Ldarg_0); // Load arg 0 (flag to be tested)
+            ilgen.Emit(OpCodes.Ldarg_1); // Load arg 1 (flag to test for)
+            ilgen.Emit(OpCodes.And); // Bitwise-AND of the two args
+            ilgen.Emit(OpCodes.Ldarg_1); // Loard arg 1 (flag to test for)
+            ilgen.Emit(OpCodes.Ceq); // Compare equality of the AND result and arg 1, push boolean result
+            ilgen.Emit(OpCodes.Ret); // return the boolean result
             return (Func<T, T, bool>)method.CreateDelegate(typeof(Func<T, T, bool>));
         }
 

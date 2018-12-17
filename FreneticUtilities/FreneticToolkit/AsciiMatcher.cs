@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FreneticUtilities.FreneticExtensions
+namespace FreneticUtilities.FreneticToolkit
 {
     /// <summary>
     /// Helper class to match ASCII characters efficiently.
