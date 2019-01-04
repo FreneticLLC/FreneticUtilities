@@ -12,7 +12,7 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
 ### Some information (unordered)
 
 - FDS supports (and encourages) tabs as a representative of 4 spaces.
-	- This trims a few bytes and allows users to freely control how they view an FDS file.
+    - This trims a few bytes and allows users to freely control how they view an FDS file.
 - FDS is neat, clean, and user friendly.
 - FDS preserves list order, but not section order.
 - FDS preserves preceding comments (Comments that come before a data section).
@@ -28,13 +28,13 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
 - FDS has a developer-friendly API for interfacing with FDS data and data sections.
 - FDS has a developer-unfriendly secondary API for interfacing with raw underlying data as well.
 - FDS **DOES NOT** currently support:
-	- Lists of binary information.
-	- Multi-line keys.
-	- Automatic serialization of non-basic types.
-	- Comments at end-of-file.
-	- Files or data bigger than your RAM.
-	- Empty key labels.
-	- Lists/maps inside of lists
+    - Lists of binary information.
+    - Multi-line keys.
+    - Automatic serialization of non-basic types.
+    - Comments at end-of-file.
+    - Files or data bigger than your RAM.
+    - Empty key labels.
+    - Lists/maps inside of lists
 
 ### Example
 
@@ -54,12 +54,12 @@ my root section 1:
 my second root section:
     # contains UTF-8 text: Hello world, and all who inhabit it!
     my binary key= SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
-	# This is a list.
+    # This is a list.
     my list key:
-	# This will be correct integer type.
+    # This will be correct integer type.
     - 1
-	# This will be text.
+    # This will be text.
     - two
-	# Wrap up with more text.
+    # Wrap up with more text.
     - three makes it complete!
 ```
