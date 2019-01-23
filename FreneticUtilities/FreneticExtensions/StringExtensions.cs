@@ -40,6 +40,59 @@ namespace FreneticUtilities.FreneticExtensions
             return new string(finalString);
         }
 
+
+        /// <summary>
+        /// Gets the part of a string before a specified portion.
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <param name="match">The end marker.</param>
+        /// <returns>The prior portion.</returns>
+        public static string Before(this string input, string match)
+        {
+            int index = input.IndexOf(match);
+            if (index < 0)
+            {
+                return input;
+            }
+
+            return input.Substring(0, index);
+        }
+
+        /// <summary>
+        /// Gets the parts of a string before and after a specified portion.
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <param name="match">The end marker.</param>
+        /// <param name="after">The output of the latter portion.</param>
+        /// <returns>The prior portion.</returns>
+        public static string BeforeAndAfter(this string input, string match, out string after)
+        {
+            int index = input.IndexOf(match);
+            if (index < 0)
+            {
+                after = "";
+                return input;
+            }
+            after = input.Substring(index + match.Length);
+            return input.Substring(0, index);
+        }
+
+        /// <summary>
+        /// Gets the part of a string after a specified portion.
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <param name="match">The end marker.</param>
+        /// <returns>The latter portion.</returns>
+        public static string After(this string input, string match)
+        {
+            int index = input.IndexOf(match);
+            if (index < 0)
+            {
+                return input;
+            }
+            return input.Substring(index + match.Length);
+        }
+
         /// <summary>
         /// Returns whether the string has a specific character at a specific index.
         /// </summary>

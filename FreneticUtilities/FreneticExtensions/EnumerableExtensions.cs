@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -113,6 +114,60 @@ namespace FreneticUtilities.FreneticExtensions
             TValue created = createFunction();
             dictionary.Add(key, created);
             return created;
+        }
+
+        /// <summary>
+        /// Converts a <see cref="System.Collections.IEnumerator"/> to a generic Enumerable.
+        /// </summary>
+        /// <typeparam name="T">The expected Enumerable type.</typeparam>
+        /// <param name="enumerator">The original Enumerator.</param>
+        /// <returns>The enumerable.</returns>
+        public static IEnumerable<T> AsEnumerable<T>(this System.Collections.IEnumerator enumerator) where T : class
+        {
+            while (enumerator.MoveNext())
+            {
+                yield return enumerator.Current as T;
+            }
+        }
+
+        /// <summary>
+        /// Converts an <see cref="IEnumerator{T}"/> to an Enumerable.
+        /// </summary>
+        /// <typeparam name="T">The expected Enumerable type.</typeparam>
+        /// <param name="enumerator">The original Enumerator.</param>
+        /// <returns>The enumerable.</returns>
+        public static IEnumerable<T> AsEnumerable<T>(this IEnumerator<T> enumerator) where T : class
+        {
+            while (enumerator.MoveNext())
+            {
+                yield return enumerator.Current;
+            }
+        }
+
+        /// <summary>
+        /// Returns an array where additional objects are joined into the array.
+        /// </summary>
+        /// <typeparam name="T">The array type.</typeparam>
+        /// <param name="originalArray">The main array.</param>
+        /// <param name="addtionalObjects">The additional objects to append to the end.</param>
+        /// <returns>The joined result.</returns>
+        public static T[] JoinWith<T>(this T[] originalArray, params T[] addtionalObjects)
+        {
+            T[] res = new T[originalArray.Length + addtionalObjects.Length];
+            originalArray.CopyTo(res, 0);
+            addtionalObjects.CopyTo(res, originalArray.Length);
+            return res;
+        }
+
+        /// <summary>
+        /// Returns whether a stream is empty. Invert of "Any()" call.
+        /// </summary>
+        /// <typeparam name="T">The stream type.</typeparam>
+        /// <param name="inp">The input stream.</param>
+        /// <returns>Whether the stream is empty.</returns>
+        public static bool IsEmpty<T>(this IEnumerable<T> inp)
+        {
+            return !inp.Any();
         }
     }
 }
