@@ -1,3 +1,9 @@
+//
+// This file is part of Frenetic Utilities, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of the MIT license.
+// See README.md or LICENSE.txt in the FreneticUtilities source root for the contents of the license.
+//
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
