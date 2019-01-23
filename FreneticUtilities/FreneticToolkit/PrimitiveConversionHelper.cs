@@ -277,7 +277,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="outputBytes">The output byte array.</param>
         /// <param name="offset">The starting offset in the byte array.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Short16ToBytes(short inputShort16, byte[] outputBytes, short offset)
+        public static void Short16ToBytes(short inputShort16, byte[] outputBytes, int offset)
         {
             unchecked
             {
@@ -349,7 +349,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="outputBytes">The output byte array.</param>
         /// <param name="offset">The starting offset in the byte array.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void UShort16ToBytes(ushort inputUShort16, byte[] outputBytes, short offset)
+        public static void UShort16ToBytes(ushort inputUShort16, byte[] outputBytes, int offset)
         {
             unchecked
             {
