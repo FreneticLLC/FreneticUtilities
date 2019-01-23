@@ -21,6 +21,38 @@ namespace FreneticUtilities.FreneticToolkit
         public static readonly UTF8Encoding UTF8Encoding = new UTF8Encoding(false);
 
         /// <summary>
+        /// Converts a string value to the unsigned short-integer value it represents.
+        /// Returns the specified default value (or zero if unset) if the string does not represent a unsigned short-integer.
+        /// </summary>
+        /// <param name="input">The string to get the value from.</param>
+        /// <param name="defaultValue">The default value to use.</param>
+        /// <returns>a unsigned short-integer value.</returns>
+        public static ushort StringToUShort(string input, ushort defaultValue = 0)
+        {
+            if (ushort.TryParse(input, out ushort output))
+            {
+                return output;
+            }
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// Converts a string value to the short-integer value it represents.
+        /// Returns the specified default value (or zero if unset) if the string does not represent a short-integer.
+        /// </summary>
+        /// <param name="input">The string to get the value from.</param>
+        /// <param name="defaultValue">The default value to use.</param>
+        /// <returns>a short-integer value.</returns>
+        public static short StringToShort(string input, short defaultValue = 0)
+        {
+            if (short.TryParse(input, out short output))
+            {
+                return output;
+            }
+            return defaultValue;
+        }
+
+        /// <summary>
         /// Converts a string value to the long-integer value it represents.
         /// Returns the specified default value (or zero if unset) if the string does not represent a long-integer.
         /// </summary>
