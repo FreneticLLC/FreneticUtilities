@@ -15,7 +15,7 @@ namespace FreneticUtilities.FreneticToolkit
     /// <summary>
     /// Represents an event within the Frenetic Game Engine.
     /// </summary>
-    public class FreneticEvent<T> where T : EventArgs
+    public class FreneticEvent<T> where T : FreneticEventArgs
     {
         /// <summary>
         /// All event handlers for this event.
@@ -106,13 +106,7 @@ namespace FreneticUtilities.FreneticToolkit
                     for (int x = 0; x < set.Handlers.Count; x++)
                     {
                         CurrentlyProcessing = set.Handlers[x].Key;
-                        FreneticEventArgs<T> fargs = new FreneticEventArgs<T>()
-                        {
-                            PriorityPosition = set.Priority,
-                            Context = args,
-                            Helper = Helper
-                        };
-                        FreneticEventWaiter few = set.Handlers[x].Value.Fire(fargs);
+                        FreneticEventWaiter few = set.Handlers[x].Value.Fire(Helper, args);
                         if (waiters != null && few != null)
                         {
                             waiters.Add(few);
@@ -155,6 +149,16 @@ namespace FreneticUtilities.FreneticToolkit
                 }
                 Helper.ScheduleSync(complete);
             });
+        }
+
+        /// <summary>
+        /// Returns whether the event is handled by a specific source.
+        /// </summary>
+        /// <param name="sourceTracker">The source.</param>
+        /// <returns>Whether it is handled.</returns>
+        public bool IsHandledBySource(Object sourceTracker)
+        {
+            return HandlersBySource.ContainsKey(sourceTracker);
         }
 
         /// <summary>
@@ -263,7 +267,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="sourceTracker">The object sourcing this event (for example, a plugin object).</param>
         /// <param name="priority">The priority of the handler.</param>
         /// <returns>The index of the added handler.</returns>
-        public HandlerIndex AddEvent(Action<FreneticEventArgs<T>> act, Object sourceTracker, double priority)
+        public HandlerIndex AddEvent(Action<T> act, Object sourceTracker, double priority)
         {
             return AddEvent(new FreneticEventFirer<T>(act), sourceTracker, priority);
         }
@@ -275,7 +279,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="sourceTracker">The object sourcing this event (for example, a plugin object).</param>
         /// <param name="priority">The priority of the handler.</param>
         /// <returns>The index of the added handler.</returns>
-        public HandlerIndex AddEvent(Action<FreneticEventArgs<T>, FreneticEventWaiter> act, Object sourceTracker, double priority)
+        public HandlerIndex AddEvent(Action<T, FreneticEventWaiter> act, Object sourceTracker, double priority)
         {
             return AddEvent(new FreneticEventFirer<T>(act), sourceTracker, priority);
         }
@@ -318,24 +322,14 @@ namespace FreneticUtilities.FreneticToolkit
     }
 
     /// <summary>
-    /// Represents the arguments to an event.
+    /// Base class for event arguments.
     /// </summary>
-    public class FreneticEventArgs<T> where T : EventArgs
+    public class FreneticEventArgs : EventArgs
     {
         /// <summary>
-        /// The priority value of this firing. Not valid after a wait instruction.
+        /// The event priority currently firing.
         /// </summary>
-        public double PriorityPosition;
-
-        /// <summary>
-        /// Helper for various usages, primarily scheduling.
-        /// </summary>
-        public FreneticEventHelper Helper;
-
-        /// <summary>
-        /// The contextual arguments to this event.
-        /// </summary>
-        public T Context;
+        public double Priority;
     }
 
     /// <summary>
@@ -446,36 +440,37 @@ namespace FreneticUtilities.FreneticToolkit
     /// <summary>
     /// Helper to fire an event.
     /// </summary>
-    public class FreneticEventFirer<T> where T : EventArgs
+    public class FreneticEventFirer<T> where T : FreneticEventArgs
     {
         /// <summary>
         /// Used to fire the event.
         /// </summary>
+        /// <param name="helper">The event helper.</param>
         /// <param name="args">The event arguments.</param>
-        public FreneticEventWaiter Fire(FreneticEventArgs<T> args)
+        public FreneticEventWaiter Fire(FreneticEventHelper helper, T args)
         {
             if (FireAction != null)
             {
                 return FireNoWait(args);
             }
-            return FireWait(args);
+            return FireWait(helper, args);
         }
 
         /// <summary>
         /// The action used to fire the FreneticEventArgs without a water.
         /// </summary>
-        public Action<FreneticEventArgs<T>> FireAction;
+        public Action<T> FireAction;
 
         /// <summary>
         /// The action used to fire the FreneticEventArgs with a waiter.
         /// </summary>
-        public Action<FreneticEventArgs<T>, FreneticEventWaiter> FireWaiter;
+        public Action<T, FreneticEventWaiter> FireWaiter;
 
         /// <summary>
         /// Constructs the firer without a waitable option.
         /// </summary>
         /// <param name="noWaitEvent">The standard event.</param>
-        public FreneticEventFirer(Action<FreneticEventArgs<T>> noWaitEvent)
+        public FreneticEventFirer(Action<T> noWaitEvent)
         {
             FireAction = noWaitEvent;
         }
@@ -484,7 +479,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Constructs the firer with a waitable option.
         /// </summary>
         /// <param name="waitedEvent">The waiter.</param>
-        public FreneticEventFirer(Action<FreneticEventArgs<T>, FreneticEventWaiter> waitedEvent)
+        public FreneticEventFirer(Action<T, FreneticEventWaiter> waitedEvent)
         {
             FireWaiter = waitedEvent;
         }
@@ -492,25 +487,26 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Fires the event, not returning a waiter.
         /// </summary>
-        /// <param name="fea">The arguments to the event.</param>
+        /// <param name="args">The arguments to the event.</param>
         /// <returns>No waiter.</returns>
-        public FreneticEventWaiter FireNoWait(FreneticEventArgs<T> fea)
+        public FreneticEventWaiter FireNoWait(T args)
         {
-            FireAction(fea);
+            FireAction(args);
             return null;
         }
 
         /// <summary>
         /// Fires the event, potentially returning a waiter.
         /// </summary>
-        /// <param name="fea">The arguments to the event.</param>
+        /// <param name="helper">The event helper.</param>
+        /// <param name="args">The arguments to the event.</param>
         /// <returns>A waiter if needed.</returns>
-        public FreneticEventWaiter FireWait(FreneticEventArgs<T> fea)
+        public FreneticEventWaiter FireWait(FreneticEventHelper helper, T args)
         {
-            FreneticEventWaiter few = new FreneticEventWaiter() { Helper = fea.Helper };
-            fea.Helper.StartAsync(() =>
+            FreneticEventWaiter few = new FreneticEventWaiter() { Helper = helper };
+            helper.StartAsync(() =>
             {
-                FireWaiter(fea, few);
+                FireWaiter(args, few);
                 few.MREFirst.Set();
                 if (few.Used && few.AutoComplete)
                 {
