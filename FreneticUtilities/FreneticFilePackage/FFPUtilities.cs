@@ -24,7 +24,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <summary>
         /// An <see cref="AsciiMatcher"/> for file-name-valid symbols.
         /// </summary>
-        public static AsciiMatcher FileNameValidator = new AsciiMatcher("abcdefghijklmnopqrstuvwxyz0123456789_./");
+        public static AsciiMatcher FileNameValidator = new AsciiMatcher("abcdefghijklmnopqrstuvwxyz0123456789_. /");
 
         /// <summary>
         /// Cleans a string to only valid symbols for a file name to contain.
@@ -33,7 +33,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <returns>The cleaned file name.</returns>
         public static string CleanFileName(string input)
         {
-            return FileNameValidator.TrimToMatches(input.ToLowerFast());
+            return FileNameValidator.TrimToMatches(input.ToLowerFast()).Trim('/', ' ');
         }
 
         /// <summary>
@@ -63,6 +63,22 @@ namespace FreneticUtilities.FreneticFilePackage
         }
 
         /// <summary>
+        /// Compresses the data using the GZip compression algorithm.
+        /// </summary>
+        /// <param name="input">The input data (uncompressed).</param>
+        /// <returns>The output data (compressed).</returns>
+        public static byte[] CompressGZip(byte[] input)
+        {
+            MemoryStream outputStream = new MemoryStream();
+            using (GZipStream GZStream = new GZipStream(outputStream, CompressionMode.Compress))
+            {
+                GZStream.Write(input, 0, input.Length);
+                GZStream.Flush();
+                return outputStream.ToArray();
+            }
+        }
+
+        /// <summary>
         /// Encodes data stored with a specified encoding.
         /// </summary>
         /// <param name="input">The input binary data.</param>
@@ -75,13 +91,7 @@ namespace FreneticUtilities.FreneticFilePackage
                 case FFPEncoding.RAW:
                     return input;
                 case FFPEncoding.GZIP:
-                    MemoryStream outputStream = new MemoryStream();
-                    using (GZipStream GZStream = new GZipStream(outputStream, CompressionMode.Compress))
-                    {
-                        GZStream.Write(input, 0, input.Length);
-                        GZStream.Flush();
-                        return outputStream.ToArray();
-                    }
+                    return CompressGZip(input);
                 default:
                     throw new NotSupportedException("Cannot decode from encoding: " + encoding);
             }
