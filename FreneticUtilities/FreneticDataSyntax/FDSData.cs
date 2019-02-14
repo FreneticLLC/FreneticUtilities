@@ -42,14 +42,14 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The resultant data.</returns>
         public string Outputable()
         {
-            if (Internal is List<FDSData>)
+            if (Internal is List<FDSData> list)
             {
-                StringBuilder sb = new StringBuilder();
-                foreach (FDSData dat in (List<FDSData>)Internal)
+                StringBuilder outputBuilder = new StringBuilder();
+                foreach (FDSData dat in list)
                 {
-                    sb.Append(dat.Outputable()).Append('|');
+                    outputBuilder.Append(dat.Outputable()).Append('|');
                 }
-                return sb.ToString();
+                return outputBuilder.ToString();
             }
             if (Internal is byte[])
             {

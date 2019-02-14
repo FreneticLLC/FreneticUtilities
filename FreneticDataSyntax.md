@@ -15,23 +15,22 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
     - This trims a few bytes and allows users to freely control how they view an FDS file.
 - FDS is neat, clean, and user friendly.
 - FDS preserves list order, but not section order.
-- FDS preserves preceding comments (Comments that come before a data section).
-- FDS interprets quotes as raw input.
+- FDS preserves comments in their positions based on what data follows (comments follow what's below them in the file. Comments at the end of the file remain at the end).
+- FDS interprets quotes as raw input (ie they are treated as just textual quotes, no special handling is applied).
 - FDS supports binary data via the `=` syntax, in Base64.
-- FDS does not guess at data types and cause copy-over errors. Instead, it preserves data exactly as input, while still translating type where possible.
+- FDS does not guess at data types and cause copy-over errors. Instead, it preserves data exactly as input, while still translating type where possible
+    - Eg, input of "3.5" will be read as double with value 3.5, but "3.50" will not be, as the double value will output "3.5", which is an inconsistent copy-over error.
 - FDS uses UTF-8 for data input across all machines, regardless of operating system. This ensures Unicode data is preserved.
 - FDS supports simple data lists.
-- FDS reads line endings properly, and outputs with the correct system line endings (except when configured to use a specific ending).
-- FDS supports 32-bit integers, 64-bit integers ("longs"), 32-bit floats, 64-bit floats ("doubles"), textual strings, binary arrays.
+- FDS reads any line endings properly (for Windows, old-Mac, and Unix file endings), and outputs with the correct standard line endings (single-newline, Unix-like) except when configured to use a specific ending.
+- FDS supports 32-bit integers, 64-bit integers ("longs"), 32-bit floats, 64-bit floats ("doubles"), booleans, textual strings, binary arrays.
 - FDS is case sensitive, but supports case-insensitive reads.
 - FDS supports newlines in text via `\n`, and backslashes via `\\`. Also available: `\r` (carriage return), `\t` (tab), `\d` (dot), `\c` (colon), `\e` (equals sign), `\x` (nothing, to allow spaces at start or end of text).
 - FDS has a developer-friendly API for interfacing with FDS data and data sections.
 - FDS has a developer-unfriendly secondary API for interfacing with raw underlying data as well.
 - FDS **DOES NOT** currently support:
-    - Lists of binary information.
     - Multi-line keys.
     - Automatic serialization of non-basic types.
-    - Comments at end-of-file.
     - Files or data bigger than your RAM.
     - Empty key labels.
     - Lists/maps inside of lists
@@ -60,6 +59,8 @@ my second root section:
     - 1
     # This will be text.
     - two
+    # A binary entry in the list.
+    = SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
     # Wrap up with more text.
     - three makes it complete!
 ```

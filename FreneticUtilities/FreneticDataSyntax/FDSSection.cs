@@ -76,7 +76,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                             + string.Join(" / ", spacedsections.Keys) + ", found: " + spaces + ", was: " + pspaces);
                     }
                 }
-                if (datum[0] == '-')
+                if (datum[0] == '-' || datum[0] == '=')
                 {
                     string clistline = datum.Substring(1).TrimStart(' ');
                     if (clist == null)
@@ -93,7 +93,12 @@ namespace FreneticUtilities.FreneticDataSyntax
                             Exception(i, line, "Line purpose unknown, attempted list entry when not building a list");
                         }
                     }
-                    clist.Add(new FDSData() { PrecedingComments = new List<string>(ccomments), Internal = FDSUtility.InterpretType(FDSUtility.UnEscape(clistline)) });
+                    string unescaped = FDSUtility.UnEscape(clistline);
+                    clist.Add(new FDSData()
+                    {
+                        PrecedingComments = new List<string>(ccomments),
+                        Internal = datum[0] == '=' ? FDSUtility.FromBase64(unescaped) : FDSUtility.InterpretType(unescaped)
+                    });
                     ccomments.Clear();
                     continue;
                 }
@@ -123,7 +128,11 @@ namespace FreneticUtilities.FreneticDataSyntax
                 if (spaces > pspaces && secwaiting != null)
                 {
                     FDSSection sect = new FDSSection();
-                    csection.SetRootData(FDSUtility.UnEscapeKey(secwaiting), new FDSData() { PrecedingComments = new List<string>(seccomments), Internal = sect });
+                    csection.SetRootData(FDSUtility.UnEscapeKey(secwaiting), new FDSData()
+                    {
+                        PrecedingComments = new List<string>(seccomments),
+                        Internal = sect
+                    });
                     seccomments.Clear();
                     csection = sect;
                     spacedsections[spaces] = sect;
@@ -131,14 +140,11 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 if (type == '=')
                 {
-                    if (endofline.Length == 0)
+                    csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData()
                     {
-                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData() { PrecedingComments = new List<string>(ccomments), Internal = new byte[0] });
-                    }
-                    else
-                    {
-                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData() { PrecedingComments = new List<string>(ccomments), Internal = Convert.FromBase64String(endofline) });
-                    }
+                        PrecedingComments = new List<string>(ccomments),
+                        Internal = FDSUtility.FromBase64(FDSUtility.UnEscape(endofline))
+                    });
                     ccomments.Clear();
                 }
                 else if (type == ':')
@@ -151,7 +157,11 @@ namespace FreneticUtilities.FreneticDataSyntax
                     }
                     else
                     {
-                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData() { PrecedingComments = new List<string>(ccomments), Internal = FDSUtility.InterpretType(FDSUtility.UnEscape(endofline)) });
+                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData()
+                        {
+                            PrecedingComments = new List<string>(ccomments),
+                            Internal = FDSUtility.InterpretType(FDSUtility.UnEscape(endofline))
+                        });
                         ccomments.Clear();
                     }
                 }
@@ -161,6 +171,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 pspaces = spaces;
             }
+            PostComments.AddRange(ccomments);
         }
 
         private void Exception(int linenumber, string line, string reason)
@@ -192,6 +203,11 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// Lowercase-stored data for this section.
         /// </summary>
         public Dictionary<string, FDSData> DataLowered = new Dictionary<string, FDSData>();
+
+        /// <summary>
+        /// Comments at the end of the section (usually only on the file root section).
+        /// </summary>
+        public List<string> PostComments = new List<string>();
 
         /// <summary>
         /// The section path splitter for this section.
@@ -694,45 +710,55 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 newline = "\n";
             }
-            StringBuilder sb = new StringBuilder();
+            string tabs = new string('\t', tabulation);
+            StringBuilder outputBuilder = new StringBuilder(Data.Count * 100);
             foreach (string key in Data.Keys)
             {
                 FDSData dat = Data[key];
                 foreach (string str in dat.PrecedingComments)
                 {
-                    sb.Append('\t', tabulation);
-                    sb.Append("#").Append(str).Append(newline);
+                    outputBuilder.Append(tabs).Append("#").Append(str).Append(newline);
                 }
-                sb.Append('\t', tabulation);
-                sb.Append(FDSUtility.EscapeKey(key));
+                outputBuilder.Append(tabs).Append(FDSUtility.EscapeKey(key));
                 if (dat.Internal is FDSSection)
                 {
-                    sb.Append(":").Append(newline).Append(((FDSSection)dat.Internal).SaveToString(tabulation + 1, newline));
+                    outputBuilder.Append(":").Append(newline).Append(((FDSSection)dat.Internal).SaveToString(tabulation + 1, newline));
                 }
                 else if (dat.Internal is byte[])
                 {
-                    sb.Append("= ").Append(dat.Outputable()).Append(newline);
+                    outputBuilder.Append("= ").Append(FDSUtility.Escape(dat.Outputable())).Append(newline);
                 }
                 else if (dat.Internal is List<FDSData> datums)
                 {
-                    sb.Append(":").Append(newline);
+                    outputBuilder.Append(":").Append(newline);
                     foreach (FDSData cdat in datums)
                     {
                         foreach (string com in cdat.PrecedingComments)
                         {
-                            sb.Append('\t', tabulation);
-                            sb.Append("#").Append(com).Append(newline);
+                            outputBuilder.Append(tabs).Append("#").Append(com).Append(newline);
                         }
-                        sb.Append('\t', tabulation);
-                        sb.Append("- ").Append(FDSUtility.Escape(cdat.Outputable())).Append(newline);
+                        outputBuilder.Append(tabs);
+                        if (cdat.Internal is byte[])
+                        {
+                            outputBuilder.Append("= ");
+                        }
+                        else
+                        {
+                            outputBuilder.Append("- ");
+                        }
+                        outputBuilder.Append(FDSUtility.Escape(cdat.Outputable())).Append(newline);
                     }
                 }
                 else
                 {
-                    sb.Append(": ").Append(FDSUtility.Escape(dat.Outputable())).Append(newline);
+                    outputBuilder.Append(": ").Append(FDSUtility.Escape(dat.Outputable())).Append(newline);
                 }
             }
-            return sb.ToString();
+            foreach (string str in PostComments)
+            {
+                outputBuilder.Append(tabs).Append("#").Append(str).Append(newline);
+            }
+            return outputBuilder.ToString();
         }
     }
 }

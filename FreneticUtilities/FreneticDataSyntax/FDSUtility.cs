@@ -57,6 +57,22 @@ namespace FreneticUtilities.FreneticDataSyntax
             File.WriteAllBytes(fname, StringConversionHelper.UTF8Encoding.GetBytes(section.SaveToString()));
         }
 
+        private static readonly byte[] EMPTY_BYTES = new byte[0];
+
+        /// <summary>
+        /// Converts a Base64 string to a byte array.
+        /// </summary>
+        /// <param name="inputString">The input string to convert.</param>
+        /// <returns>The byte array output.</returns>
+        public static byte[] FromBase64(string inputString)
+        {
+            if (inputString.Length == 0)
+            {
+                return EMPTY_BYTES;
+            }
+            return Convert.FromBase64String(inputString);
+        }
+
         /// <summary>
         /// Cleans file line endings, tabs, and any other data that may cause issues.
         /// </summary>
