@@ -84,6 +84,38 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Adds all entries from a separate <see cref="Dictionary{TKey, TValue}"/> to this <see cref="Dictionary{TKey, TValue}"/>.
+        /// Does not allow duplicates.
+        /// </summary>
+        /// <typeparam name="TKey">Key type.</typeparam>
+        /// <typeparam name="TValue">Value type.</typeparam>
+        /// <param name="self">This <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="toAdd">The entries to add.</param>
+        public static void AddAll<TKey, TValue>(this Dictionary<TKey, TValue> self, Dictionary<TKey, TValue> toAdd)
+        {
+            foreach (KeyValuePair<TKey, TValue> entry in toAdd)
+            {
+                self.Add(entry.Key, entry.Value);
+            }
+        }
+
+        /// <summary>
+        /// Adds all entries from a separate <see cref="Dictionary{TKey, TValue}"/> to this <see cref="Dictionary{TKey, TValue}"/>.
+        /// For any keys present in both <see cref="Dictionary{TKey, TValue}"/>s, the new values are used (and old values discarded).
+        /// </summary>
+        /// <typeparam name="TKey">Key type.</typeparam>
+        /// <typeparam name="TValue">Value type.</typeparam>
+        /// <param name="self">This <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="toAdd">The entries to add.</param>
+        public static void UnionWith<TKey, TValue>(this Dictionary<TKey, TValue> self, Dictionary<TKey, TValue> toAdd)
+        {
+            foreach (KeyValuePair<TKey, TValue> entry in toAdd)
+            {
+                self[entry.Key] = entry.Value;
+            }
+        }
+
+        /// <summary>
         /// Stops an enumerable processing when a function returns true for an item.
         /// </summary>
         /// <typeparam name="T">List item type.</typeparam>

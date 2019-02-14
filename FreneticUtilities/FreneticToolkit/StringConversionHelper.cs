@@ -21,7 +21,7 @@ namespace FreneticUtilities.FreneticToolkit
     {
         /// <summary>
         /// A standard UTF-8 encoding helper object instance.
-        /// <para>This is not equialent to <see cref="Encoding.UTF8"/> as that will output BOM when converting a <see cref="string"/> to binary data (which is usually bad).</para>
+        /// <para>This is not equivalent to <see cref="Encoding.UTF8"/> as that will output BOM when converting a <see cref="string"/> to binary data (which is usually bad).</para>
         /// <para>This instance, by contrast, is guaranteed to not do that.</para>
         /// </summary>
         public static readonly UTF8Encoding UTF8Encoding = new UTF8Encoding(false);

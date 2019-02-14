@@ -37,10 +37,11 @@ namespace FreneticUtilities.FreneticFilePackage
         /// </summary>
         /// <param name="path">The full file path, separated by the '/' character.</param>
         /// <param name="file">The actual file.</param>
+        /// <param name="overwrite">Whether to overwrite existing files.</param>
         /// <exception cref="InvalidOperationException">If the file cannot be added.</exception>
-        public void AddFile(string path, FFPFile file)
+        public void AddFile(string path, FFPFile file, bool overwrite = false)
         {
-            AddFile(SplitPath(path), file);
+            AddFile(SplitPath(path), file, overwrite);
         }
 
         /// <summary>
@@ -48,8 +49,9 @@ namespace FreneticUtilities.FreneticFilePackage
         /// </summary>
         /// <param name="path">The full file path.</param>
         /// <param name="file">The actual file.</param>
+        /// <param name="overwrite">Whether to overwrite existing files.</param>
         /// <exception cref="InvalidOperationException">If the file cannot be added.</exception>
-        public void AddFile(string[] path, FFPFile file)
+        public void AddFile(string[] path, FFPFile file, bool overwrite = false)
         {
             if (path.Length == 0)
             {
@@ -67,16 +69,36 @@ namespace FreneticUtilities.FreneticFilePackage
                 }
                 if (!(value is FFPFolder newFolder))
                 {
-                    throw new InvalidOperationException("Part of the path is a file, not a folder.");
+                    if (overwrite)
+                    {
+                        FFPFolder createdFolder = new FFPFolder();
+                        folder.Contents[path[i]] = createdFolder;
+                        folder = createdFolder;
+                        continue;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Part of the path is a file, not a folder.");
+                    }
                 }
                 folder = newFolder;
             }
             string finalName = path[path.Length - 1];
             if (folder.Contents.ContainsKey(finalName))
             {
-                throw new InvalidOperationException("File name already exists.");
+                if (overwrite)
+                {
+                    folder.Contents[finalName] = file;
+                }
+                else
+                {
+                    throw new InvalidOperationException("File name already exists.");
+                }
             }
-            folder.Contents.Add(finalName, file);
+            else
+            {
+                folder.Contents.Add(finalName, file);
+            }
         }
 
         /// <summary>
@@ -121,6 +143,46 @@ namespace FreneticUtilities.FreneticFilePackage
         }
 
         /// <summary>
+        /// Returns whether a file exists at the specified path.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns>Whether the file exists.</returns>
+        public bool HasFile(string[] path)
+        {
+            return GetObjectAt(path) is FFPFile;
+        }
+
+        /// <summary>
+        /// Returns whether a file exists at the specified path.
+        /// </summary>
+        /// <param name="path">The path, separated by the '/' symbol.</param>
+        /// <returns>Whether the file exists.</returns>
+        public bool HasFile(string path)
+        {
+            return HasFile(SplitPath(path));
+        }
+
+        /// <summary>
+        /// Returns whether a sub-folder exists at the specified path.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns>Whether the sub-folder exists.</returns>
+        public bool HasSubFolder(string[] path)
+        {
+            return GetObjectAt(path) is FFPFolder;
+        }
+
+        /// <summary>
+        /// Returns whether a sub-folder exists at the specified path.
+        /// </summary>
+        /// <param name="path">The path, separated by the '/' symbol.</param>
+        /// <returns>Whether the sub-folder exists.</returns>
+        public bool HasSubFolder(string path)
+        {
+            return HasSubFolder(SplitPath(path));
+        }
+
+        /// <summary>
         /// Gets a sub-folder at the specified path.
         /// </summary>
         /// <param name="path">The path.</param>
@@ -135,7 +197,7 @@ namespace FreneticUtilities.FreneticFilePackage
             }
             throw new InvalidOperationException("Path is not a folder.");
         }
-
+        
         /// <summary>
         /// Gets a sub-folder at the specified path.
         /// </summary>
