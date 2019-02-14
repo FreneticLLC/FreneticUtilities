@@ -33,7 +33,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <returns>The cleaned file name.</returns>
         public static string CleanFileName(string input)
         {
-            return FileNameValidator.TrimToMatches(input.ToLowerFast()).Trim('/', ' ');
+            return FileNameValidator.TrimToMatches(input.ToLowerFast().Replace('\\', '/')).Trim('/', ' ');
         }
 
         /// <summary>
@@ -73,9 +73,8 @@ namespace FreneticUtilities.FreneticFilePackage
             using (GZipStream GZStream = new GZipStream(outputStream, CompressionMode.Compress))
             {
                 GZStream.Write(input, 0, input.Length);
-                GZStream.Flush();
-                return outputStream.ToArray();
             }
+            return outputStream.ToArray();
         }
 
         /// <summary>
@@ -129,9 +128,11 @@ namespace FreneticUtilities.FreneticFilePackage
                     return input;
                 case FFPEncoding.GZIP:
                     MemoryStream outputStream = new MemoryStream();
-                    GZipStream gzStream = new GZipStream(outputStream, CompressionMode.Compress);
-                    input.CopyTo(gzStream);
-                    return gzStream;
+                    using (GZipStream gzStream = new GZipStream(outputStream, CompressionMode.Compress))
+                    {
+                        input.CopyTo(gzStream);
+                    }
+                    return outputStream;
                 default:
                     throw new NotSupportedException("Cannot decode from encoding: " + encoding);
             }
