@@ -6,5 +6,6 @@ Frenetic Extensions is a collection of extensions and utilities for use with gen
 ## Included
 
 - **EnumerableExtensions**: helpers for `IEnumerable` and related interfaces.
+- **OtherExtensions**: helpers for various other types.
 - **StreamExtensions**: helpers for `Stream` control.
-- **StringExtensions**: helper extensions for `String` control.
+- **StringExtensions**: helpers for `String` control.
