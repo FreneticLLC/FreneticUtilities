@@ -1,0 +1,216 @@
+﻿//
+// This file is part of Frenetic Utilities, created by Frenetic LLC.
+// This code is Copyright (C) Frenetic LLC under the terms of the MIT license.
+// See README.md or LICENSE.txt in the FreneticUtilities source root for the contents of the license.
+//
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using FreneticUtilities.FreneticToolkit;
+using FreneticUtilities.FreneticExtensions;
+
+namespace FreneticUtilities.FreneticFilePackage
+{
+    /// <summary>
+    /// The centerpoint class for the Frenetic File Package system. Handles a single file package.
+    /// </summary>
+    public class FFPackage
+    {
+        /// <summary>
+        /// Construct a <see cref="FFPackage"/> from a data stream. Generally a <see cref="FileStream"/> is the stream type to use.
+        /// </summary>
+        /// <param name="dataStream">The stream.</param>
+        /// <param name="warning">An action to give warnings. Can be null if warnings should be ignored.</param>
+        public FFPackage(Stream dataStream, Action<string> warning)
+        {
+            FileStream = dataStream;
+            ReadHeadersIn(warning);
+        }
+
+        // ---------------------------------------
+        // HEADER FORMAT:
+        // 
+        // 3 bytes: ASCII 'FFP'
+        // 3 bytes: ASCII version label (currently, '001'). Must be ASCII numbers.
+        // int32: number of contained files
+        // Tight array of FILE HEADER
+        // Tight array of raw file data
+        // 
+        // FILE HEADER FORMAT:
+        // 
+        // int64: file start position (relative to end of header)
+        // int64: file length (in stream)
+        // byte: encoding mode (see FFPEncoding enumeration)
+        // int64: actual file length (after decompression)
+        // int32: length of file name (in bytes)
+        // UTF-8 string: file name
+        // ---------------------------------------
+
+        private void ReadHeadersIn(Action<string> warning)
+        {
+            FileStream.Seek(0, SeekOrigin.Begin);
+            byte header_1 = GetByte();
+            byte header_2 = GetByte();
+            byte header_3 = GetByte();
+            if (header_1 != 'F' || header_2 != 'F' || header_3 != 'P')
+            {
+                throw new InvalidOperationException("File is not an FFP file (header failure).");
+            }
+            byte version_1 = GetByte();
+            byte version_2 = GetByte();
+            byte version_3 = GetByte();
+            if (!(version_1 >= '0' && version_1 <= '9')
+                || !(version_2 >= '0' && version_2 <= '9')
+                || !(version_3 >= '0' && version_3 <= '9'))
+            {
+                throw new InvalidOperationException("File is not an FFP file (version failure).");
+            }
+            int fileVersion = (version_1 - '0') * 100 + (version_2 - '0') * 10 + (version_3 - '0');
+            if (fileVersion < 1)
+            {
+                throw new InvalidOperationException("File is not an FFP file (version 0 unsupported).");
+            }
+            // Prior version update code goes here if/when needed.
+            if (fileVersion > 1)
+            {
+                warning("File version '" + fileVersion + "' is newer than this code supports. Read error may occur.");
+            }
+            int fileCount = GetInt();
+            Files = new Dictionary<string, FFPFile>(fileCount * 2);
+            for (int i = 0; i < fileCount; i++)
+            {
+                FFPFile file = new FFPFile()
+                {
+                    Package = this
+                };
+                file.Internal.StartPosition = GetLong();
+                file.Internal.FileLength = GetLong();
+                file.Internal.Encoding = (FFPEncoding)GetByte();
+                file.Length = GetLong();
+                int nameLength = GetInt();
+                byte[] nameBytes = new byte[nameLength];
+                FFPUtilities.ReadBytesGuaranteed(FileStream, nameBytes, nameLength);
+                file.FullName = FFPUtilities.CleanFileName(StringConversionHelper.UTF8Encoding.GetString(nameBytes));
+                file.SimpleName = file.FullName.AfterLast('/');
+                Files.Add(file.FullName, file);
+            }
+            Internal.FileDataStart = FileStream.Position;
+        }
+
+        private readonly byte[] helperBytes = new byte[8];
+
+        private byte GetByte()
+        {
+            int value = FileStream.ReadByte();
+            if (value == -1)
+            {
+                throw new InvalidOperationException("Stream closed early.");
+            }
+            return (byte)value;
+        }
+
+        private int GetInt()
+        {
+            FFPUtilities.ReadBytesGuaranteed(FileStream, helperBytes, 4);
+            int value = PrimitiveConversionHelper.BytesToInt32(helperBytes);
+            if (value < 0)
+            {
+                throw new InvalidOperationException("Value is negative or file package is misformatted.");
+            }
+            return value;
+        }
+
+        private long GetLong()
+        {
+            FFPUtilities.ReadBytesGuaranteed(FileStream, helperBytes, 8);
+            long value = PrimitiveConversionHelper.BytesToLong64(helperBytes);
+            if (value < 0)
+            {
+                throw new InvalidOperationException("Value is negative or file package is misformatted.");
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// The internal data for this <see cref="FFPackage"/>.
+        /// </summary>
+        public struct InternalData
+        {
+            /// <summary>
+            /// Where file data starts at in the backing stream.
+            /// </summary>
+            public long FileDataStart;
+        }
+
+        /// <summary>
+        /// The internal data for this <see cref="FFPackage"/>.
+        /// </summary>
+        public InternalData Internal;
+
+        /// <summary>
+        /// The backing data stream.
+        /// </summary>
+        public Stream FileStream;
+
+        /// <summary>
+        /// A mapping of all files contained within the <see cref="FFPackage"/>.
+        /// </summary>
+        public Dictionary<string, FFPFile> Files;
+
+        /// <summary>
+        /// The root <see cref="FFPFolder"/> of this <see cref="FFPackage"/>.
+        /// </summary>
+        public FFPFolder RootFolder;
+
+        /// <summary>
+        /// Gets the data of a file at the specified path.
+        /// </summary>
+        /// <param name="fileName">The name of the file, with path separated by '/'.</param>
+        /// <returns>The file data.</returns>
+        /// <exception cref="FileNotFoundException">If the file is not present.</exception>
+        /// <exception cref="InvalidOperationException">If there is a file reading error.</exception>
+        public byte[] GetFileData(string fileName)
+        {
+            fileName = FFPUtilities.CleanFileName(fileName);
+            if (!Files.TryGetValue(fileName, out FFPFile file))
+            {
+                throw new FileNotFoundException("File is not present in the package.", fileName);
+            }
+            return file.ReadFileData();
+        }
+
+        /// <summary>
+        /// Tries to get the data of a file at the specified path.
+        /// </summary>
+        /// <param name="fileName">The name of the file, with path separated by '/'.</param>
+        /// <param name="data">The file data, if found.</param>
+        /// <returns>Whether the file was found.</returns>
+        /// <exception cref="InvalidOperationException">If there is a file reading error.</exception>
+        public bool TryGetFileData(string fileName, out byte[] data)
+        {
+            fileName = FFPUtilities.CleanFileName(fileName);
+            if (!Files.TryGetValue(fileName, out FFPFile file))
+            {
+                data = null;
+                return false;
+            }
+            data = file.ReadFileData();
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the number of files in this <see cref="FFPackage"/>.
+        /// </summary>
+        public int FileCount
+        {
+            get
+            {
+                return Files.Count;
+            }
+        }
+    }
+}
