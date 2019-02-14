@@ -33,6 +33,50 @@ namespace FreneticUtilities.FreneticFilePackage
         public Dictionary<string, object> Contents;
 
         /// <summary>
+        /// Adds a file to the folder.
+        /// </summary>
+        /// <param name="path">The full file path, separated by the '/' character.</param>
+        /// <param name="file">The actual file.</param>
+        /// <exception cref="InvalidOperationException">If the file cannot be added.</exception>
+        public void AddFile(string path, FFPFile file)
+        {
+            AddFile(SplitPath(path), file);
+        }
+
+        /// <summary>
+        /// Adds a file to the folder.
+        /// </summary>
+        /// <param name="path">The full file path.</param>
+        /// <param name="file">The actual file.</param>
+        /// <exception cref="InvalidOperationException">If the file cannot be added.</exception>
+        public void AddFile(string[] path, FFPFile file)
+        {
+            if (path.Length == 0)
+            {
+                throw new InvalidOperationException("Path is empty.");
+            }
+            FFPFolder folder = this;
+            for (int i = 0; i < path.Length - 1; i++)
+            {
+                if (!folder.Contents.TryGetValue(path[i], out object value))
+                {
+                    throw new InvalidOperationException("Part of the requested path is not present.");
+                }
+                if (!(value is FFPFolder newFolder))
+                {
+                    throw new InvalidOperationException("Part of the path is a file, not a folder.");
+                }
+                folder = newFolder;
+            }
+            string finalName = path[path.Length - 1];
+            if (folder.Contents.ContainsKey(finalName))
+            {
+                throw new InvalidOperationException("File name already exists.");
+            }
+            folder.Contents.Add(finalName, file);
+        }
+
+        /// <summary>
         /// Gets the object at a specified path.
         /// </summary>
         /// <param name="path">The path.</param>

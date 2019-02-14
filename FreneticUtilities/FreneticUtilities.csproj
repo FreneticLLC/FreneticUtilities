@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">DebugNetCore</Configuration>
     <OutputType>Library</OutputType>
     <RootNamespace>FreneticUtilities</RootNamespace>
     <AssemblyName>FreneticUtilities</AssemblyName>
@@ -11,23 +11,24 @@
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilities</Product>
     <Copyright>Copyright (C) Frenetic LLC 2016-2019</Copyright>
-    <Configurations>Debug;Release;ReleaseNet461</Configurations>
+    <Configurations>DebugNetCore;ReleaseNetCore;ReleaseNet461</Configurations>
+    <Version>1.0.1</Version>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'DebugNetCore' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'ReleaseNetCore' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='ReleaseNet461'">
     <DebugType>full</DebugType>

@@ -62,6 +62,7 @@ namespace FreneticUtilities.FreneticFilePackage
             }
             int fileCount = GetInt();
             Files = new Dictionary<string, FFPFile>(fileCount * 2);
+            RootFolder = new FFPFolder();
             for (int i = 0; i < fileCount; i++)
             {
                 FFPFile file = new FFPFile()
@@ -77,7 +78,12 @@ namespace FreneticUtilities.FreneticFilePackage
                 FFPUtilities.ReadBytesGuaranteed(FileStream, nameBytes, nameLength);
                 file.FullName = FFPUtilities.CleanFileName(StringConversionHelper.UTF8Encoding.GetString(nameBytes));
                 file.SimpleName = file.FullName.AfterLast('/');
+                if (Files.ContainsKey(file.FullName))
+                {
+                    throw new InvalidOperationException("Cannot form a package with duplicate file names. Duplicate file name: " + file.FullName);
+                }
                 Files.Add(file.FullName, file);
+                RootFolder.AddFile(file.FullName, file);
             }
             Internal.FileDataStart = FileStream.Position;
         }

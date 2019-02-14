@@ -75,7 +75,7 @@ namespace FreneticUtilities.FreneticFilePackage
             {
                 filesOutput.Add(new FFPBuilderFile()
                 {
-                    Name = FFPUtilities.CleanFileName(file.Substring(folder.Length)),
+                    Name = file.Substring(folder.Length),
                     FileObject = file
                 });
             }
@@ -117,10 +117,18 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <exception cref="InvalidOperationException">If there are duplicate files, or the file cannot be created.</exception>
         public static void CreateFromFiles(FFPBuilderFile[] files, Stream output, Options options)
         {
-            HashSet<string> fileSet = new HashSet<string>(files.Select(f => f.Name));
-            if (fileSet.Count != files.Length)
+            HashSet<string> fileSet = new HashSet<string>();
+            for (int i = 0; i < files.Length; i++)
             {
-                throw new InvalidOperationException("Cannot form a package with duplicate files.");
+                files[i].Name = FFPUtilities.CleanFileName(files[i].Name);
+                if (files[i].Name.Length == 0)
+                {
+                    throw new InvalidOperationException("Cannot have empty file names.");
+                }
+                if (!fileSet.Add(files[i].Name))
+                {
+                    throw new InvalidOperationException("Cannot form a package with duplicate files. Duplicate file name: " + files[i].Name);
+                }
             }
             byte[] helper = new byte[8];
             output.Write(HEADER, 0, HEADER.Length);

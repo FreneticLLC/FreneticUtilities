@@ -7,15 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreneticUtilities", "Frenet
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		DebugNetCore|Any CPU = DebugNetCore|Any CPU
 		ReleaseNet461|Any CPU = ReleaseNet461|Any CPU
+		ReleaseNetCore|Any CPU = ReleaseNetCore|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DB47D6A-4225-4F25-8559-2C6292496953}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DB47D6A-4225-4F25-8559-2C6292496953}.DebugNetCore|Any CPU.ActiveCfg = DebugNetCore|Any CPU
+		{1DB47D6A-4225-4F25-8559-2C6292496953}.DebugNetCore|Any CPU.Build.0 = DebugNetCore|Any CPU
 		{1DB47D6A-4225-4F25-8559-2C6292496953}.ReleaseNet461|Any CPU.ActiveCfg = ReleaseNet461|Any CPU
 		{1DB47D6A-4225-4F25-8559-2C6292496953}.ReleaseNet461|Any CPU.Build.0 = ReleaseNet461|Any CPU
 	EndGlobalSection
