@@ -30,26 +30,7 @@ namespace FreneticUtilities.FreneticFilePackage
             FileStream = dataStream;
             ReadHeadersIn(warning);
         }
-
-        // ---------------------------------------
-        // HEADER FORMAT:
-        // 
-        // 3 bytes: ASCII 'FFP'
-        // 3 bytes: ASCII version label (currently, '001'). Must be ASCII numbers.
-        // int32: number of contained files
-        // Tight array of FILE HEADER
-        // Tight array of raw file data
-        // 
-        // FILE HEADER FORMAT:
-        // 
-        // int64: file start position (relative to end of header)
-        // int64: file length (in stream)
-        // byte: encoding mode (see FFPEncoding enumeration)
-        // int64: actual file length (after decompression)
-        // int32: length of file name (in bytes)
-        // UTF-8 string: file name
-        // ---------------------------------------
-
+        
         private void ReadHeadersIn(Action<string> warning)
         {
             FileStream.Seek(0, SeekOrigin.Begin);
