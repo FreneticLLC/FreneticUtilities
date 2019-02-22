@@ -130,23 +130,29 @@ namespace FreneticUtilities.FreneticFilePackage
                     throw new InvalidOperationException("Cannot form a package with duplicate files. Duplicate file name: " + files[i].Name);
                 }
             }
+            long position = 0;
             byte[] helper = new byte[8];
             output.Write(HEADER, 0, HEADER.Length);
+            position += HEADER.Length;
             WriteInt(files.Length, helper, output);
+            position += 4;
             FileHeaderInfo[] headers = new FileHeaderInfo[files.Length];
             for (int i = 0; i < files.Length; i++)
             {
-                headers[i].HeaderPosition = output.Position;
+                headers[i].HeaderPosition = position;
                 output.Write(PLACEHOLDER_FILEDATA, 0, PLACEHOLDER_FILEDATA.Length);
+                position += PLACEHOLDER_FILEDATA.Length;
                 byte[] fileNameBytes = StringConversionHelper.UTF8Encoding.GetBytes(files[i].Name);
                 WriteInt(fileNameBytes.Length, helper, output);
+                position += 4;
                 output.Write(fileNameBytes, 0, fileNameBytes.Length);
+                position += fileNameBytes.Length;
             }
             for (int i = 0; i < files.Length; i++)
             {
                 if (files[i].FileObject is string fileName)
                 {
-                    headers[i].Position = output.Position;
+                    headers[i].Position = position;
                     using (FileStream stream = File.OpenRead(fileName))
                     {
                         headers[i].ActualLength = stream.Length;
@@ -169,11 +175,13 @@ namespace FreneticUtilities.FreneticFilePackage
                             }
                             headers[i].FileLength = toWrite.Length;
                             output.Write(toWrite, 0, toWrite.Length);
+                            position += toWrite.Length;
                         }
                         else
                         {
                             headers[i].Encoding = (byte)FFPEncoding.RAW;
                             headers[i].FileLength = stream.Length;
+                            position += stream.Length;
                             stream.CopyTo(output);
                         }
                     }

@@ -71,7 +71,7 @@ namespace FreneticUtilities.FreneticFilePackage
         public byte[] ReadFileData()
         {
             byte[] output = new byte[Internal.FileLength];
-            Package.FileStream.Seek(Package.Internal.FileDataStart + Internal.StartPosition, SeekOrigin.Begin);
+            Package.FileStream.Seek(Internal.StartPosition, SeekOrigin.Begin);
             FFPUtilities.ReadBytesGuaranteed(Package.FileStream, output, (int) Internal.FileLength);
             return FFPUtilities.Decode(output, Internal.Encoding);
         }

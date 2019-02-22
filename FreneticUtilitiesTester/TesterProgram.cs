@@ -87,6 +87,26 @@ namespace FreneticUtilitiesTester
                         Console.WriteLine("Package showing failed: " + ex.ToString());
                     }
                     break;
+                case "pack-dump":
+                    if (args.Length < 3)
+                    {
+                        Console.WriteLine("Usage: pack-dump [package file] [output folder]");
+                        break;
+                    }
+                    try
+                    {
+                        using (FileStream stream = File.OpenRead(args[1]))
+                        {
+                            FFPackage package = new FFPackage(stream, (warn) => Console.WriteLine("FFPackage Warning: " + warn));
+                            Console.WriteLine("Package has " + package.FileCount + " file(s)...");
+                            DumpFolder(1, package.RootFolder, args[2]);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Package dumping failed: " + ex.ToString());
+                    }
+                    break;
                 case "fds-resave":
                     if (args.Length < 3)
                     {
@@ -114,12 +134,42 @@ namespace FreneticUtilitiesTester
                 default:
                     Console.WriteLine("Frenetic Utilities Tester Program");
                     Console.WriteLine("Sub-commands available:");
-                    Console.WriteLine("  pack-folder [folder] [output file]    | Packages a folder using FFP");
-                    Console.WriteLine("  pack-show [input file]                | Shows the contents of a package");
-                    Console.WriteLine("  fds-resave [input file] [output file] | Packages a folder using FFP");
-                    Console.WriteLine("  help                                  | This help output");
-                    Console.WriteLine("  version                               | Displays program version");
+                    Console.WriteLine("  pack-folder [folder] [output file]       | Packages a folder using FFP");
+                    Console.WriteLine("  pack-show [input file]                   | Shows the contents of a package");
+                    Console.WriteLine("  pack-dump [package file] [output folder] | Dumps the contents of a package");
+                    Console.WriteLine("  fds-resave [input file] [output file]    | Packages a folder using FFP");
+                    Console.WriteLine("  help                                     | This help output");
+                    Console.WriteLine("  version                                  | Displays program version");
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Outputs the contents of a folder to console.
+        /// </summary>
+        /// <param name="tabs">How much to tab out.</param>
+        /// <param name="folder">The folder.</param>
+        /// <param name="outputPath">The path to output data to.</param>
+        public static void DumpFolder(int tabs, FFPFolder folder, string outputPath)
+        {
+            Directory.CreateDirectory(outputPath);
+            string tabstring = new string(' ', tabs * 2);
+            foreach (KeyValuePair<string, object> entry in folder.Contents)
+            {
+                if (entry.Value is FFPFolder subfolder)
+                {
+                    Console.WriteLine(tabstring + "| " + entry.Key + ":");
+                    DumpFolder(tabs + 1, subfolder, outputPath + "/" + entry.Key);
+                }
+                else if (entry.Value is FFPFile file)
+                {
+                    Console.WriteLine(tabstring + "- " + entry.Key + ": " + file.Length + " bytes of data, with " + file.Internal.FileLength + " bytes encoded as " + file.Internal.Encoding);
+                    File.WriteAllBytes(outputPath + "/" + entry.Key, file.ReadFileData());
+                }
+                else
+                {
+                    Console.WriteLine(tabstring + "* Unknown (broken?) entry at " + entry.Key + ": " + entry.Value);
+                }
             }
         }
 
@@ -140,7 +190,8 @@ namespace FreneticUtilitiesTester
                 }
                 else if (entry.Value is FFPFile file)
                 {
-                    Console.WriteLine(tabstring + "- " + entry.Key + ": " + file.Length + " bytes of data, with " + file.Internal.FileLength + " bytes encoded as " + file.Internal.Encoding);
+                    Console.WriteLine(tabstring + "- " + entry.Key + ": " + file.Length + " bytes of data, with "
+                        + file.Internal.FileLength + " bytes encoded as " + file.Internal.Encoding + ", starting in-file at " + file.Internal.StartPosition);
                 }
                 else
                 {
