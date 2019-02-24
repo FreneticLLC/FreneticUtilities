@@ -45,7 +45,7 @@ See **Sample 1** below for reference on basics.
     - Short names (especially single-letter names like `x`) should be avoided except where they are sufficiently clear alone. For example, a `Location` class would probably have fields `X`, `Y`, and `Z`, and that's sufficiently clear there. Additionally, `for` loops often use variable `i`, which generally is fine.
     - At the same time, horribly long names (like `BeginToGoSoFarAsToSeeMoreLikeTheCalculationOfTheMethodThatThuslyFollows`) should be avoided for conciseness reasons: put the long description in the summary documentation slot, not the method name.
     - In general, a name should describe exactly what it represents, and nothing more, without being repetitive.
-    - A name including its own type should be used only in cases where they type is a critical point in what it is. For example, a `ConvertToLocation` method might have input parameter names like `inputString` on the grounds that the type is the critical information included.
+    - A name including its own type should be used only in cases where the type is a critical point in what it is. For example, a `ConvertToLocation` method might have input parameter names like `inputString` on the grounds that the type is the critical information included.
 
 ### Samples
 
