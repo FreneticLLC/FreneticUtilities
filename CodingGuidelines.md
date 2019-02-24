@@ -13,6 +13,7 @@ These guidelines are recommended for C# programmers in general, and strongly exp
 - Start every file (after header text) with `using System;` (the standard first `using` statement). Do not remove that specific `using` line, and do not place it lower down. Avoid intentionally reordering that list beyond necessity.
 - Namespace should match the file folder path, and type name should match the file name (So: `public class MyType` goes in `MyType.cs`, `namespace MyProject.MySet` goes in file directory `MyProject/MySet/`).
 - When reflection is involved, avoid hardcoded strings when possible. For example, instead of `"MyType"` when reflecting type `MyType`, use `nameof(MyType)`. This is useful in particular for later project updating (If `MyType` is renamed, the `nameof(MyType)` will be a compiler error if not updated, whereas `"MyType"` will be a runtime only error).
+- Always include xml code documentation on fields and methods.
 
 See **Sample 1** below for reference on basics.
 
