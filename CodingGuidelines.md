@@ -31,7 +31,7 @@ See **Sample 1** below for reference on basics.
             - Define all "private" fields within here (and optionally private methods as well), but mark them public.
             - Define within your type a public field holding the struct (like `public Impl Internal;`).
             - Choose one of these two options:
-                - Option A: Have all references to private data in your changed to be prefixed by your public field name (like `Internal.MyValue`).
+                - Option A: Have all references to private data in your code class to be prefixed by your public field name (like `Internal.MyValue`).
                 - Option B: Define private redirect properties within your type to allow short names to still be used (like `private int MyValue { get { return Internal.MyValue; } set { Internal.MyValue = value; } }`).
             - If both options seem like too much work: just make your fields public at normal root level. If you don't want to write a few more lines to make your code work as a clean API-style organized library, then you don't want a clean API-style organized library, and thus public fields are fine.
         - Now your type is presented with the API-style organization you wish to be put forth, but allows users with higher needs (like modders) to use more advanced actions with relative simplicity (like `myObj.Internal.MyValue = 0;`).
