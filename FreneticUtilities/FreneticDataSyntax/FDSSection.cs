@@ -260,9 +260,9 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return null;
             }
             object o = got.Internal;
-            if (o is List<FDSData>)
+            if (o is List<FDSData> asList)
             {
-                return (List<FDSData>)o;
+                return asList;
             }
             else
             {
@@ -285,9 +285,9 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return def;
             }
             object o = got.Internal;
-            if (o is bool)
+            if (o is bool asBool)
             {
-                return (bool)o;
+                return asBool;
             }
             else
             {
@@ -310,9 +310,9 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return def;
             }
             object o = got.Internal;
-            if (o is string)
+            if (o is string str)
             {
-                return (string)o;
+                return str;
             }
             else
             {
@@ -329,7 +329,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The data found, or the default.</returns>
         public float? GetFloat(string key, float? def = null)
         {
-            return (float?)GetDouble(key, def);
+            double? asDouble = GetDouble(key, def);
+            if (asDouble != null)
+            {
+                return (float)asDouble;
+            }
+            return null;
         }
 
         /// <summary>
@@ -347,13 +352,21 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return def;
             }
             object o = got.Internal;
-            if (o is double)
+            if (o is double asDouble)
             {
-                return (double)o;
+                return asDouble;
             }
-            else if (o is float)
+            else if (o is float asFloat)
             {
-                return (float)o;
+                return asFloat;
+            }
+            if (o is long asLong)
+            {
+                return (double)asLong;
+            }
+            else if (o is int asInt)
+            {
+                return (double)asInt;
             }
             else
             {
@@ -374,7 +387,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The data found, or the default.</returns>
         public int? GetInt(string key, int? def = null)
         {
-            return (int?)GetLong(key, def);
+            long? asLong = GetLong(key, def);
+            if (asLong != null)
+            {
+                return (int)asLong;
+            }
+            return null;
         }
 
         /// <summary>
@@ -392,13 +410,13 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return def;
             }
             object o = got.Internal;
-            if (o is long)
+            if (o is long asLong)
             {
-                return (long)o;
+                return asLong;
             }
-            else if (o is int)
+            else if (o is int asInt)
             {
-                return (int)o;
+                return asInt;
             }
             else
             {
@@ -634,9 +652,9 @@ namespace FreneticUtilities.FreneticDataSyntax
             for (int i = 0; i < dat.Length; i++)
             {
                 FDSData fdat = lowered ? current.GetRootDataLowered(dat[i]) : current.GetRootData(dat[i]);
-                if (fdat != null && fdat.Internal is FDSSection)
+                if (fdat != null && fdat.Internal is FDSSection asSection)
                 {
-                    current = (FDSSection)fdat.Internal;
+                    current = asSection;
                 }
                 else
                 {
@@ -712,17 +730,17 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             string tabs = new string('\t', tabulation);
             StringBuilder outputBuilder = new StringBuilder(Data.Count * 100);
-            foreach (string key in Data.Keys)
+            foreach (KeyValuePair<string, FDSData> entry in Data)
             {
-                FDSData dat = Data[key];
+                FDSData dat = entry.Value;
                 foreach (string str in dat.PrecedingComments)
                 {
                     outputBuilder.Append(tabs).Append("#").Append(str).Append(newline);
                 }
-                outputBuilder.Append(tabs).Append(FDSUtility.EscapeKey(key));
-                if (dat.Internal is FDSSection)
+                outputBuilder.Append(tabs).Append(FDSUtility.EscapeKey(entry.Key));
+                if (dat.Internal is FDSSection asSection)
                 {
-                    outputBuilder.Append(":").Append(newline).Append(((FDSSection)dat.Internal).SaveToString(tabulation + 1, newline));
+                    outputBuilder.Append(":").Append(newline).Append(asSection.SaveToString(tabulation + 1, newline));
                 }
                 else if (dat.Internal is byte[])
                 {
