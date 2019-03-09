@@ -22,7 +22,7 @@ If you make any changes that could benefit the community as a whole, please cont
 
 ### The short of the license is:
 
-You can do basically whatever you want, except you may not hold any developer liable for what you do with the software.
+You can do basically whatever you want (as long as you give credit), except you may not hold any developer liable for what you do with the software.
 
 ### The long version of the license follows:
 
