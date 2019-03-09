@@ -12,7 +12,7 @@ using System.Text;
 namespace FreneticUtilities.FreneticDataSyntax
 {
     /// <summary>
-    /// Represents an exception throw while inputting data to an FDS section.
+    /// Represents an exception thrown while inputting data to an FDS section.
     /// </summary>
     [Serializable]
     public class FDSInputException : Exception
