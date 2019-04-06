@@ -6,7 +6,6 @@
     <RootNamespace>FreneticUtilities</RootNamespace>
     <AssemblyName>FreneticUtilities</AssemblyName>
     <LangVersion>latest</LangVersion>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
     <DocumentationFile>bin\Release\FreneticUtilities.xml</DocumentationFile>
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilities</Product>
