@@ -168,7 +168,7 @@ namespace FreneticUtilities.FreneticToolkit
             {
                 return null;
             }
-            int offsetHours = 0;
+            int offsetHours;
             int offsetMinutes = 0;
             if (inputSplit[2].Contains('-'))
             {
@@ -244,6 +244,53 @@ namespace FreneticUtilities.FreneticToolkit
                 + " " + QPad(input.Hour.ToString()) + ":" + QPad(input.Minute.ToString()) + ":" + QPad(input.Second.ToString())
                 + (showMilliseconds ? ":" + QPad(input.Millisecond.ToString(), 4) : "")
                 + " UTC" + utcoffset;
+        }
+
+        /// <summary>
+        /// Gets the approximate distance between two strings, based on Levenshtein comparison logic.
+        /// Useful for finding "Did you mean ...?" suggestions.
+        /// </summary>
+        /// <param name="firstString">The first string.</param>
+        /// <param name="secondString">The second string to compare against the first.</param>
+        /// <returns>A numerical value indicating how different the two strings are.</returns>
+        public static int GetLevenshteinDistance(String firstString, String secondString)
+        {
+            int firstLength = firstString.Length;
+            int secondLength = secondString.Length;
+            if (firstLength == 0)
+            {
+                return secondLength;
+            }
+            else if (secondLength == 0)
+            {
+                return firstLength;
+            }
+            int[] previousCostArray = new int[firstLength + 1];
+            int[] costArray = new int[firstLength + 1];
+            int[] swapPlaceholder;
+            for (int i = 0; i <= firstLength; i++)
+            {
+                previousCostArray[i] = i;
+            }
+            for (int j = 0; j < secondLength; j++)
+            {
+                char secondAtJ = secondString[j];
+                costArray[0] = j + 1;
+                for (int i = 0; i < firstLength; i++)
+                {
+                    int cost = firstString[i] == secondAtJ ? 0 : 1;
+                    // minimum of cell to the left+1, to the top+1, diagonally left
+                    // and up +cost
+                    costArray[i + 1] = Math.Min(Math.Min(costArray[i] + 1, previousCostArray[i + 1] + 1), previousCostArray[i] + cost);
+                }
+                // copy current distance counts to 'previous row' distance counts
+                swapPlaceholder = previousCostArray;
+                previousCostArray = costArray;
+                costArray = swapPlaceholder;
+            }
+            // our last action in the above loop was to switch previous and current, so previous now
+            // actually has the most recent cost counts
+            return previousCostArray[firstLength];
         }
     }
 }
