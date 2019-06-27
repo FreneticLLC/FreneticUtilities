@@ -798,6 +798,40 @@ namespace FreneticUtilities.FreneticToolkit
         }
         #endregion
 
+        #region inter-conversion
+        /// <summary>
+        /// Converts a 64-bit unsigned long integer to a 64-bit double-width floating point number.
+        /// </summary>
+        /// <param name="inputUlong">The input ulong.</param>
+        /// <returns>The output double64.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ULongToDouble64(ulong inputUlong)
+        {
+            unchecked
+            {
+                Double64UlongUnion unionHelper = default;
+                unionHelper.ULong64 = inputUlong;
+                return unionHelper.Double64Value;
+            }
+        }
+
+        /// <summary>
+        /// Converts a 64-bit double-width floating point number to a 64-bit unsigned long integer.
+        /// </summary>
+        /// <param name="inputDouble">The input double64.</param>
+        /// <returns>The output ulong64.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong Double64ToULong(double inputDouble)
+        {
+            unchecked
+            {
+                Double64UlongUnion unionHelper = default;
+                unionHelper.Double64Value = inputDouble;
+                return unionHelper.ULong64;
+            }
+        }
+        #endregion
+
         #region union structs
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 2)]
         private struct ByteUnionBase16
@@ -928,6 +962,16 @@ namespace FreneticUtilities.FreneticToolkit
         {
             [FieldOffset(0)]
             public ByteUnionBase64 Bytes;
+
+            [FieldOffset(0)]
+            public double Double64Value;
+        }
+
+        [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
+        private struct Double64UlongUnion
+        {
+            [FieldOffset(0)]
+            public ulong ULong64;
 
             [FieldOffset(0)]
             public double Double64Value;
