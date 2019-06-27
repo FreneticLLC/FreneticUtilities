@@ -170,5 +170,19 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             return input;
         }
+
+        /// <summary>
+        /// Processes an input object to standardize it for FDS.
+        /// </summary>
+        /// <param name="input">The original input object.</param>
+        /// <returns>The cleaned proper FDS object.</returns>
+        public static object ProcessObject(object input)
+        {
+            if (input is List<string> stringList)
+            {
+                return stringList.Select(s => new FDSData() { Internal = s }).ToList();
+            }
+            return input;
+        }
     }
 }

@@ -486,7 +486,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="input">The key to set data to.</param>
         public void Set(string key, object input)
         {
-            SetData(key, new FDSData() { Internal = input, PrecedingComments = new List<string>() });
+            SetData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = new List<string>() });
         }
 
         /// <summary>
@@ -519,7 +519,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="input">The key to set data to.</param>
         public void Default(string key, object input)
         {
-            DefaultData(key, new FDSData() { Internal = input, PrecedingComments = new List<string>() });
+            DefaultData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = new List<string>() });
         }
 
         /// <summary>
