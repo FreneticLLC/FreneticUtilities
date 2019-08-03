@@ -247,13 +247,37 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         /// <summary>
+        /// Finds the closest string in a list to a searched string, using Levenshtein comparison logic.
+        /// See also <see cref="GetLevenshteinDistance(string, string)"/>.
+        /// </summary>
+        /// <param name="allStrs">The list of all valid strings.</param>
+        /// <param name="searchString">The string to search for.</param>
+        /// <param name="maxDistance">The maximum Levenshtein distance, if any.</param>
+        /// <returns>The found string, or null if none.</returns>
+        public static string FindClosestString(IEnumerable<string> allStrs, string searchString, int maxDistance = int.MaxValue)
+        {
+            int lowestDistance = maxDistance;
+            string lowestStr = null;
+            foreach (string option in allStrs)
+            {
+                int currentDistance = GetLevenshteinDistance(searchString, option);
+                if (currentDistance < lowestDistance)
+                {
+                    lowestDistance = currentDistance;
+                    lowestStr = option;
+                }
+            }
+            return lowestStr;
+        }
+
+        /// <summary>
         /// Gets the approximate distance between two strings, based on Levenshtein comparison logic.
-        /// Useful for finding "Did you mean ...?" suggestions.
+        /// Useful for finding "Did you mean ...?" suggestions (see also <see cref="FindClosestString(IEnumerable{string}, string, int)"/>).
         /// </summary>
         /// <param name="firstString">The first string.</param>
         /// <param name="secondString">The second string to compare against the first.</param>
         /// <returns>A numerical value indicating how different the two strings are.</returns>
-        public static int GetLevenshteinDistance(String firstString, String secondString)
+        public static int GetLevenshteinDistance(string firstString, string secondString)
         {
             int firstLength = firstString.Length;
             int secondLength = secondString.Length;
