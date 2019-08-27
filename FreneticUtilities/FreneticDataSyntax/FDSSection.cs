@@ -226,7 +226,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
-        /// Gets a string from the section. Can stringify non-string values.
+        /// Gets a list of strings from the section. Can stringify non-string values.
         /// Returns null if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
@@ -247,7 +247,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
-        /// Gets a string from the section. Can stringify non-string values.
+        /// Gets a list of data from the section.
         /// Returns null if not found.
         /// </summary>
         /// <param name="key">The key to get data from.</param>
