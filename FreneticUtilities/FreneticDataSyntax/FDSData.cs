@@ -19,7 +19,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <summary>
         /// The list of comments preceding this data piece.
         /// </summary>
-        public List<string> PrecedingComments;
+        public List<string> PrecedingComments = new List<string>();
 
         /// <summary>
         /// Adds a preceding comment to this data piece.
