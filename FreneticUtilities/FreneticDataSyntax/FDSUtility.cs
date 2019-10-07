@@ -101,7 +101,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The escaped string.</returns>
         public static string Escape(string str)
         {
-            str = str.Replace("\\", "\\\\").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\r", "\\r");
+            str = str.Replace("\\", "\\s").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\r", "\\r");
             if (str.EndWithFast(' '))
             {
                 str = str + "\\x";
@@ -131,7 +131,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The unescaped string.</returns>
         public static string UnEscape(string str)
         {
-            str = str.Replace("\\t", "\t").Replace("\\n", "\n").Replace("\\r", "\r").Replace("\\x", "").Replace("\\\\", "\\");
+            str = str.Replace("\\t", "\t").Replace("\\n", "\n").Replace("\\r", "\r").Replace("\\x", "").Replace("\\s", "\\");
             return str;
         }
 

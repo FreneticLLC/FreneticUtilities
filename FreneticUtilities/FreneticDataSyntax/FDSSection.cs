@@ -562,6 +562,16 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
+        /// Checks if a key exists in the root of the FDS section.
+        /// </summary>
+        /// <param name="key">The key to check for.</param>
+        /// <returns>Whether the key is present.</returns>
+        public bool HasRootKey(string key)
+        {
+            return GetRootData(key) != null;
+        }
+
+        /// <summary>
         /// Gets data from the section.
         /// Returns null if not found.
         /// </summary>
