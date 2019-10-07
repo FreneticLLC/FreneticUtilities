@@ -479,6 +479,17 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
+        /// Sets data to the root of the section.
+        /// May throw an FDSInputException if Set failed!
+        /// </summary>
+        /// <param name="key">The key to set data from.</param>
+        /// <param name="input">The key to set data to.</param>
+        public void SetRoot(string key, object input)
+        {
+            SetRootData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = new List<string>() });
+        }
+
+        /// <summary>
         /// Sets data to the section.
         /// May throw an FDSInputException if Set failed!
         /// </summary>
