@@ -233,17 +233,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The data found, or the default.</returns>
         public List<string> GetStringList(string key)
         {
-            List<FDSData> dat = GetDataList(key);
-            if (dat == null)
+            FDSData got = GetData(key);
+            if (got == null)
             {
                 return null;
             }
-            List<string> newlist = new List<string>(dat.Count);
-            for (int i = 0; i < dat.Count; i++)
-            {
-                newlist.Add(dat[i].Internal.ToString());
-            }
-            return newlist;
+            return got.AsStringList;
         }
 
         /// <summary>
@@ -259,15 +254,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return null;
             }
-            object o = got.Internal;
-            if (o is List<FDSData> asList)
-            {
-                return asList;
-            }
-            else
-            {
-                return new List<FDSData>() { got };
-            }
+            return got.AsDataList;
         }
 
         /// <summary>
@@ -284,15 +271,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return def;
             }
-            object o = got.Internal;
-            if (o is bool asBool)
-            {
-                return asBool;
-            }
-            else
-            {
-                return o.ToString().ToLowerFast() == "true";
-            }
+            return got.AsBool;
         }
 
         /// <summary>
@@ -309,15 +288,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return def;
             }
-            object o = got.Internal;
-            if (o is string str)
-            {
-                return str;
-            }
-            else
-            {
-                return o.ToString();
-            }
+            return got.AsString;
         }
 
         /// <summary>
@@ -329,12 +300,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The data found, or the default.</returns>
         public float? GetFloat(string key, float? def = null)
         {
-            double? asDouble = GetDouble(key, def);
-            if (asDouble != null)
+            FDSData got = GetData(key);
+            if (got == null)
             {
-                return (float)asDouble;
+                return def;
             }
-            return null;
+            return got.AsFloat ?? def;
         }
 
         /// <summary>
@@ -351,31 +322,24 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return def;
             }
-            object o = got.Internal;
-            if (o is double asDouble)
+            return got.AsDouble ?? def;
+        }
+
+        /// <summary>
+        /// Gets an optional uint from the section.
+        /// Returns def if not found.
+        /// </summary>
+        /// <param name="key">The key to get data from.</param>
+        /// <param name="def">The default object.</param>
+        /// <returns>The data found, or the default.</returns>
+        public uint? GetUInt(string key, uint? def = null)
+        {
+            FDSData got = GetData(key);
+            if (got == null)
             {
-                return asDouble;
-            }
-            else if (o is float asFloat)
-            {
-                return asFloat;
-            }
-            if (o is long asLong)
-            {
-                return (double)asLong;
-            }
-            else if (o is int asInt)
-            {
-                return (double)asInt;
-            }
-            else
-            {
-                if (double.TryParse(o.ToString(), out double d))
-                {
-                    return d;
-                }
                 return def;
             }
+            return got.AsUInt ?? def;
         }
 
         /// <summary>
@@ -387,12 +351,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The data found, or the default.</returns>
         public int? GetInt(string key, int? def = null)
         {
-            long? asLong = GetLong(key, def);
-            if (asLong != null)
+            FDSData got = GetData(key);
+            if (got == null)
             {
-                return (int)asLong;
+                return def;
             }
-            return null;
+            return got.AsInt ?? def;
         }
 
         /// <summary>
@@ -409,23 +373,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return def;
             }
-            object o = got.Internal;
-            if (o is long asLong)
-            {
-                return asLong;
-            }
-            else if (o is int asInt)
-            {
-                return asInt;
-            }
-            else
-            {
-                if (long.TryParse(o.ToString(), out long l))
-                {
-                    return l;
-                }
-                return def;
-            }
+            return got.AsLong ?? def;
         }
 
         /// <summary>
@@ -442,23 +390,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return def;
             }
-            object o = got.Internal;
-            if (o is ulong oul)
-            {
-                return oul;
-            }
-            else if (o is uint oui)
-            {
-                return oui;
-            }
-            else
-            {
-                if (ulong.TryParse(o.ToString(), out ulong ul))
-                {
-                    return ul;
-                }
-                return def;
-            }
+            return got.AsULong ?? def;
         }
 
         /// <summary>
