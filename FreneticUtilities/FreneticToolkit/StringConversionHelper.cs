@@ -256,6 +256,20 @@ namespace FreneticUtilities.FreneticToolkit
         /// <returns>The found string, or null if none.</returns>
         public static string FindClosestString(IEnumerable<string> allStrs, string searchString, int maxDistance = int.MaxValue)
         {
+            return FindClosestString(allStrs, searchString, out _, maxDistance);
+        }
+
+        /// <summary>
+        /// Finds the closest string in a list to a searched string, using Levenshtein comparison logic.
+        /// See also <see cref="GetLevenshteinDistance(string, string)"/>.
+        /// </summary>
+        /// <param name="allStrs">The list of all valid strings.</param>
+        /// <param name="searchString">The string to search for.</param>
+        /// <param name="maxDistance">The maximum Levenshtein distance, if any.</param>
+        /// <param name="dist">An output parameter for the lowest distance value.</param>
+        /// <returns>The found string, or null if none.</returns>
+        public static string FindClosestString(IEnumerable<string> allStrs, string searchString, out int dist, int maxDistance = int.MaxValue)
+        {
             int lowestDistance = maxDistance;
             string lowestStr = null;
             foreach (string option in allStrs)
@@ -267,6 +281,7 @@ namespace FreneticUtilities.FreneticToolkit
                     lowestStr = option;
                 }
             }
+            dist = lowestDistance;
             return lowestStr;
         }
 
