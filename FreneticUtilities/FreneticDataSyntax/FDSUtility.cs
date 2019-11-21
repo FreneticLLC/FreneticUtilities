@@ -102,7 +102,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         public static string Escape(string str)
         {
             str = str.Replace("\\", "\\s").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\r", "\\r");
-            if (str.EndWithFast(' '))
+            if (str.EndsWithFast(' '))
             {
                 str = str + "\\x";
             }

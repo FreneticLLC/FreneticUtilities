@@ -246,7 +246,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// Returns whether the string has a specific character at a specific index.
         /// </summary>
         /// <param name="input">The input string.</param>
-        /// <param name="index">The index to check.</param>
+        /// <param name="index">The 0-based index to check.</param>
         /// <param name="character">The character to check against.</param>
         /// <returns>True if that index equals that character, otherwise false.</returns>
         public static bool IndexEquals(this string input, int index, char character)
@@ -280,7 +280,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// </summary>
         /// <param name="input">The input string.</param>
         /// <returns>True if the last character of the string is a null, otherwise false.</returns>
-        public static bool EndWithNull(this string input)
+        public static bool EndsWithNull(this string input)
         {
             return input.Length > 0 && input[input.Length - 1] == '\0';
         }
@@ -291,7 +291,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <param name="input">The input string.</param>
         /// <param name="firstChar">The character being checked for.</param>
         /// <returns>True if the last character of the string is equal to the specified character, otherwise false.</returns>
-        public static bool EndWithFast(this string input, char firstChar)
+        public static bool EndsWithFast(this string input, char firstChar)
         {
             return input.Length > 0 && input[input.Length - 1] == firstChar;
         }
@@ -347,7 +347,7 @@ namespace FreneticUtilities.FreneticExtensions
         {
             for (int i = 0; i < input.Length; i++)
             {
-                if (input[i] >= 'A' && input[i] <= 'Z')
+                if (input[i] >= 'a' && input[i] <= 'z')
                 {
                     return false;
                 }
@@ -404,7 +404,8 @@ namespace FreneticUtilities.FreneticExtensions
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="splitChar">What to split it by.</param>
-        /// <param name="maxCount">The maximum number of times to split it.</param>
+        /// <param name="maxCount">The maximum number of times to split it.
+        /// Note that the result array will have a length 1 greater than this input value.</param>
         /// <returns>The split string pieces.</returns>
         public static string[] SplitFast(this string input, char splitChar, int maxCount)
         {
