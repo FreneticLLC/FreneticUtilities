@@ -211,9 +211,9 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Local utility used for <see cref="DateTimeToString(DateTimeOffset, bool)"/>.
         /// </summary>
-        private static string QPad(string input, int length = 2)
+        private static string QPad(int input, int length = 2)
         {
-            return input.PadLeft(length, '0');
+            return input.ToString().PadLeft(length, '0');
         }
 
         /// <summary>
@@ -234,16 +234,14 @@ namespace FreneticUtilities.FreneticToolkit
             if (input.Offset.TotalMilliseconds < 0)
             {
                 // TODO: Are minutes correctly handled here (for negative offset)?
-                utcoffset = "-" + QPad(((int)Math.Abs(Math.Floor(input.Offset.TotalHours))).ToString()) + ":" + QPad(input.Offset.Minutes.ToString());
+                utcoffset = "-" + QPad((int)Math.Abs(Math.Floor(input.Offset.TotalHours))) + ":" + QPad(input.Offset.Minutes);
             }
             else
             {
-                utcoffset = "+" + QPad(((int)Math.Floor(input.Offset.TotalHours)).ToString()) + ":" + QPad(input.Offset.Minutes.ToString());
+                utcoffset = "+" + QPad(((int)Math.Floor(input.Offset.TotalHours))) + ":" + QPad(input.Offset.Minutes);
             }
-            return QPad(input.Year.ToString(), 4) + "/" + QPad(input.Month.ToString()) + "/" + QPad(input.Day.ToString())
-                + " " + QPad(input.Hour.ToString()) + ":" + QPad(input.Minute.ToString()) + ":" + QPad(input.Second.ToString())
-                + (showMilliseconds ? ":" + QPad(input.Millisecond.ToString(), 4) : "")
-                + " UTC" + utcoffset;
+            return QPad(input.Year, 4) + "/" + QPad(input.Month) + "/" + QPad(input.Day) + " " + QPad(input.Hour) + ":" + QPad(input.Minute) + ":" + QPad(input.Second)
+                + (showMilliseconds ? ":" + QPad(input.Millisecond, 4) : "") + " UTC" + utcoffset;
         }
 
         /// <summary>
