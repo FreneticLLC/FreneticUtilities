@@ -137,7 +137,7 @@ namespace FreneticUtilitiesTester
                     Console.WriteLine("  pack-folder [folder] [output file]       | Packages a folder using FFP");
                     Console.WriteLine("  pack-show [input file]                   | Shows the contents of a package");
                     Console.WriteLine("  pack-dump [package file] [output folder] | Dumps the contents of a package");
-                    Console.WriteLine("  fds-resave [input file] [output file]    | Packages a folder using FFP");
+                    Console.WriteLine("  fds-resave [input file] [output file]    | Loads in and saves back an FDS document");
                     Console.WriteLine("  help                                     | This help output");
                     Console.WriteLine("  version                                  | Displays program version");
                     break;

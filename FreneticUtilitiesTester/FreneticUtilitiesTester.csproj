@@ -6,7 +6,6 @@
     <RootNamespace>FreneticUtilitiesTester</RootNamespace>
     <AssemblyName>FreneticUtilitiesTester</AssemblyName>
     <LangVersion>latest</LangVersion>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
     <DocumentationFile>bin\Release\FreneticUtilitiesTester.xml</DocumentationFile>
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilitiesTester</Product>
