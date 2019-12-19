@@ -38,7 +38,7 @@ namespace FreneticUtilities.FreneticToolkit
             spreadMSB |= spreadMSB >> 16;
             // Full value minus the downshift of it = *only* the MSB
             int onlyMSB = spreadMSB - (spreadMSB >> 1);
-            // Exactly on MSB = return that, otherwise we're greater so grow by one.
+            // Exactly on MSB = return that, otherwise we're greater so grow by one power.
             if (x == onlyMSB)
             {
                 return onlyMSB;

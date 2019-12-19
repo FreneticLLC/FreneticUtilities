@@ -14,6 +14,11 @@ Frenetic Utilities is a collection of general C# utilities and documents made by
 
 - [Coding Guidelines](CodingGuidelines.md): General purpose coding guidelines for C# development.
 
+## Code Testing
+
+- Automated code testing for FreneticUtilities is included in the [FreneticGameEngine Tests](https://github.com/FreneticLLC/FreneticGameEngine/tree/master/FGETests/FreneticUtilitiesTests).
+- Some amount of manual testing (or learning/practice) is made available through the `FreneticUtilitiesTester` project.
+
 ### Licensing pre-note:
 
 This is an open source project, provided entirely freely, for everyone to use and contribute to.
