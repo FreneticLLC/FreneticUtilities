@@ -184,6 +184,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Returns an array where additional objects are joined into the array.
+        /// No checks are done, the two arrays are simply combined into one larger array.
         /// </summary>
         /// <typeparam name="T">The array type.</typeparam>
         /// <param name="originalArray">The main array.</param>
@@ -191,10 +192,28 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The joined result.</returns>
         public static T[] JoinWith<T>(this T[] originalArray, params T[] addtionalObjects)
         {
-            T[] res = new T[originalArray.Length + addtionalObjects.Length];
-            originalArray.CopyTo(res, 0);
-            addtionalObjects.CopyTo(res, originalArray.Length);
-            return res;
+            T[] result = new T[originalArray.Length + addtionalObjects.Length];
+            originalArray.CopyTo(result, 0);
+            addtionalObjects.CopyTo(result, originalArray.Length);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a list where additional objects are joined into the list.
+        /// No checks are done, the two lists are simply combined into one larger list.
+        /// <para>Similar to the LINQ-Provided "Enumerable.Join" extension, but without the equality checking
+        /// (the LINQ version does deduplication, this version does not).</para>
+        /// </summary>
+        /// <typeparam name="T">The list type.</typeparam>
+        /// <param name="originalList">The main list.</param>
+        /// <param name="addtionalObjects">The additional objects to append to the end.</param>
+        /// <returns>The joined result.</returns>
+        public static List<T> JoinWith<T>(this IEnumerable<T> originalList, IEnumerable<T> addtionalObjects)
+        {
+            List<T> result = new List<T>(originalList.Count() + addtionalObjects.Count());
+            result.AddRange(originalList);
+            result.AddRange(addtionalObjects);
+            return result;
         }
 
         /// <summary>
