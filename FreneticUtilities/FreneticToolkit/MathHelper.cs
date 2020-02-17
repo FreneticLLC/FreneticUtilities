@@ -80,5 +80,41 @@ namespace FreneticUtilities.FreneticToolkit
         {
             return Math.Abs(one - target) < amount;
         }
+
+        /// <summary>
+        /// Clamps an integer value to within a range.
+        /// </summary>
+        /// <param name="value">The current value.</param>
+        /// <param name="minimum">The minimum value.</param>
+        /// <param name="maximum">The maximum value.</param>
+        /// <returns>The clamped value.</returns>
+        public static int Clamp(int value, int minimum, int maximum)
+        {
+            return Math.Min(Math.Max(value, minimum), maximum);
+        }
+
+        /// <summary>
+        /// Clamps a float value to within a range.
+        /// </summary>
+        /// <param name="value">The current value.</param>
+        /// <param name="minimum">The minimum value.</param>
+        /// <param name="maximum">The maximum value.</param>
+        /// <returns>The clamped value.</returns>
+        public static float Clamp(float value, float minimum, float maximum)
+        {
+            return Math.Min(Math.Max(value, minimum), maximum);
+        }
+
+        /// <summary>
+        /// Clamps a double value to within a range.
+        /// </summary>
+        /// <param name="value">The current value.</param>
+        /// <param name="minimum">The minimum value.</param>
+        /// <param name="maximum">The maximum value.</param>
+        /// <returns>The clamped value.</returns>
+        public static double Clamp(double value, double minimum, double maximum)
+        {
+            return Math.Min(Math.Max(value, minimum), maximum);
+        }
     }
 }
