@@ -8,6 +8,7 @@ Frenetic File Packages are files that contain multiple other files within the ma
 - Frenetic File Package files use the `.ffp` file extensions.
 - FFP files are specifically optimized for fast reading.
     - Faster than zip files as FFP files do not spend significant CPU resources on decompression (except where the file space advantage is significant enough to justify it).
+        - A **lot** faster. Initial testing on packaged image files (that wouldn't receive a benefit from zip, and so FFP stores them raw) showed about 30x faster read times.
     - Faster than raw file directories as common operating systems use file-systems that add significant time and complexity to reading separate files (such as fragmentation issues, slow tree traversals, large padding widths, file lock acquisition handling, ...).
 - FFP files are handled by preloading the general file header data into memory (ie, the file names, positions, etc.) and maintaining a file system lock on the package, to allow quickly reading data from held files as needed.
 
