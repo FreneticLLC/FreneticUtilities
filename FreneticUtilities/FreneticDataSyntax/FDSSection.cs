@@ -759,7 +759,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 else if (dat.Internal is byte[])
                 {
-                    outputBuilder.Append("= ").Append(FDSUtility.Escape(dat.Outputable())).Append(newline);
+                    outputBuilder.Append("= ").Append(dat.Outputable()).Append(newline);
                 }
                 else if (dat.Internal is List<FDSData> datums)
                 {
@@ -779,12 +779,12 @@ namespace FreneticUtilities.FreneticDataSyntax
                         {
                             outputBuilder.Append("- ");
                         }
-                        outputBuilder.Append(FDSUtility.Escape(cdat.Outputable())).Append(newline);
+                        outputBuilder.Append(cdat.Outputable()).Append(newline);
                     }
                 }
                 else
                 {
-                    outputBuilder.Append(": ").Append(FDSUtility.Escape(dat.Outputable())).Append(newline);
+                    outputBuilder.Append(": ").Append(dat.Outputable()).Append(newline);
                 }
             }
             foreach (string str in PostComments)
