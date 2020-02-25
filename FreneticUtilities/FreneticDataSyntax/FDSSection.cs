@@ -464,7 +464,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
-        /// Defaults data to the section (IE, sets it if not present!)
+        /// Defaults data to the section (IE, sets it if not present).
         /// </summary>
         /// <param name="key">The key to set data from.</param>
         /// <param name="input">The key to set data to.</param>
@@ -474,7 +474,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
-        /// Defaults data to the section (IE, sets it if not present!)
+        /// Defaults data to the section (IE, sets it if not present).
         /// </summary>
         /// <param name="key">The key to set data from.</param>
         /// <param name="data">The key to set data to.</param>
@@ -659,6 +659,40 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return temp;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Removes data direct from the root level.
+        /// </summary>
+        /// <param name="key">The key to remove.</param>
+        public void RemoveRoot(string key)
+        {
+            Data.Remove(key);
+            DataLowered.Remove(key.ToLowerFast());
+        }
+
+        /// <summary>
+        /// Removes data from the section.
+        /// </summary>
+        /// <param name="key">The key to remove.</param>
+        public void Remove(string key)
+        {
+            int lind = key.LastIndexOf(SectionPathSplit);
+            if (lind < 0)
+            {
+                RemoveRoot(key);
+                return;
+            }
+            if (lind == key.Length - 1)
+            {
+                return;
+            }
+            FDSSection sec = GetSection(key.Substring(0, lind));
+            if (sec == null)
+            {
+                return;
+            }
+            sec.RemoveRoot(key.Substring(lind + 1));
         }
 
         /// <summary>
