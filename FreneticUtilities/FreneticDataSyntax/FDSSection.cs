@@ -217,6 +217,14 @@ namespace FreneticUtilities.FreneticDataSyntax
         public char SectionPathSplit = FDSUtility.DefaultSectionPathSplit;
 
         /// <summary>
+        /// Returns a boolean indicating whether the section is empty.
+        /// </summary>
+        public bool IsEmpty()
+        {
+            return Data.IsEmpty();
+        }
+
+        /// <summary>
         /// Returns the set of all keys at the root of this section.
         /// </summary>
         /// <returns>All keys.</returns>
