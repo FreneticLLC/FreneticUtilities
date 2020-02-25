@@ -523,6 +523,26 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
+        /// Checks if a case-insensitive key exists in the FDS section.
+        /// </summary>
+        /// <param name="key">The key to check for.</param>
+        /// <returns>Whether the key is present.</returns>
+        public bool HasKeyLowered(string key)
+        {
+            return GetDataLowered(key) != null;
+        }
+
+        /// <summary>
+        /// Checks if a case-insensitive key exists in the root of the FDS section.
+        /// </summary>
+        /// <param name="key">The key to check for.</param>
+        /// <returns>Whether the key is present.</returns>
+        public bool HasRootKeyLowered(string key)
+        {
+            return GetRootDataLowered(key.ToLowerFast()) != null;
+        }
+
+        /// <summary>
         /// Gets data from the section.
         /// Returns null if not found.
         /// </summary>
