@@ -37,24 +37,48 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>
         /// Reads a file into an <see cref="FDSSection"/>. Throws normal exceptions on any issue.
-        /// NOTE: May be removed or switched for journalling logic in the future.
+        /// Uses simple journalling save logic to protect against data loss.
         /// </summary>
-        /// <param name="fname">The name of the file to read.</param>
+        /// <param name="filename">The name of the file to read.</param>
         /// <returns>An <see cref="FDSSection"/> containing the same data as the file (if successfully read).</returns>
-        public static FDSSection ReadFile(string fname)
+        public static FDSSection ReadFile(string filename)
         {
-            return new FDSSection(StringConversionHelper.UTF8Encoding.GetString(File.ReadAllBytes(fname)));
+            string realPath;
+            if (File.Exists(filename))
+            {
+                realPath = filename;
+            }
+            else if (File.Exists(filename + "~2"))
+            {
+                realPath = filename + "~2";
+            }
+            // Note: ~1 are likely corrupted, so ignore them.
+            else
+            {
+                throw new FileNotFoundException($"File not found: {filename}");
+            }
+            return new FDSSection(StringConversionHelper.UTF8Encoding.GetString(File.ReadAllBytes(realPath)));
         }
 
         /// <summary>
         /// Saves an <see cref="FDSSection"/> into a file. Throws normal exceptions on any issue.
-        /// NOTE: May be removed or switched for journalling logic in the future.
+        /// Uses simple journalling save logic to protect against data loss.
         /// </summary>
         /// <param name="section">The data to save.</param>
-        /// <param name="fname">The name of the file to read.</param>
-        public static void SaveToFile(this FDSSection section, string fname)
+        /// <param name="filename">The name of the file to save to.</param>
+        public static void SaveToFile(this FDSSection section, string filename)
         {
-            File.WriteAllBytes(fname, StringConversionHelper.UTF8Encoding.GetBytes(section.SaveToString()));
+            Directory.CreateDirectory(Path.GetDirectoryName(filename));
+            File.WriteAllBytes(filename + "~1", StringConversionHelper.UTF8Encoding.GetBytes(section.SaveToString()));
+            if (File.Exists(filename))
+            {
+                File.Move(filename, filename + "~2");
+            }
+            File.Move(filename + "~1", filename);
+            if (File.Exists(filename + "~2"))
+            {
+                File.Delete(filename + "~2");
+            }
         }
 
         private static readonly byte[] EMPTY_BYTES = new byte[0];
