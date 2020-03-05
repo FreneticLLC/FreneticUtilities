@@ -40,6 +40,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string before a specified portion.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -56,6 +57,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string before a specified portion.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -72,6 +74,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string before the last occurence of a specified portion.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -88,6 +91,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string before the last occurence of a specified portion.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -104,6 +108,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the parts of a string before and after a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -123,6 +128,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the parts of a string before and after a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -142,6 +148,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the parts of a string before and after the last occurence of a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -161,6 +168,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the parts of a string before and after the last occurence of a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -180,6 +188,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string after the last occurence of a specified character.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -196,6 +205,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string after the last occurence of a specified portion.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -212,6 +222,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string after a specified portion.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -228,6 +239,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Gets the part of a string after a specified portion.
+        /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
         /// <param name="input">The original string.</param>
         /// <param name="match">The end marker.</param>
@@ -244,6 +256,7 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Returns whether the string has a specific character at a specific index.
+        /// <para>Accepts values out of range (less than zero or greater than length) and returns false for those values.</para>
         /// </summary>
         /// <param name="input">The input string.</param>
         /// <param name="index">The 0-based index to check.</param>
