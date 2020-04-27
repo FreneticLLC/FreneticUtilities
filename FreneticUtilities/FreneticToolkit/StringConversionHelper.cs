@@ -329,5 +329,31 @@ namespace FreneticUtilities.FreneticToolkit
             // actually has the most recent cost counts
             return previousCostArray[firstLength];
         }
+
+        /// <summary>
+        /// Finds the index of the first different character between two strings (case sensitive).
+        /// <para>For example, input of "My text" and "My word" returns '3' (character 't' in <paramref name="a"/> vs character 'w' in <paramref name="b"/>).</para>
+        /// <para>For input like "My text" and "My text2", returns '7' (the index of character '2').</para>
+        /// <para>Returns -1 for exactly equal strings.</para>
+        /// </summary>
+        /// <param name="a">The first string.</param>
+        /// <param name="b">The second string.</param>
+        /// <returns>The index of first difference, or -1 if no difference.</returns>
+        public static int FindFirstDifference(string a, string b)
+        {
+            int maxLen = Math.Min(a.Length, b.Length);
+            for (int i = 0; i < maxLen; i++)
+            {
+                if (a[i] != b[i])
+                {
+                    return i;
+                }
+            }
+            if (a.Length != b.Length)
+            {
+                return maxLen;
+            }
+            return -1;
+        }
     }
 }
