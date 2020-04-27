@@ -39,6 +39,27 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Produces a reversed copy of the string, using relatively efficient logic.
+        /// <para>This purely reverses the underlying array of 16-bit characters, and therefore does not account for unicode character groups or other special cases.</para>
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <returns>The reversed string.</returns>
+        public static string ReverseFast(this string input)
+        {
+            char[] output = input.ToCharArray();
+            int halfLength = output.Length / 2;
+            int lengthMinusOne = output.Length - 1;
+            for (int i = 0; i < halfLength; i++)
+            {
+                int endIndex = lengthMinusOne - i;
+                char opposite = output[endIndex];
+                output[endIndex] = output[i];
+                output[i] = opposite;
+            }
+            return new string(output);
+        }
+
+        /// <summary>
         /// Gets the part of a string before a specified portion.
         /// <para>If no match is found, the full input string will be returned.</para>
         /// </summary>
