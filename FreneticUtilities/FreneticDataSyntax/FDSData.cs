@@ -201,6 +201,38 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
+        /// Gets the internal represented data as a 16-bit signed integer. Returns null if not a valid integer.
+        /// </summary>
+        public short? AsShort
+        {
+            get
+            {
+                long? lValue = AsLong;
+                if (!lValue.HasValue)
+                {
+                    return null;
+                }
+                return (short)lValue.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the internal represented data as an 8-bit signed integer (sbyte). Returns null if not a valid integer.
+        /// </summary>
+        public sbyte? AsSByte
+        {
+            get
+            {
+                long? lValue = AsLong;
+                if (!lValue.HasValue)
+                {
+                    return null;
+                }
+                return (sbyte)lValue.Value;
+            }
+        }
+
+        /// <summary>
         /// Gets the internal represented data as a 64-bit unsigned integer. Returns null if not a valid integer.
         /// </summary>
         public ulong? AsULong
@@ -243,6 +275,49 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
+        /// Gets the internal represented data as a 16-bit unsigned integer. Returns null if not a valid integer.
+        /// </summary>
+        public ushort? AsUShort
+        {
+            get
+            {
+                ulong? lValue = AsULong;
+                if (!lValue.HasValue)
+                {
+                    return null;
+                }
+                return (ushort)lValue.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the internal represented data as an 8-bit unsigned integer (byte). Returns null if not a valid integer.
+        /// </summary>
+        public byte? AsByte
+        {
+            get
+            {
+                ulong? lValue = AsULong;
+                if (!lValue.HasValue)
+                {
+                    return null;
+                }
+                return (byte)lValue.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the internal represented data as an array of bytes. Returns null if not a valid array of bytes.
+        /// </summary>
+        public byte[] AsByteArray
+        {
+            get
+            {
+                return Internal as byte[];
+            }
+        }
+
+        /// <summary>
         /// Returns the output-able string representation of this data.
         /// </summary>
         /// <returns>The resultant data.</returns>
@@ -257,13 +332,13 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 return outputBuilder.ToString();
             }
-            if (Internal is byte[])
+            if (Internal is byte[] output)
             {
-                return Convert.ToBase64String((byte[])Internal, Base64FormattingOptions.None);
+                return Convert.ToBase64String(output, Base64FormattingOptions.None);
             }
-            if (Internal is bool)
+            if (Internal is bool bValue)
             {
-                return ((bool)Internal) ? "true" : "false";
+                return bValue ? "true" : "false";
             }
             return FDSUtility.Escape(Internal.ToString());
         }
