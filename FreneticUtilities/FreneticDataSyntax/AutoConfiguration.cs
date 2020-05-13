@@ -240,20 +240,24 @@ namespace FreneticUtilities.FreneticDataSyntax
                         saveILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=output,name)
                         saveILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the input config) (stack=output,name,input)
                         saveILGen.Emit(OpCodes.Ldfld, field); // load the relevant field (stack=output,name,data)
-                        loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
-                        loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=config,section)
-                        loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=config,section,name)
                         if (typeof(AutoConfiguration).IsAssignableFrom(field.FieldType))
                         {
                             saveILGen.Emit(OpCodes.Call, ConfigSaveMethod); // Call config.Save() (stack=output,name,out-data)
-                            loadILGen.Emit(OpCodes.Call, SectionGetSectionMethod); // Call section.GetSection(name) (stack=config,sub-section)
-                            loadILGen.Emit(OpCodes.Call, ConfigLoadMethod); // Call config.Load(section) (stack now clear)
-                            loadILGen.Emit(OpCodes.Ldarg_0); // reload arg 0 (the config) (stack=config)
+                            loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
+                            loadILGen.Emit(OpCodes.Ldfld, field); // load the relevant field (stack=sub-config)
+                            loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=sub-config,section)
+                            loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=sub-config,section,name)
+                            loadILGen.Emit(OpCodes.Call, SectionGetSectionMethod); // Call section.GetSection(name) (stack=sub-config,sub-section)
+                            loadILGen.Emit(OpCodes.Call, ConfigLoadMethod); // Call sub_config.Load(section) (stack now clear)
                         }
                         else
                         {
+                            loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
+                            loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=config,section)
+                            loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=config,section,name)
                             loadILGen.Emit(OpCodes.Call, SectionGetRootDataMethod); // call section.GetRootData(name) (stack=config,data)
                             EmitTypeLoader(field.FieldType, loadILGen); // call the type converter needed (stack=config,out-data)
+                            loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
                         }
                         if (field.FieldType.IsValueType)
                         {
@@ -270,7 +274,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                             saveILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data) (stack=output,name,FDSData)
                         }
                         saveILGen.Emit(OpCodes.Call, SectionSetRootDataMethod); // Call output.SetRootData(name, data); (stack was output,name,FDSData - now clear)
-                        loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
                     }
                     saveILGen.Emit(OpCodes.Ldloc, saveOutputLocal); // return output;
                     saveILGen.Emit(OpCodes.Ret);
