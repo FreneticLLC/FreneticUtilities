@@ -18,6 +18,33 @@ namespace FreneticUtilities.FreneticDataSyntax
     public class FDSData
     {
         /// <summary>
+        /// Constructs an empty <see cref="FDSData"/> instance.
+        /// </summary>
+        public FDSData()
+        {
+        }
+
+        /// <summary>
+        /// Constructs an <see cref="FDSData"/> instance of the specified object.
+        /// </summary>
+        /// <param name="_internal">The object.</param>
+        public FDSData(object _internal)
+        {
+            Internal = _internal;
+        }
+
+        /// <summary>
+        /// Constructs an <see cref="FDSData"/> instance of the specified object and the specified comments.
+        /// </summary>
+        /// <param name="_internal">The object.</param>
+        /// <param name="comment">The comments to apply (newline separated).</param>
+        public FDSData(object _internal, string comment)
+        {
+            Internal = _internal;
+            AddComment(comment);
+        }
+
+        /// <summary>
         /// The list of comments preceding this data piece.
         /// </summary>
         public List<string> PrecedingComments = new List<string>();

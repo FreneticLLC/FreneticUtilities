@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Reflection.Emit;
 using FreneticUtilities.FreneticToolkit;
@@ -22,6 +24,27 @@ namespace FreneticUtilities.FreneticDataSyntax
     /// </summary>
     public abstract class AutoConfiguration
     {
+        /// <summary>
+        /// Adds comment lines to a configuration value.
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Field)]
+        public class ConfigComment : Attribute
+        {
+            /// <summary>
+            /// The comments to add (separated via newline).
+            /// </summary>
+            public string Comments;
+
+            /// <summary>
+            /// Construct the config comment.
+            /// </summary>
+            /// <param name="_comment">The comment to add.</param>
+            public ConfigComment(string _comment)
+            {
+                Comments = _comment;
+            }
+        }
+
         /// <summary>
         /// Internal tooling for <see cref="AutoConfiguration"/>.
         /// </summary>
@@ -80,9 +103,9 @@ namespace FreneticUtilities.FreneticDataSyntax
             public static MethodInfo ConfigLoadMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Load));
             
             /// <summary>
-            /// A reference to the <see cref="FDSSection.SetRoot(string, object)"/> method.
+            /// A reference to the <see cref="FDSSection.SetRootData(string, FDSData)"/> method.
             /// </summary>
-            public static MethodInfo SectionSetRootMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.SetRoot), new Type[] { typeof(string), typeof(object) });
+            public static MethodInfo SectionSetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.SetRootData), new Type[] { typeof(string), typeof(FDSData) });
 
             /// <summary>
             /// A reference to the <see cref="FDSSection.GetSection(string)"/> method.
@@ -103,6 +126,16 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// A reference to the <see cref="FDSSection"/> no-arguments constructor.
             /// </summary>
             public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor(new Type[] { });
+
+            /// <summary>
+            /// A reference to the <see cref="FDSData"/> one-argument constructor.
+            /// </summary>
+            public static ConstructorInfo FDSDataObjectConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object) });
+
+            /// <summary>
+            /// A reference to the <see cref="FDSData"/> two-argument constructor.
+            /// </summary>
+            public static ConstructorInfo FDSDataObjectCommentConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object), typeof(string) });
 
             /// <summary>
             /// A mapping of core object types to the method that converts <see cref="FDSData"/> to them.
@@ -222,14 +255,21 @@ namespace FreneticUtilities.FreneticDataSyntax
                             loadILGen.Emit(OpCodes.Call, SectionGetRootDataMethod); // call section.GetRootData(name) (stack=config,data)
                             EmitTypeLoader(field.FieldType, loadILGen); // call the type converter needed (stack=config,out-data)
                         }
-
-                        // TODO: Saver: Generate comments based on a custom attribute
-
                         if (field.FieldType.IsValueType)
                         {
                             saveILGen.Emit(OpCodes.Box, field.FieldType); // Box value types before sending along.
                         }
-                        saveILGen.Emit(OpCodes.Call, SectionSetRootMethod); // Call output.SetRoot(name, data); (stack was output,name,out-data - now clear)
+                        ConfigComment comment = field.GetCustomAttribute<ConfigComment>();
+                        if (comment != null)
+                        {
+                            saveILGen.Emit(OpCodes.Ldstr, comment.Comments); // Load the comments onto stack (stack=output,name,out-data,commentstring)
+                            saveILGen.Emit(OpCodes.Newobj, FDSDataObjectCommentConstructor); // new FDSData(out-data, commentstring) (stack=output,name,FDSData)
+                        }
+                        else
+                        {
+                            saveILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data) (stack=output,name,FDSData)
+                        }
+                        saveILGen.Emit(OpCodes.Call, SectionSetRootDataMethod); // Call output.SetRootData(name, data); (stack was output,name,FDSData - now clear)
                         loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
                     }
                     saveILGen.Emit(OpCodes.Ldloc, saveOutputLocal); // return output;
