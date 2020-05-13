@@ -65,3 +65,47 @@ my second root section:
     - three makes it complete!
 # That's all, folks!
 ```
+
+### AutoConfiguration
+
+FDS also includes the `AutoConfiguration` class, which automatically converts between FDS Sections and C# class objects.
+
+Example of an `AutoConfiguration` class:
+```cs
+    class TestConfig : AutoConfiguration
+    {
+        public bool BoValue = true;
+
+        [ConfigComment("Wow!\nWhat a comment!")]
+        public int NumVal = 5;
+
+        public float ValF = 7.2f;
+
+        public string Text = "Wow\nText here!";
+
+        public class SubClass : AutoConfiguration
+        {
+            public sbyte WeirdData = -5;
+
+            [ConfigComment("This encodes as a binary key!")]
+            public byte[] WeirdArray = new byte[] { 7, 12, 42 };
+        }
+
+        public SubClass SubData = new SubClass();
+    }
+```
+
+That will auto-encode as:
+
+```fds
+BoValue: true
+#Wow!
+#What a comment!
+NumVal: 5
+ValF: 7.2
+Text: Wow\nText here!
+SubData:
+    WeirdData: -5
+    #This encodes as a binary key!
+    WeirdArray= Bwwq
+```
