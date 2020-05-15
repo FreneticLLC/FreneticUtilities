@@ -173,6 +173,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 register(typeof(float), nameof(FDSData.AsFloat));
                 register(typeof(string), nameof(FDSData.AsString));
                 register(typeof(byte[]), nameof(FDSData.AsByteArray));
+                register(typeof(List<string>), nameof(FDSData.AsStringList));
             }
 
             /// <summary>
