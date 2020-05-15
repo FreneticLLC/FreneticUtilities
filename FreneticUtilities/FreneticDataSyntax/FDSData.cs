@@ -193,14 +193,11 @@ namespace FreneticUtilities.FreneticDataSyntax
                 {
                     return (double)asInt;
                 }
-                else
+                else if (double.TryParse(Internal.ToString(), out double d))
                 {
-                    if (double.TryParse(Internal.ToString(), out double d))
-                    {
-                        return d;
-                    }
-                    return null;
+                    return d;
                 }
+                return null;
             }
         }
 
@@ -235,14 +232,11 @@ namespace FreneticUtilities.FreneticDataSyntax
                 {
                     return asInt;
                 }
-                else
+                else if (long.TryParse(Internal.ToString(), out long l))
                 {
-                    if (long.TryParse(Internal.ToString(), out long l))
-                    {
-                        return l;
-                    }
-                    return null;
+                    return l;
                 }
+                return null;
             }
         }
 
@@ -394,11 +388,11 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 return outputBuilder.ToString();
             }
-            if (Internal is byte[] output)
+            else if (Internal is byte[] output)
             {
                 return Convert.ToBase64String(output, Base64FormattingOptions.None);
             }
-            if (Internal is bool bValue)
+            else if (Internal is bool bValue)
             {
                 return bValue ? "true" : "false";
             }
