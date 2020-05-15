@@ -5,6 +5,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -123,6 +124,36 @@ namespace FreneticUtilities.FreneticDataSyntax
             public static MethodInfo FixNullMethod = typeof(Internal).GetMethod(nameof(FixNull));
 
             /// <summary>
+            /// A reference to the <see cref="List{FDSData}.Add"/> method for lists of <see cref="FDSData"/>.
+            /// </summary>
+            public static MethodInfo FDSDataListAddMethod = typeof(List<FDSData>).GetMethod(nameof(List<FDSData>.Add));
+
+            /// <summary>
+            /// A reference to the <see cref="List{FDSData}.GetEnumerator"/> method for lists of <see cref="FDSData"/>.
+            /// </summary>
+            public static MethodInfo FDSDataListGetEnumeratorMethod = typeof(List<FDSData>).GetMethod(nameof(List<FDSData>.GetEnumerator));
+
+            /// <summary>
+            /// A reference to the <see cref="List{FDSData}.Enumerator.MoveNext"/> method for a list of <see cref="FDSData"/>.
+            /// </summary>
+            public static MethodInfo FDSDataListEnumeratorMoveNextMethod = typeof(List<FDSData>.Enumerator).GetMethod(nameof(List<FDSData>.Enumerator.MoveNext));
+
+            /// <summary>
+            /// A reference to the <see cref="IDisposable.Dispose"/> method.
+            /// </summary>
+            public static MethodInfo IDisposableDisposeMethod = typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose));
+
+            /// <summary>
+            /// A reference to the <see cref="List{FDSData}.Enumerator.Current"/> property getter for a list of <see cref="FDSData"/>.
+            /// </summary>
+            public static MethodInfo FDSDataListEnumeratorCurrentGetter = typeof(List<FDSData>.Enumerator).GetProperty(nameof(List<FDSData>.Enumerator.Current)).GetMethod;
+
+            /// <summary>
+            /// A reference to the <see cref="FDSData.AsDataList"/> property getter method.
+            /// </summary>
+            public static MethodInfo FDSDataAsDataListGetter = typeof(FDSData).GetProperty(nameof(FDSData.AsDataList)).GetMethod;
+
+            /// <summary>
             /// A reference to the <see cref="FDSSection"/> no-arguments constructor.
             /// </summary>
             public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor(new Type[] { });
@@ -136,6 +167,11 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// A reference to the <see cref="FDSData"/> two-arguments constructor.
             /// </summary>
             public static ConstructorInfo FDSDataObjectCommentConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object), typeof(string) });
+
+            /// <summary>
+            /// A reference to the <see cref="List{FDSData}"/> of <see cref="FDSData"/> no-arguments constructor.
+            /// </summary>
+            public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor(new Type[] { });
 
             /// <summary>
             /// A mapping of core object types to the method that converts <see cref="FDSData"/> to them.
@@ -173,7 +209,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                 register(typeof(float), nameof(FDSData.AsFloat));
                 register(typeof(string), nameof(FDSData.AsString));
                 register(typeof(byte[]), nameof(FDSData.AsByteArray));
-                register(typeof(List<string>), nameof(FDSData.AsStringList));
             }
 
             /// <summary>
@@ -188,13 +223,149 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
 
             /// <summary>
+            /// A mapping of types to methods that load a list of that type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
+            /// </summary>
+            public static Dictionary<Type, MethodInfo> ListLoaders = new Dictionary<Type, MethodInfo>(32);
+
+            /// <summary>
+            /// A mapping of types to methods that save a list of that type to a <see cref="List{T}"/> of <see cref="FDSData"/>.
+            /// </summary>
+            public static Dictionary<Type, MethodInfo> ListSavers = new Dictionary<Type, MethodInfo>(32);
+
+            /// <summary>
+            /// Gets or creates a method that loads a list of the specified type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
+            /// Uses <see cref="ListLoaders"/> as a backing map.
+            /// </summary>
+            /// <param name="type">The list type to load to, like typeof 'List&lt;int&gt;'.</param>
+            /// <returns>The method that loads to it.</returns>
+            public static MethodInfo GetListLoader(Type type)
+            {
+                if (ListLoaders.TryGetValue(type, out MethodInfo method))
+                {
+                    return method;
+                }
+                MethodInfo generated = CreateListConverter(type, true);
+                ListLoaders[type] = generated;
+                return generated;
+            }
+
+            /// <summary>
+            /// Gets or creates a method that saves a list of the specified type to a <see cref="List{T}"/> of <see cref="FDSData"/>.
+            /// Uses <see cref="ListSavers"/> as a backing map.
+            /// </summary>
+            /// <param name="type">The list type to save from, like typeof 'List&lt;int&gt;'.</param>
+            /// <returns>The method that saves from it.</returns>
+            public static MethodInfo GetListSaver(Type type)
+            {
+                if (ListSavers.TryGetValue(type, out MethodInfo method))
+                {
+                    return method;
+                }
+                MethodInfo generated = CreateListConverter(type, false);
+                ListSavers[type] = generated;
+                return generated;
+            }
+
+            /// <summary>
+            /// Generates a method that loads a list of the specified type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
+            /// </summary>
+            /// <param name="type">The type to convert to/from.</param>
+            /// <param name="doLoad">True indicates load, false indicates save.</param>
+            /// <returns>The generated method.</returns>
+            public static MethodInfo CreateListConverter(Type type, bool doLoad)
+            {
+                Type listSubType = type.GetGenericArguments()[0];
+                Type inListType, outListType, inSubType, outSubType, enumeratorType;
+                LocalBuilder outListVariable, inListVariable;
+                MethodInfo enumeratorMethod, enumeratorMoveNextMethod, enumeratorCurrentGetter, listAddMethod;
+                ConstructorInfo outListConstructor;
+                if (doLoad)
+                {
+                    inListType = typeof(List<FDSData>);
+                    outListType = type;
+                    inSubType = typeof(FDSData);
+                    outSubType = listSubType;
+                    enumeratorMethod = FDSDataListGetEnumeratorMethod;
+                    enumeratorType = typeof(List<FDSData>.Enumerator);
+                    enumeratorMoveNextMethod = FDSDataListEnumeratorMoveNextMethod;
+                    enumeratorCurrentGetter = FDSDataListEnumeratorCurrentGetter;
+                    listAddMethod = outListType.GetMethod(nameof(ICollection<int>.Add));
+                    outListConstructor = type.GetConstructor(new Type[] { });
+                }
+                else
+                {
+                    inListType = type;
+                    outListType = typeof(List<FDSData>);
+                    inSubType = listSubType;
+                    outSubType = typeof(FDSData);
+                    enumeratorMethod = inListType.GetMethod(nameof(ICollection<int>.GetEnumerator));
+                    enumeratorType = enumeratorMethod.ReturnType;
+                    enumeratorMoveNextMethod = enumeratorType.GetMethod(nameof(IEnumerator<int>.MoveNext));
+                    enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator<int>.Current)).GetMethod;
+                    listAddMethod = FDSDataListAddMethod;
+                    outListConstructor = FDSDataListConstructor;
+                }
+                DynamicMethod genMethod = new DynamicMethod("ListConvert", outListType, new Type[] { inListType }, typeof(AutoConfiguration).Module, true);
+                ILGenerator targetILGen = genMethod.GetILGenerator();
+                targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=paramInList)
+                if (doLoad)
+                {
+                    targetILGen.Emit(OpCodes.Call, FDSDataAsDataListGetter); // data.AsDataList (stack=origInList)
+                }
+                // Store input list and new output list to local variable
+                inListVariable = targetILGen.DeclareLocal(inListType); // List<TIn> inList;
+                targetILGen.Emit(OpCodes.Stloc, inListVariable); // inList = dataList; (stack now clear)
+                targetILGen.Emit(OpCodes.Newobj, outListConstructor); // new List<TOut>(); (stack=newOutList)
+                outListVariable = targetILGen.DeclareLocal(outListType); // List<TOut> outList;
+                targetILGen.Emit(OpCodes.Stloc, outListVariable); // outList = newOutList; (stack now clear)
+                // foreach (TIn datum in inList)
+                // Gather enumerator data
+                targetILGen.Emit(OpCodes.Ldloc, inListVariable); // Load the inList (stack=inList)
+                targetILGen.Emit(OpCodes.Call, enumeratorMethod); // call inList.GetEnumerator() (stack=gottenEnum)
+                LocalBuilder enumeratorVariable = targetILGen.DeclareLocal(enumeratorType);
+                targetILGen.Emit(OpCodes.Stloc, enumeratorVariable); // Enumerator<TIn> enumerator = gottenEnum; (stack now clear)
+                Label tryBlock = targetILGen.BeginExceptionBlock(); // try { // for the 'finally' block farther down
+                Label loopCheck = targetILGen.DefineLabel();
+                targetILGen.Emit(OpCodes.Br, loopCheck); // Jump to the loop check first
+                // Loop body
+                Label blockStart = targetILGen.DefineLabel();
+                targetILGen.MarkLabel(blockStart);
+                targetILGen.Emit(OpCodes.Ldloc, outListVariable); // Load the outlist (stack=outList)
+                targetILGen.Emit(OpCodes.Ldloca, enumeratorVariable); // Load the enumerator (stack=outList,enumerator)
+                targetILGen.Emit(OpCodes.Call, enumeratorCurrentGetter); // Call TIn enumator.Current getter (stack=outList,datum)
+                EmitTypeConverter(listSubType, targetILGen, doLoad); // Convert the data as-needed
+                if (!doLoad)
+                {
+                    targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data)
+                }
+                targetILGen.Emit(OpCodes.Call, listAddMethod); // call outList.add(datum); (stack now clear)
+                // Loop check (MoveNext)
+                targetILGen.MarkLabel(loopCheck);
+                targetILGen.Emit(OpCodes.Ldloca, enumeratorVariable); // Load the enumerator (stack=enumerator)
+                targetILGen.Emit(OpCodes.Call, enumeratorMoveNextMethod); // Call bool enumator.MoveNext() (stack=hasNext)
+                targetILGen.Emit(OpCodes.Brtrue, blockStart); // If true, jump to block start
+                // else, continue to finally logic
+                // Finally block
+                targetILGen.Emit(OpCodes.Leave, tryBlock); // end the 'try' block
+                targetILGen.BeginFinallyBlock(); // finally {
+                targetILGen.Emit(OpCodes.Ldloca, enumeratorVariable); // load enumerator variable (stack=enumerator)
+                targetILGen.Emit(OpCodes.Constrained, enumeratorType); // constrain the type for the disposable call
+                targetILGen.Emit(OpCodes.Callvirt, IDisposableDisposeMethod); // enumerator.Dispose(); (stack now clear)
+                targetILGen.EndExceptionBlock(); // end the finally { block
+                // End of method (return)
+                targetILGen.Emit(OpCodes.Ldloc, outListVariable); // load the outList onto stack (stack=outList)
+                targetILGen.Emit(OpCodes.Ret); // return outList;
+                return genMethod;
+            }
+
+            /// <summary>
             /// Emits the appropriate <see cref="FDSData"/> convert method for the applicable type.
             /// <para>Expected stack condition for load is input one <see cref="FDSData"/> on top of stack at start, output one object of type param <paramref name="type"/> on top of stack at end, and save is reverse of that.</para>
             /// </summary>
             /// <param name="type">The type to convert to/from.</param>
             /// <param name="targetILGen">The IL Generator to emit to.</param>
             /// <param name="doLoad">True indicates load, false indicates save.</param>
-            public static void EmitTypeConverter(Type type, ILGeneratorTracker targetILGen, bool doLoad)
+            public static void EmitTypeConverter(Type type, ILGenerator targetILGen, bool doLoad)
             {
                 if (FDSDataFieldsByType.TryGetValue(type, out DataConverter converter))
                 {
@@ -208,12 +379,15 @@ namespace FreneticUtilities.FreneticDataSyntax
                     }
                     else if (!doLoad && type.IsValueType)
                     {
-
                         targetILGen.Emit(OpCodes.Box, type); // Box value types before sending along.
                     }
                 }
+                else if (typeof(ICollection).IsAssignableFrom(type))
+                {
+                    targetILGen.Emit(OpCodes.Call, doLoad ? GetListLoader(type) : GetListSaver(type)); // Call the relevant list converter method
+                }
 
-                // TODO: List/Dictionary/etc. type support
+                // TODO: Dictionary/...? type support
 
                 else
                 {
@@ -275,7 +449,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                             loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
                             EmitTypeConverter(field.FieldType, saveILGen, false); // call the type converter needed (stack=output,name,out-data-cleaned)
                         }
-                        ConfigComment comment = field.GetCustomAttribute<ConfigComment>();
+                        ConfigComment comment = field?.GetCustomAttribute<ConfigComment>();
                         if (comment != null)
                         {
                             saveILGen.Emit(OpCodes.Ldstr, comment.Comments); // Load the comments onto stack (stack=output,name,out-data,commentstring)

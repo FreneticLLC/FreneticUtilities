@@ -23,7 +23,8 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
 - FDS uses UTF-8 for data input across all machines, regardless of operating system. This ensures Unicode data is preserved.
 - FDS supports simple data lists.
 - FDS reads any line endings properly (for Windows, old-Mac, and Unix file endings), and outputs with the correct standard line endings (single-newline, Unix-like) except when configured to use a specific ending.
-- FDS supports 32-bit integers, 64-bit integers ("longs"), 32-bit floats, 64-bit floats ("doubles"), booleans, textual strings, binary arrays.
+- FDS explicitly supports 32-bit integers, 64-bit integers ("longs"), 32-bit floats, 64-bit floats ("doubles"), booleans, textual strings, binary arrays.
+- FDS implicitly supports other types, particularly when they can be naturally encoded as a string (such as `decimal`, or just any type that you define your own string encode/decode for).
 - FDS is case sensitive, but supports case-insensitive reads.
 - FDS supports newlines in text via `\n`, and backslashes via `\s`. Also available: `\r` (carriage return), `\t` (tab), `\d` (dot), `\c` (colon), `\e` (equals sign), `\x` (nothing, to allow spaces at start or end of text).
 - FDS has a developer-friendly API for interfacing with FDS data and data sections.
@@ -84,6 +85,12 @@ Example of an `AutoConfiguration` class:
 
         public string Text = "Wow\nText here!";
 
+        public List<string> StringList = new List<string>() { "alpha", "bravo string", "string number three" };
+
+        public List<int> IntList = new List<int>() { 1, 7, 12, 42, 96 };
+
+        public List<short> ShortList = new List<short>() { 5 };
+
         public class SubClass : AutoConfiguration
         {
             public sbyte WeirdData = -5;
@@ -105,6 +112,18 @@ BoValue: true
 NumVal: 5
 ValF: 7.2
 Text: Wow\nText here!
+StringList:
+- alpha
+- bravo string
+- string number three
+IntList:
+- 1
+- 7
+- 12
+- 42
+- 96
+ShortList:
+- 5
 SubData:
     WeirdData: -5
     #This encodes as a binary key!
@@ -112,9 +131,14 @@ SubData:
 ```
 
 - Note that all default values should be set and non-null.
+    - Lists for example should be empty lists (like `new List<Type>();`), not `null`.
 - Supports:
     - `AutoConfiguration` sub-instances (that is, configs within configs, to be sub-mapped)
     - Basic types: `string`, `bool`
     - Signed integer types: `long`, `int`, `short`, `sbyte`
     - Unsigned integer types: `ulong`, `uint`, `ushort`, `byte`
     - Floating point types: `float`, `double`, `decimal`
+    - Generic types: `ICollection<T>`
+        - Can have any collection type (`List<T>`, `LinkedList<T>`, etc.) so long as it supports a no-argument constructor and extends `ICollection<T>`.
+        - Note that the variable type should match the real type (ie don't use an interface as the actual variable type, use a concrete type).
+        - Can have any supported type as `T`.
