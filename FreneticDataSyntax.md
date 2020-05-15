@@ -109,3 +109,11 @@ SubData:
     #This encodes as a binary key!
     WeirdArray= Bwwq
 ```
+
+- Note that all default values should be set and non-null.
+- Supports:
+    - `AutoConfiguration` sub-instances (that is, configs within configs, to be sub-mapped)
+    - Basic types: `string`, `bool`
+    - Signed integer types: `long`, `int`, `short`, `sbyte`
+    - Unsigned integer types: `ulong`, `uint`, `ushort`, `byte`
+    - Floating point types: `float`, `double`, `decimal`

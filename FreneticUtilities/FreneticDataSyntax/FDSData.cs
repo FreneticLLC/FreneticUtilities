@@ -136,6 +136,41 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
+        /// Gets the internal represented data as a C# decimal value. Returns null if not a valid decimal.
+        /// </summary>
+        public decimal? AsDecimal
+        {
+            get
+            {
+                if (Internal is decimal asDecimal)
+                {
+                    return asDecimal;
+                }
+                else if (Internal is double asDouble)
+                {
+                    return (decimal)asDouble;
+                }
+                else if (Internal is float asFloat)
+                {
+                    return (decimal)asFloat;
+                }
+                if (Internal is long asLong)
+                {
+                    return (decimal)asLong;
+                }
+                else if (Internal is int asInt)
+                {
+                    return (decimal)asInt;
+                }
+                else if (decimal.TryParse(Internal.ToString(), out decimal d))
+                {
+                    return d;
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Gets the internal represented data as a double-precision (64-bit) floating point value. Returns null if not a valid double.
         /// </summary>
         public double? AsDouble

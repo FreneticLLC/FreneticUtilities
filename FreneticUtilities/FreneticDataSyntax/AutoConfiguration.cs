@@ -168,6 +168,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 register(typeof(uint), nameof(FDSData.AsUInt));
                 register(typeof(ushort), nameof(FDSData.AsUShort));
                 register(typeof(byte), nameof(FDSData.AsByte));
+                register(typeof(decimal), nameof(FDSData.AsDecimal));
                 register(typeof(double), nameof(FDSData.AsDouble));
                 register(typeof(float), nameof(FDSData.AsFloat));
                 register(typeof(string), nameof(FDSData.AsString));
