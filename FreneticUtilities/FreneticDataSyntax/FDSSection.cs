@@ -42,6 +42,7 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>
         /// Lowercase-stored data for this section.
+        /// For lookup assistance only.
         /// </summary>
         public Dictionary<string, FDSData> DataLowered = new Dictionary<string, FDSData>();
 

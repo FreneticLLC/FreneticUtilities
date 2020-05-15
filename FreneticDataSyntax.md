@@ -14,7 +14,7 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
 - FDS supports (and encourages) tabs as a representative of 4 spaces.
     - This trims a few bytes and allows users to freely control how they view an FDS file.
 - FDS is neat, clean, and user friendly.
-- FDS preserves list order, but not section order.
+- FDS preserves list and section key order.
 - FDS preserves comments in their positions based on what data follows (comments follow what's below them in the file. Comments at the end of the file remain at the end).
 - FDS interprets quotes as raw input (ie they are treated as just textual quotes, no special handling is applied).
 - FDS supports binary data via the `=` syntax, in Base64.
