@@ -17,166 +17,14 @@ namespace FreneticUtilities.FreneticDataSyntax
     /// </summary>
     public class FDSSection
     {
-        // TODO: Clean code base! Current code contains a lot of poorly named variables and messy code.
-
         /// <summary>
         /// Constructs the FDS Section from textual data.
         /// </summary>
         /// <param name="contents">The contents of the data file.</param>
+        /// <exception cref="FDSInputException">If parsing fails.</exception>
         public FDSSection(string contents)
         {
-            StartingLine = 1;
-            contents = FDSUtility.CleanFileData(contents);
-            Dictionary<int, FDSSection> spacedsections = new Dictionary<int, FDSSection>() { { 0, this } };
-            List<string> ccomments = new List<string>();
-            List<string> seccomments = new List<string>();
-            FDSSection csection = this;
-            string[] data = contents.SplitFast('\n');
-            int pspaces = 0;
-            string secwaiting = null;
-            List<FDSData> clist = null;
-            for (int i = 0; i < data.Length; i++)
-            {
-                string line = data[i];
-                int spaces;
-                for (spaces = 0; spaces < line.Length; spaces++)
-                {
-                    if (line[spaces] != ' ')
-                    {
-                        break;
-                    }
-                }
-                if (spaces == line.Length)
-                {
-                    continue;
-                }
-                string datum = line.Substring(spaces).TrimEnd(' ');
-                if (datum.StartsWith("#"))
-                {
-                    ccomments.Add(datum.Substring(1));
-                    continue;
-                }
-                if (spaces < pspaces)
-                {
-                    if (spacedsections.TryGetValue(spaces, out FDSSection temp))
-                    {
-                        csection = temp;
-                        foreach (int test in new List<int>(spacedsections.Keys))
-                        {
-                            if (test > spaces)
-                            {
-                                spacedsections.Remove(test);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Exception(i, line, "Spaced incorrectly. Spacing length is less than previous spacing length,"
-                            + "but does not match the spacing value of any known section, valid: "
-                            + string.Join(" / ", spacedsections.Keys) + ", found: " + spaces + ", was: " + pspaces);
-                    }
-                }
-                if (datum[0] == '-' || datum[0] == '=')
-                {
-                    string clistline = datum.Substring(1).TrimStart(' ');
-                    if (clist == null)
-                    {
-                        if (spaces >= pspaces && secwaiting != null)
-                        {
-                            clist = new List<FDSData>();
-                            csection.SetRootData(FDSUtility.UnEscapeKey(secwaiting), new FDSData() { PrecedingComments = new List<string>(seccomments), Internal = clist });
-                            seccomments.Clear();
-                            secwaiting = null;
-                        }
-                        else
-                        {
-                            Exception(i, line, "Line purpose unknown, attempted list entry when not building a list");
-                        }
-                    }
-                    string unescaped = FDSUtility.UnEscape(clistline);
-                    clist.Add(new FDSData()
-                    {
-                        PrecedingComments = new List<string>(ccomments),
-                        Internal = datum[0] == '=' ? FDSUtility.FromBase64(unescaped) : FDSUtility.InterpretType(unescaped)
-                    });
-                    ccomments.Clear();
-                    continue;
-                }
-                clist = null;
-                string startofline = "";
-                string endofline = "";
-                char type = '\0';
-                for (int spot = 0; spot < datum.Length; spot++)
-                {
-                    if (datum[spot] == ':' || datum[spot] == '=')
-                    {
-                        type = datum[spot];
-                        startofline = datum.Substring(0, spot);
-                        endofline = spot == datum.Length - 1 ? "": datum.Substring(spot + 1);
-                        break;
-                    }
-                }
-                endofline = endofline.TrimStart(' ');
-                if (type == '\0')
-                {
-                    Exception(i, line, "Line purpose unknown");
-                }
-                if (startofline.Length == 0)
-                {
-                    Exception(i, line, "Empty key label!");
-                }
-                if (spaces > pspaces && secwaiting != null)
-                {
-                    FDSSection sect = new FDSSection();
-                    csection.SetRootData(FDSUtility.UnEscapeKey(secwaiting), new FDSData()
-                    {
-                        PrecedingComments = new List<string>(seccomments),
-                        Internal = sect
-                    });
-                    seccomments.Clear();
-                    csection = sect;
-                    spacedsections[spaces] = sect;
-                    secwaiting = null;
-                }
-                if (type == '=')
-                {
-                    csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData()
-                    {
-                        PrecedingComments = new List<string>(ccomments),
-                        Internal = FDSUtility.FromBase64(FDSUtility.UnEscape(endofline))
-                    });
-                    ccomments.Clear();
-                }
-                else if (type == ':')
-                {
-                    if (endofline.Length == 0)
-                    {
-                        secwaiting = startofline;
-                        seccomments = new List<string>(ccomments);
-                        ccomments.Clear();
-                    }
-                    else
-                    {
-                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData()
-                        {
-                            PrecedingComments = new List<string>(ccomments),
-                            Internal = FDSUtility.InterpretType(FDSUtility.UnEscape(endofline))
-                        });
-                        ccomments.Clear();
-                    }
-                }
-                else
-                {
-                    Exception(i, line, "Internal issue: unrecognize 'type' value: " + type);
-                }
-                pspaces = spaces;
-            }
-            PostComments.AddRange(ccomments);
-        }
-
-        private void Exception(int linenumber, string line, string reason)
-        {
-            throw new Exception("[FDS Parsing error] Line " + (linenumber + 1) + ": " + reason + ", from line as follows: `" + line + "`");
+            FDSParser.Parse(contents, this);
         }
 
         /// <summary>
@@ -186,13 +34,6 @@ namespace FreneticUtilities.FreneticDataSyntax
         {
             // Do nothing, we're init'd enough!
         }
-
-        /// <summary>
-        /// The line number this section starts on.
-        /// Note that files start at 1.
-        /// Only accurate at file-load time.
-        /// </summary>
-        public int StartingLine = 0;
 
         /// <summary>
         /// All data contained by this section.
