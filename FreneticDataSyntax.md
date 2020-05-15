@@ -28,11 +28,12 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
 - FDS supports newlines in text via `\n`, and backslashes via `\s`. Also available: `\r` (carriage return), `\t` (tab), `\d` (dot), `\c` (colon), `\e` (equals sign), `\x` (nothing, to allow spaces at start or end of text).
 - FDS has a developer-friendly API for interfacing with FDS data and data sections.
 - FDS has a developer-unfriendly secondary API for interfacing with raw underlying data as well.
-- FDS **DOES NOT** currently support:
+- FDS **DOES NOT** support:
     - Multi-line keys.
     - Automatic serialization of non-basic types.
     - Files or data bigger than your RAM.
     - Empty key labels.
+- FDS **DOES NOT YET** support but will one day:
     - Lists/maps inside of lists
 
 ### Example
