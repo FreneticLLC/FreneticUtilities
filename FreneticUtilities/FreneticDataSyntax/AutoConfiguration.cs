@@ -133,7 +133,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             public static ConstructorInfo FDSDataObjectConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object) });
 
             /// <summary>
-            /// A reference to the <see cref="FDSData"/> two-argument constructor.
+            /// A reference to the <see cref="FDSData"/> two-arguments constructor.
             /// </summary>
             public static ConstructorInfo FDSDataObjectCommentConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object), typeof(string) });
 
@@ -189,23 +189,36 @@ namespace FreneticUtilities.FreneticDataSyntax
 
             /// <summary>
             /// Emits the appropriate <see cref="FDSData"/> convert method for the applicable type.
+            /// <para>Expected stack condition for load is input one <see cref="FDSData"/> on top of stack at start, output one object of type param <paramref name="type"/> on top of stack at end, and save is reverse of that.</para>
             /// </summary>
-            /// <param name="type">The type to load.</param>
-            /// <param name="loadILGen">The IL Generator to emit to.</param>
-            public static void EmitTypeLoader(Type type, ILGenerator loadILGen)
+            /// <param name="type">The type to convert to/from.</param>
+            /// <param name="targetILGen">The IL Generator to emit to.</param>
+            /// <param name="doLoad">True indicates load, false indicates save.</param>
+            public static void EmitTypeConverter(Type type, ILGeneratorTracker targetILGen, bool doLoad)
             {
-                if (!FDSDataFieldsByType.TryGetValue(type, out DataConverter converter))
+                if (FDSDataFieldsByType.TryGetValue(type, out DataConverter converter))
                 {
-                    throw new InvalidOperationException($"Type '{type.FullName}' is not supported by {nameof(AutoConfiguration)}.");
-                }
-                loadILGen.Emit(OpCodes.Callvirt, converter.Getter); // Call the loader method
-                if (converter.ValueGrabber != null)
-                {
-                    loadILGen.Emit(OpCodes.Call, converter.ValueGrabber); // Call the nullable converter if needed
+                    if (doLoad)
+                    {
+                        targetILGen.Emit(OpCodes.Callvirt, converter.Getter); // Call the loader method
+                        if (converter.ValueGrabber != null)
+                        {
+                            targetILGen.Emit(OpCodes.Call, converter.ValueGrabber); // Call the nullable converter if needed
+                        }
+                    }
+                    else if (!doLoad && type.IsValueType)
+                    {
+
+                        targetILGen.Emit(OpCodes.Box, type); // Box value types before sending along.
+                    }
                 }
 
                 // TODO: List/Dictionary/etc. type support
 
+                else
+                {
+                    throw new InvalidOperationException($"Type '{type.FullName}' is not supported by {nameof(AutoConfiguration)}.");
+                }
             }
 
             /// <summary>
@@ -258,12 +271,9 @@ namespace FreneticUtilities.FreneticDataSyntax
                             loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=config,section)
                             loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=config,section,name)
                             loadILGen.Emit(OpCodes.Call, SectionGetRootDataMethod); // call section.GetRootData(name) (stack=config,data)
-                            EmitTypeLoader(field.FieldType, loadILGen); // call the type converter needed (stack=config,out-data)
+                            EmitTypeConverter(field.FieldType, loadILGen, true); // call the type converter needed (stack=config,out-data)
                             loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
-                        }
-                        if (field.FieldType.IsValueType)
-                        {
-                            saveILGen.Emit(OpCodes.Box, field.FieldType); // Box value types before sending along.
+                            EmitTypeConverter(field.FieldType, saveILGen, false); // call the type converter needed (stack=output,name,out-data-cleaned)
                         }
                         ConfigComment comment = field.GetCustomAttribute<ConfigComment>();
                         if (comment != null)
