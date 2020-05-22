@@ -25,17 +25,15 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>All lines of text, separated.</returns>
         public static IEnumerable<string> AllLinesOfText(this Stream input)
         {
-            using (StreamReader reader = new StreamReader(input))
+            using StreamReader reader = new StreamReader(input);
+            while (true)
             {
-                while (true) // TODO: Cleaner way to write this loop?
+                string line = reader.ReadLine();
+                if (line == null)
                 {
-                    string line = reader.ReadLine();
-                    if (line == null)
-                    {
-                        break;
-                    }
-                    yield return line;
+                    break;
                 }
+                yield return line;
             }
         }
     }

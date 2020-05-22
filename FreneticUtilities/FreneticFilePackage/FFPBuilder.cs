@@ -91,11 +91,9 @@ namespace FreneticUtilities.FreneticFilePackage
         public static void CreateFromFolder(string folder, string outputFile, Options options)
         {
             FFPBuilderFile[] inputFiles = GetFilesIn(folder);
-            using (FileStream output = File.OpenWrite(outputFile))
-            {
-                CreateFromFiles(inputFiles, output, options);
-                output.Flush(true);
-            }
+            using FileStream output = File.OpenWrite(outputFile);
+            CreateFromFiles(inputFiles, output, options);
+            output.Flush(true);
         }
         /// <summary>
         /// Creates a <see cref="FFPackage"/> from a file system folder.
@@ -153,37 +151,35 @@ namespace FreneticUtilities.FreneticFilePackage
                 if (files[i].FileObject is string fileName)
                 {
                     headers[i].Position = position;
-                    using (FileStream stream = File.OpenRead(fileName))
+                    using FileStream stream = File.OpenRead(fileName);
+                    headers[i].ActualLength = stream.Length;
+                    if (options.MayGZip && stream.Length > options.MinimumCompression && stream.Length < options.MaximumCompression)
                     {
-                        headers[i].ActualLength = stream.Length;
-                        if (options.MayGZip && stream.Length > options.MinimumCompression && stream.Length < options.MaximumCompression)
+                        byte[] raw = new byte[stream.Length];
+                        FFPUtilities.ReadBytesGuaranteed(stream, raw, (int)stream.Length);
+                        byte[] compressed = FFPUtilities.CompressGZip(raw);
+                        byte[] toWrite;
+                        int ratio = (int)((compressed.Length / (double)raw.Length) * 100);
+                        if (ratio < options.RequiredCompressionPercentage)
                         {
-                            byte[] raw = new byte[stream.Length];
-                            FFPUtilities.ReadBytesGuaranteed(stream, raw, (int)stream.Length);
-                            byte[] compressed = FFPUtilities.CompressGZip(raw);
-                            byte[] toWrite;
-                            int ratio = (int)((compressed.Length / (double)raw.Length) * 100);
-                            if (ratio < options.RequiredCompressionPercentage)
-                            {
-                                headers[i].Encoding = (byte)FFPEncoding.GZIP;
-                                toWrite = compressed;
-                            }
-                            else
-                            {
-                                headers[i].Encoding = (byte)FFPEncoding.RAW;
-                                toWrite = raw;
-                            }
-                            headers[i].FileLength = toWrite.Length;
-                            output.Write(toWrite, 0, toWrite.Length);
-                            position += toWrite.Length;
+                            headers[i].Encoding = (byte)FFPEncoding.GZIP;
+                            toWrite = compressed;
                         }
                         else
                         {
                             headers[i].Encoding = (byte)FFPEncoding.RAW;
-                            headers[i].FileLength = stream.Length;
-                            position += stream.Length;
-                            stream.CopyTo(output);
+                            toWrite = raw;
                         }
+                        headers[i].FileLength = toWrite.Length;
+                        output.Write(toWrite, 0, toWrite.Length);
+                        position += toWrite.Length;
+                    }
+                    else
+                    {
+                        headers[i].Encoding = (byte)FFPEncoding.RAW;
+                        headers[i].FileLength = stream.Length;
+                        position += stream.Length;
+                        stream.CopyTo(output);
                     }
                 }
             }

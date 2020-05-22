@@ -85,15 +85,12 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <returns>The output data.</returns>
         public static byte[] Encode(byte[] input, FFPEncoding encoding)
         {
-            switch (encoding)
+            return encoding switch
             {
-                case FFPEncoding.RAW:
-                    return input;
-                case FFPEncoding.GZIP:
-                    return CompressGZip(input);
-                default:
-                    throw new NotSupportedException("Cannot decode from encoding: " + encoding);
-            }
+                FFPEncoding.RAW => input,
+                FFPEncoding.GZIP => CompressGZip(input),
+                _ => throw new NotSupportedException("Cannot decode from encoding: " + encoding),
+            };
         }
         /// <summary>
         /// Provides a decoding stream for data stored with a specified encoding.
@@ -103,15 +100,12 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <returns>The output data stream.</returns>
         public static Stream DecodeStream(Stream input, FFPEncoding encoding)
         {
-            switch (encoding)
+            return encoding switch
             {
-                case FFPEncoding.RAW:
-                    return input;
-                case FFPEncoding.GZIP:
-                    return new GZipStream(input, CompressionMode.Decompress);
-                default:
-                    throw new NotSupportedException("Cannot decode from encoding: " + encoding);
-            }
+                FFPEncoding.RAW => input,
+                FFPEncoding.GZIP => new GZipStream(input, CompressionMode.Decompress),
+                _ => throw new NotSupportedException("Cannot decode from encoding: " + encoding),
+            };
         }
 
         /// <summary>
