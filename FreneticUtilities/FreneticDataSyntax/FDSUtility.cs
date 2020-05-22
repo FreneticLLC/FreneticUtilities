@@ -81,8 +81,6 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        private static readonly byte[] EMPTY_BYTES = new byte[0];
-
         /// <summary>
         /// Converts a Base64 string to a byte array.
         /// </summary>
@@ -92,7 +90,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         {
             if (inputString.Length == 0)
             {
-                return EMPTY_BYTES;
+                return Internal.EMPTY_BYTES;
             }
             return Convert.FromBase64String(inputString);
         }
@@ -118,6 +116,27 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>
+        /// Values used internally by <see cref="FDSUtility"/> that generally don't need external reference.
+        /// </summary>
+        public static class Internal
+        {
+            /// <summary>
+            /// A premade, reusable, empty byte array, for <see cref="FromBase64(string)"/> to return when the input is empty.
+            /// </summary>
+            public static readonly byte[] EMPTY_BYTES = new byte[0];
+
+            /// <summary>
+            /// Quick-matcher for text codes that need to be escaped by <see cref="Escape(string)"/>.
+            /// </summary>
+            public static AsciiMatcher NeedsEscapingMatcher = new AsciiMatcher("\\\t\n\r");
+
+            /// <summary>
+            /// Quick-matcher for text codes that need to be escaped by <see cref="EscapeKey(string)"/>.
+            /// </summary>
+            public static AsciiMatcher NeedsKeyEscapingMatcher = new AsciiMatcher(".:=");
+        }
+
+        /// <summary>
         /// Escapes a string for output.
         /// <para>Only good for values. For keys, use <see cref="EscapeKey(string)"/>.</para>
         /// </summary>
@@ -125,10 +144,13 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The escaped string.</returns>
         public static string Escape(string str)
         {
-            str = str.Replace("\\", "\\s").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\r", "\\r");
+            if (Internal.NeedsEscapingMatcher.ContainsAnyMatch(str))
+            {
+                str = str.Replace("\\", "\\s").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\r", "\\r");
+            }
             if (str.EndsWithFast(' '))
             {
-                str = str + "\\x";
+                str += "\\x";
             }
             if (str.StartsWithFast(' '))
             {
@@ -144,7 +166,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The escaped string.</returns>
         public static string EscapeKey(string str)
         {
-            return Escape(str).Replace(".", "\\d").Replace(":", "\\c").Replace("=", "\\e");
+            str = Escape(str);
+            if (Internal.NeedsKeyEscapingMatcher.ContainsAnyMatch(str))
+            {
+                str = str.Replace(".", "\\d").Replace(":", "\\c").Replace("=", "\\e");
+            }
+            return str;
         }
 
         /// <summary>
@@ -155,7 +182,10 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The unescaped string.</returns>
         public static string UnEscape(string str)
         {
-            str = str.Replace("\\t", "\t").Replace("\\n", "\n").Replace("\\r", "\r").Replace("\\x", "").Replace("\\s", "\\");
+            if (str.Contains('\\'))
+            {
+                str = str.Replace("\\t", "\t").Replace("\\n", "\n").Replace("\\r", "\r").Replace("\\x", "").Replace("\\s", "\\");
+            }
             return str;
         }
 
@@ -166,7 +196,11 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The unescaped string.</returns>
         public static string UnEscapeKey(string str)
         {
-            return UnEscape(str.Replace("\\d", ".").Replace("\\c", ":").Replace("\\e", "="));
+            if (str.Contains('\\'))
+            {
+                str = UnEscape(str.Replace("\\d", ".").Replace("\\c", ":").Replace("\\e", "="));
+            }
+            return str;
         }
 
         /// <summary>
