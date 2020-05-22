@@ -10,10 +10,11 @@ These guidelines are recommended for C# programmers in general, and strongly exp
 - Generally, follow the standard Visual Studio formatting ruleset (so: braces on own lines, spaces like `void Name(Type name, Type name2)`, etc.)
 - Spaces, not tabs.
 - Don't use the `var` keyword: use the explicit expected type. (So: NOT `var x = 0;`, only use `int x = 0;`).
-- Start every file (after header text) with `using System;` (the standard first `using` statement). Do not remove that specific `using` line, and do not place it lower down. Avoid intentionally reordering that list beyond necessity.
+- Start every file (after header text) with `using System;` (the standard first `using` statement). Do not remove that specific `using` line, and do not place it lower down. Avoid intentionally reordering that list beyond necessity. Generally, the list should be grouped together by root folder name (so, for example, `using FreneticUtilities.FreneticExtensions;` and `using FreneticUtilities.FreneticToolkit;` both have root folder `FreneticUtilities` and so should be together).
 - Namespace should match the file folder path, and type name should match the file name (So: `public class MyType` goes in `MyType.cs`, `namespace MyProject.MySet` goes in file directory `MyProject/MySet/`).
 - When reflection is involved, avoid hardcoded strings when possible. For example, instead of `"MyType"` when reflecting type `MyType`, use `nameof(MyType)`. This is useful in particular for later project updating (If `MyType` is renamed, the `nameof(MyType)` will be a compiler error if not updated, whereas `"MyType"` will be a runtime only error).
 - Always include xml code documentation on fields and methods.
+- Never leave unhandled compiler Errors or Warnings. Keep compiler Messages to a minimum, and handle them as soon as reasonably possible.
 
 See **Sample 1** below for reference on basics.
 
@@ -52,6 +53,8 @@ See **Sample 1** below for reference on basics.
 
 **Sample 1:** Simple method:
 ```cs
+/// <summary>This is my method, it does something.</summary>
+/// <param name="input">The value that is input to the method.</param>
 public void MyMethod(int input)
 {
     int myInt = input + 1;
@@ -61,37 +64,38 @@ public void MyMethod(int input)
 
 **Sample 2:** A class with "private" fields:
 ```cs
+/// <summary>This is my class, it does something.</summary>
 public class MyClassHere
 {
+    /// <summary>Internal implementation data, do not touch.</summary>
     public struct Impl
     {
+        /// <summary>Internal integer value that is used for things.</summary>
         public int MyValue;
         
+        /// <summary>Internal string value that is used for things.</summary>
         public string MyName;
     }
     
+    /// <summary>Internal implementation data, do not touch.</summary>
     public Impl Internal;
     
+    /// <summary>Construct my class.</summary>
+    /// <param name="name">The name of the object.</param>
+    /// <param name="val">The value for the object.</param>
     public MyClassHere(string name, int val)
     {
         Internal.MyName = name;
         Internal.MyValue = val;
     }
     
-    public string Name
-    {
-        get
-        {
-            return Internal.Name;
-        }
-    }
+    /// <summary>Get the name of the object.</summary>
+    public string Name => Internal.Name;
     
+    /// <summary>Get the value of the object.</summary>
     public int Value
     {
-        get
-        {
-            return Internal.MyValue;
-        }
+        get => Internal.MyValue;
         set
         {
             if (value <= 0)
