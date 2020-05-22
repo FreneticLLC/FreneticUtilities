@@ -71,6 +71,27 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         /// <summary>
+        /// Returns whether a string contains at least one matching character.
+        /// </summary>
+        /// <param name="s">The string to check.</param>
+        /// <returns>Whether any match was found.</returns>
+        public bool ContainsAnyMatch(string s)
+        {
+            if (s == null)
+            {
+                return false;
+            }
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (IsMatch(s[i]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Returns whether a string only contains matching symbols.
         /// </summary>
         /// <param name="s">The string to check.</param>
