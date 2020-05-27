@@ -316,7 +316,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>True if the last character of the string is a null, otherwise false.</returns>
         public static bool EndsWithNull(this string input)
         {
-            return input.Length > 0 && input[input.Length - 1] == '\0';
+            return input.Length > 0 && input[^1] == '\0';
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>True if the last character of the string is equal to the specified character, otherwise false.</returns>
         public static bool EndsWithFast(this string input, char firstChar)
         {
-            return input.Length > 0 && input[input.Length - 1] == firstChar;
+            return input.Length > 0 && input[^1] == firstChar;
         }
 
         /// <summary>
@@ -425,7 +425,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 if (input[currentInputIndex] == splitChar)
                 {
-                    resultArray[currentResultIndex++] = input.Substring(startIndex, currentInputIndex - startIndex);
+                    resultArray[currentResultIndex++] = input[startIndex..currentInputIndex];
                     startIndex = currentInputIndex + 1;
                 }
             }
@@ -453,7 +453,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 if (input[currentInputIndex] == splitChar)
                 {
-                    resultArray[currentResultIndex++] = input.Substring(startIndex, currentInputIndex - startIndex);
+                    resultArray[currentResultIndex++] = input[startIndex..currentInputIndex];
                     startIndex = currentInputIndex + 1;
                 }
             }

@@ -67,7 +67,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <returns>Whether it is valid.</returns>
         public bool IsMatch(char c)
         {
-            return c > MAX_ASCII ? false : Chars[c];
+            return c <= MAX_ASCII && Chars[c];
         }
 
         /// <summary>

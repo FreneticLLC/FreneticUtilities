@@ -83,7 +83,7 @@ namespace FreneticUtilities.FreneticFilePackage
                 }
                 folder = newFolder;
             }
-            string finalName = path[path.Length - 1];
+            string finalName = path[^1];
             if (folder.Contents.ContainsKey(finalName))
             {
                 if (overwrite)
