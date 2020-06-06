@@ -10,7 +10,7 @@
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilities</Product>
     <Copyright>Copyright (C) Frenetic LLC 2016-2020</Copyright>
-    <Configurations>DebugNetCore;ReleaseNetCore;ReleaseNet461</Configurations>
+    <Configurations>DebugNetCore;Release;ReleaseNet461</Configurations>
     <Version>1.0.1</Version>
     <ProjectGuid>{1DB47D6A-4225-4F25-8559-2C6292496953}</ProjectGuid>
     <TargetFramework>net472</TargetFramework>
