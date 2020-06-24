@@ -39,6 +39,44 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Rapidly compares two strings for equality, ignoring case.
+        /// <para>Does not work with non-ASCII text (no support for unicode/multi-language/etc).</para>
+        /// <para>Operates explicitly on the ASCII 'a-z' and 'A-Z' range.</para>
+        /// </summary>
+        /// <param name="first">The first string to compare.</param>
+        /// <param name="second">The second string to be compared with</param>
+        /// <returns>True if equal, otherwise false.</returns>
+        public static bool EqualsIgnoreCaseFast(this string first, string second)
+        {
+            if (second is null)
+            {
+                return false;
+            }
+            if (first.Length != second.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < first.Length; i++)
+            {
+                char a = first[i];
+                char b = second[i];
+                if (a >= 'A' && a <= 'Z')
+                {
+                    a = (char)(a - ('A' - 'a'));
+                }
+                if (b >= 'A' && b <= 'Z')
+                {
+                    b = (char)(b - ('A' - 'a'));
+                }
+                if (a != b)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Produces a reversed copy of the string, using relatively efficient logic.
         /// <para>This purely reverses the underlying array of 16-bit characters, and therefore does not account for unicode character groups or other special cases.</para>
         /// </summary>
