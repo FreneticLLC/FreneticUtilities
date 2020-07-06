@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticFilePackage
 {
@@ -65,14 +66,22 @@ namespace FreneticUtilities.FreneticFilePackage
         public string SimpleName;
 
         /// <summary>
+        /// Locker used to prevent overlapping file reads across multiple threads.
+        /// </summary>
+        public LockObject Locker = new LockObject();
+
+        /// <summary>
         /// Returns a byte array of the actual file data.
         /// </summary>
         /// <returns>The actual file data.</returns>
         public byte[] ReadFileData()
         {
             byte[] output = new byte[Internal.FileLength];
-            Package.FileStream.Seek(Internal.StartPosition, SeekOrigin.Begin);
-            FFPUtilities.ReadBytesGuaranteed(Package.FileStream, output, (int) Internal.FileLength);
+            lock (Locker)
+            {
+                Package.FileStream.Seek(Internal.StartPosition, SeekOrigin.Begin);
+                FFPUtilities.ReadBytesGuaranteed(Package.FileStream, output, (int)Internal.FileLength);
+            }
             return FFPUtilities.Decode(output, Internal.Encoding);
         }
     }
