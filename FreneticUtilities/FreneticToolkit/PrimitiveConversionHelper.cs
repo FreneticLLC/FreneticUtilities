@@ -25,7 +25,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling a 16-bit byte union helper struct section from byte array input.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyInputBytes16(out ByteUnionBase16 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
+        public static void CopyInputBytes16(out ByteUnionBase16 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
         {
             unchecked
             {
@@ -38,7 +38,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling a 16-bit byte union helper struct section from byte array input.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyInputBytes16(out ByteUnionBase16 unionBytes, byte[] inputBytes, int offset)
+        public static void CopyInputBytes16(out ByteUnionBase16 unionBytes, byte[] inputBytes, int offset)
         {
             // TODO: properly help compiler avoid checking if 'offset' is negative?
             unchecked
@@ -52,7 +52,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling an array of 2 bytes from a 16-bit byte union helper struct section.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyOutputBytes16(in ByteUnionBase16 unionBytes, byte[] outputBytes, int offset)
+        public static void CopyOutputBytes16(in ByteUnionBase16 unionBytes, byte[] outputBytes, int offset)
         {
             // TODO: properly help compiler avoid checking if 'offset' is negative?
             unchecked
@@ -67,7 +67,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Returns 2 bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static byte[] GetOutputBytes16(in ByteUnionBase16 unionBytes)
+        public static byte[] GetOutputBytes16(in ByteUnionBase16 unionBytes)
         {
             return new byte[]
             {
@@ -80,7 +80,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling a 32-bit byte union helper struct section from byte array input.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyInputBytes32(out ByteUnionBase32 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
+        public static void CopyInputBytes32(out ByteUnionBase32 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
         {
             unchecked
             {
@@ -95,7 +95,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling a 32-bit byte union helper struct section from byte array input.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyInputBytes32(out ByteUnionBase32 unionBytes, byte[] inputBytes, int offset)
+        public static void CopyInputBytes32(out ByteUnionBase32 unionBytes, byte[] inputBytes, int offset)
         {
             // TODO: properly help compiler avoid checking if 'offset' is negative?
             unchecked
@@ -111,7 +111,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling an array of 4 bytes from a 32-bit byte union helper struct section.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyOutputBytes32(in ByteUnionBase32 unionBytes, byte[] outputBytes, int offset)
+        public static void CopyOutputBytes32(in ByteUnionBase32 unionBytes, byte[] outputBytes, int offset)
         {
             // TODO: properly help compiler avoid checking if 'offset' is negative?
             unchecked
@@ -128,7 +128,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Returns 4 bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static byte[] GetOutputBytes32(in ByteUnionBase32 unionBytes)
+        public static byte[] GetOutputBytes32(in ByteUnionBase32 unionBytes)
         {
             return new byte[]
             {
@@ -143,7 +143,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling a 64-bit byte union helper struct section from byte array input.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyInputBytes64(out ByteUnionBase64 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
+        public static void CopyInputBytes64(out ByteUnionBase64 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
         {
             unchecked
             {
@@ -162,7 +162,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling a 64-bit byte union helper struct section from byte array input.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyInputBytes64(out ByteUnionBase64 unionBytes, byte[] inputBytes, int offset)
+        public static void CopyInputBytes64(out ByteUnionBase64 unionBytes, byte[] inputBytes, int offset)
         {
             // TODO: properly help compiler avoid checking if 'offset' is negative?
             unchecked
@@ -182,7 +182,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Helper for filling an array of 8 bytes from a 64-bit byte union helper struct section.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CopyOutputBytes64(in ByteUnionBase64 unionBytes, byte[] outputBytes, int offset)
+        public static void CopyOutputBytes64(in ByteUnionBase64 unionBytes, byte[] outputBytes, int offset)
         {
             // TODO: properly help compiler avoid checking if 'offset' is negative?
             unchecked
@@ -203,7 +203,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// Returns 8 bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static byte[] GetOutputBytes64(in ByteUnionBase64 unionBytes)
+        public static byte[] GetOutputBytes64(in ByteUnionBase64 unionBytes)
         {
             return new byte[]
             {
@@ -832,9 +832,10 @@ namespace FreneticUtilities.FreneticToolkit
         }
         #endregion
 
+#pragma warning disable 1591
         #region union structs
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 2)]
-        private struct ByteUnionBase16
+        public struct ByteUnionBase16
         {
             [FieldOffset(0)]
             public byte Byte0Value;
@@ -844,7 +845,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
-        private struct ByteUnionBase32
+        public struct ByteUnionBase32
         {
             [FieldOffset(0)]
             public byte Byte0Value;
@@ -860,7 +861,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
-        private struct ByteUnionBase64
+        public struct ByteUnionBase64
         {
             [FieldOffset(0)]
             public byte Byte0Value;
@@ -888,7 +889,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 2)]
-        private struct Short16ByteUnion
+        public struct Short16ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase16 Bytes;
@@ -898,7 +899,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 2)]
-        private struct UShort16ByteUnion
+        public struct UShort16ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase16 Bytes;
@@ -908,7 +909,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
-        private struct Int32ByteUnion
+        public struct Int32ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase32 Bytes;
@@ -918,7 +919,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
-        private struct UInt32ByteUnion
+        public struct UInt32ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase32 Bytes;
@@ -928,7 +929,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
-        private struct Long64ByteUnion
+        public struct Long64ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase64 Bytes;
@@ -938,7 +939,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
-        private struct ULong64ByteUnion
+        public struct ULong64ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase64 Bytes;
@@ -948,7 +949,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
-        private struct Float32ByteUnion
+        public struct Float32ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase32 Bytes;
@@ -958,7 +959,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
-        private struct Double64ByteUnion
+        public struct Double64ByteUnion
         {
             [FieldOffset(0)]
             public ByteUnionBase64 Bytes;
@@ -968,7 +969,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
-        private struct Double64UlongUnion
+        public struct Double64UlongUnion
         {
             [FieldOffset(0)]
             public ulong ULong64;
@@ -976,7 +977,7 @@ namespace FreneticUtilities.FreneticToolkit
             [FieldOffset(0)]
             public double Double64Value;
         }
-
         #endregion
+#pragma warning restore 1591
     }
 }
