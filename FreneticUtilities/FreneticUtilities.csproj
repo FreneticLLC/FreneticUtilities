@@ -45,6 +45,6 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE;NETFRAMEWORK</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 </Project>
