@@ -123,7 +123,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// <summary>
             /// A premade, reusable, empty byte array, for <see cref="FromBase64(string)"/> to return when the input is empty.
             /// </summary>
-            public static readonly byte[] EMPTY_BYTES = new byte[0];
+            public static readonly byte[] EMPTY_BYTES = Array.Empty<byte>();
 
             /// <summary>
             /// Quick-matcher for text codes that need to be escaped by <see cref="Escape(string)"/>.
