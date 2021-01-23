@@ -152,7 +152,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 str += "\\x";
             }
-            if (str.StartsWithFast(' '))
+            if (str.StartsWithFast(' ') || str.StartsWithFast('-'))
             {
                 str = "\\x" + str;
             }
