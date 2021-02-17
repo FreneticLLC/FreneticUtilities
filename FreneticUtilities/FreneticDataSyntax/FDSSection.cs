@@ -302,7 +302,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
 
             FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
-            sec.SetRootData(key.Substring(lind + 1), data);
+            sec.SetRootData(key[(lind + 1)..], data);
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
 
             FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
-            string k = key.Substring(lind + 1);
+            string k = key[(lind + 1)..];
             if (sec.GetRootData(k) == null)
             {
                 sec.SetRootData(k, data);
@@ -406,7 +406,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return null;
             }
-            return sec.GetRootData(key.Substring(lind + 1));
+            return sec.GetRootData(key[(lind + 1)..]);
         }
 
         /// <summary>
@@ -432,7 +432,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return null;
             }
-            return sec.GetRootDataLowered(key.Substring(lind + 1));
+            return sec.GetRootDataLowered(key[(lind + 1)..]);
         }
 
         /// <summary>
@@ -554,7 +554,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return;
             }
-            sec.RemoveRoot(key.Substring(lind + 1));
+            sec.RemoveRoot(key[(lind + 1)..]);
         }
 
         /// <summary>
@@ -592,12 +592,12 @@ namespace FreneticUtilities.FreneticDataSyntax
                 FDSData dat = entry.Value;
                 foreach (string str in dat.PrecedingComments)
                 {
-                    outputBuilder.Append(tabs).Append("#").Append(str).Append(newline);
+                    outputBuilder.Append(tabs).Append('#').Append(str).Append(newline);
                 }
                 outputBuilder.Append(tabs).Append(FDSUtility.EscapeKey(entry.Key));
                 if (dat.Internal is FDSSection asSection)
                 {
-                    outputBuilder.Append(":").Append(newline).Append(asSection.SaveToString(tabulation + 1, newline));
+                    outputBuilder.Append(':').Append(newline).Append(asSection.SaveToString(tabulation + 1, newline));
                 }
                 else if (dat.Internal is byte[])
                 {
@@ -605,12 +605,12 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 else if (dat.Internal is List<FDSData> datums)
                 {
-                    outputBuilder.Append(":").Append(newline);
+                    outputBuilder.Append(':').Append(newline);
                     foreach (FDSData cdat in datums)
                     {
                         foreach (string com in cdat.PrecedingComments)
                         {
-                            outputBuilder.Append(tabs).Append("#").Append(com).Append(newline);
+                            outputBuilder.Append(tabs).Append('#').Append(com).Append(newline);
                         }
                         outputBuilder.Append(tabs);
                         if (cdat.Internal is byte[])
@@ -631,7 +631,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             foreach (string str in PostComments)
             {
-                outputBuilder.Append(tabs).Append("#").Append(str).Append(newline);
+                outputBuilder.Append(tabs).Append('#').Append(str).Append(newline);
             }
             return outputBuilder.ToString();
         }
