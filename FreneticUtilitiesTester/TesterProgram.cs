@@ -75,12 +75,10 @@ namespace FreneticUtilitiesTester
                     }
                     try
                     {
-                        using (FileStream stream = File.OpenRead(args[1]))
-                        {
-                            FFPackage package = new FFPackage(stream, (warn) => Console.WriteLine("FFPackage Warning: " + warn));
-                            Console.WriteLine("Package has " + package.FileCount + " file(s)...");
-                            OutputFolder(1, package.RootFolder);
-                        }
+                        using FileStream stream = File.OpenRead(args[1]);
+                        FFPackage package = new FFPackage(stream, (warn) => Console.WriteLine("FFPackage Warning: " + warn));
+                        Console.WriteLine("Package has " + package.FileCount + " file(s)...");
+                        OutputFolder(1, package.RootFolder);
                     }
                     catch (Exception ex)
                     {
@@ -95,12 +93,10 @@ namespace FreneticUtilitiesTester
                     }
                     try
                     {
-                        using (FileStream stream = File.OpenRead(args[1]))
-                        {
-                            FFPackage package = new FFPackage(stream, (warn) => Console.WriteLine("FFPackage Warning: " + warn));
-                            Console.WriteLine("Package has " + package.FileCount + " file(s)...");
-                            DumpFolder(1, package.RootFolder, args[2]);
-                        }
+                        using FileStream stream = File.OpenRead(args[1]);
+                        FFPackage package = new FFPackage(stream, (warn) => Console.WriteLine("FFPackage Warning: " + warn));
+                        Console.WriteLine("Package has " + package.FileCount + " file(s)...");
+                        DumpFolder(1, package.RootFolder, args[2]);
                     }
                     catch (Exception ex)
                     {

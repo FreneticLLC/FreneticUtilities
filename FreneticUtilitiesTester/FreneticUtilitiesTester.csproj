@@ -1,43 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">DebugNetCore</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <OutputType>Exe</OutputType>
     <RootNamespace>FreneticUtilitiesTester</RootNamespace>
     <AssemblyName>FreneticUtilitiesTester</AssemblyName>
     <LangVersion>latest</LangVersion>
     <DocumentationFile>bin\Release\FreneticUtilitiesTester.xml</DocumentationFile>
     <Company>Frenetic LLC</Company>
-    <Product>FreneticUtilitiesTester</Product>
-    <Copyright>Copyright (C) Frenetic LLC 2016-2019</Copyright>
-    <Configurations>DebugNetCore;ReleaseNetCore;ReleaseNet461</Configurations>
-    <ApplicationIcon />
-    <StartupObject />
+    <Product>FreneticUtilities</Product>
+    <Copyright>Copyright (C) Frenetic LLC 2016-2021</Copyright>
     <Version>1.0.1</Version>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'DebugNetCore' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'ReleaseNetCore' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <DebugSymbols>true</DebugSymbols>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='ReleaseNet461'">
-    <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <DebugSymbols>true</DebugSymbols>
-    <TargetFrameworks>net472</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\FreneticUtilities\FreneticUtilities.csproj" />
