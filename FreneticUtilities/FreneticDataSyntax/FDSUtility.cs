@@ -106,17 +106,11 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The cleaned file data.</returns>
         public static string CleanFileData(string contents)
         {
-            if (contents.Contains("\r\n"))
-            {
-                // Windows to Unix
-                contents = contents.Replace("\r", "");
-            }
-            else
-            {
-                // Old Mac to Unix (leaves Unix form unaltered)
-                contents = contents.Replace('\r', '\n');
-            }
-            return contents.Replace("\t", "    "); // 4 spaces
+            // Windows to Unix
+            contents = contents.Replace("\r\n", "\n");
+            // Old Mac to Unix (leaves Unix form unaltered)
+            contents = contents.Replace('\r', '\n');
+            return contents.Replace(">\t", ">   ").Replace("\t", "    "); // 4 spaces
         }
 
         /// <summary>
@@ -156,7 +150,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 str += "\\x";
             }
-            if (str.StartsWithFast(' ') || str.StartsWithFast('-'))
+            if (str.StartsWithFast(' '))
             {
                 str = "\\x" + str;
             }
@@ -170,7 +164,15 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The escaped string.</returns>
         public static string EscapeKey(string str)
         {
+            if (str.Length == 0)
+            {
+                return "\\x";
+            }
             str = Escape(str);
+            if (str.StartsWithFast('-') || str.StartsWithFast('>'))
+            {
+                str = "\\x" + str;
+            }
             if (Internal.NeedsKeyEscapingMatcher.ContainsAnyMatch(str))
             {
                 str = str.Replace(".", "\\d").Replace(":", "\\c").Replace("=", "\\e");

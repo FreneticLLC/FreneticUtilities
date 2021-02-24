@@ -15,7 +15,7 @@ namespace FreneticUtilities.FreneticDataSyntax
     /// <summary>
     /// Represents a piece of data within an FDS Section.
     /// </summary>
-    public class FDSData
+    public class FDSData : IEquatable<FDSData>
     {
         /// <summary>
         /// Constructs an empty <see cref="FDSData"/> instance.
@@ -397,6 +397,34 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return bValue ? "true" : "false";
             }
             return FDSUtility.Escape(Internal.ToString());
+        }
+
+        /// <summary>Implements <see cref="Object.ToString"/> by redirecting to <see cref="Outputable"/></summary>
+        public override string ToString()
+        {
+            return Outputable();
+        }
+
+        /// <summary>Implements <see cref="Object.GetHashCode"/> by redirecting to <see cref="Internal"/></summary>
+        public override int GetHashCode()
+        {
+            return Internal.GetHashCode();
+        }
+
+        /// <summary>Implements <see cref="Object.Equals(object)"/> by redirecting to <see cref="Internal"/></summary>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is FDSData data))
+            {
+                return false;
+            }
+            return Equals(data);
+        }
+
+        /// <summary>Implements <see cref="IEquatable{FDSData}.Equals(FDSData)"/> by redirecting to <see cref="Internal"/></summary>
+        public bool Equals(FDSData other)
+        {
+            return Internal.Equals(other.Internal);
         }
     }
 }

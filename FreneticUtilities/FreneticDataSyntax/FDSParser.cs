@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
@@ -20,172 +21,279 @@ namespace FreneticUtilities.FreneticDataSyntax
     public static class FDSParser
     {
         /// <summary>
-        /// Parses the input text into the given <see cref="FDSSection"/> object.
-        /// <para>Generally only for internal use. Use <see cref="FDSSection"/> for most external access.</para>
+        /// Matcher for list prefix symbols (dash, equals, greater than).
         /// </summary>
-        /// <param name="text">The text to parse.</param>
-        /// <param name="section">The section object to output into.</param>
-        /// <exception cref="FDSInputException">If parsing fails.</exception>
-        public static void Parse(string text, FDSSection section)
+        public static AsciiMatcher ListPrefixMatcher = new AsciiMatcher("-=>");
+
+        /// <summary>
+        /// Matcher for symbols that separate a key from a value.
+        /// </summary>
+        public static AsciiMatcher KeySeparatorMatcher = new AsciiMatcher(":=");
+
+        public static void ParseList(string[] allLines, int startLine, int skip, int spacing, out int endLine, List<FDSData> outList)
         {
-            // TODO: Clean code base! Current code contains a lot of poorly named variables and messy code.
-            text = FDSUtility.CleanFileData(text);
-            Dictionary<int, FDSSection> spacedsections = new Dictionary<int, FDSSection>() { { 0, section } };
-            List<string> ccomments = new List<string>();
-            List<string> seccomments = new List<string>();
-            FDSSection csection = section;
-            string[] data = text.SplitFast('\n');
-            int pspaces = 0;
-            string secwaiting = null;
-            List<FDSData> clist = null;
-            for (int i = 0; i < data.Length; i++)
+            Console.WriteLine(new string('\t', spacing) + $"ParseList {startLine}");
+            List<string> currentComments = new List<string>();
+            endLine = startLine;
+            for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
             {
-                string line = data[i];
-                int spaces;
-                for (spaces = 0; spaces < line.Length; spaces++)
-                {
-                    if (line[spaces] != ' ')
-                    {
-                        break;
-                    }
-                }
-                if (spaces == line.Length)
+                string fullLine = allLines[lineNum];
+                string trimmedStart = fullLine.TrimStart(' ');
+                if (trimmedStart.Length == 0)
                 {
                     continue;
                 }
-                string datum = line.Substring(spaces).TrimEnd(' ');
-                if (datum.StartsWith("#"))
+                int spaces = fullLine.Length - trimmedStart.Length;
+                string trimmedLine = trimmedStart.TrimEnd(' ');
+                char firstSymbol = trimmedLine[0];
+                if (firstSymbol == '#')
                 {
-                    ccomments.Add(datum.Substring(1));
+                    currentComments.Add(trimmedLine[1..]);
                     continue;
                 }
-                if (spaces < pspaces)
+                if (spaces < spacing)
                 {
-                    if (spacedsections.TryGetValue(spaces, out FDSSection temp))
-                    {
-                        csection = temp;
-                        foreach (int test in new List<int>(spacedsections.Keys))
-                        {
-                            if (test > spaces)
-                            {
-                                spacedsections.Remove(test);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Exception(i, line, "Spaced incorrectly. Spacing length is less than previous spacing length,"
-                            + "but does not match the spacing value of any known section, valid: "
-                            + string.Join(" / ", spacedsections.Keys) + ", found: " + spaces + ", was: " + pspaces);
-                    }
+                    Console.WriteLine(new string('\t', spacing) + $"ParseList ending at {lineNum} because has {spaces} / {spacing}");
+                    return;
                 }
-                if (datum[0] == '-' || datum[0] == '=')
+                if (spaces > spacing)
                 {
-                    string clistline = datum.Substring(1).TrimStart(' ');
-                    if (clist == null)
-                    {
-                        if (spaces >= pspaces && secwaiting != null)
-                        {
-                            clist = new List<FDSData>();
-                            csection.SetRootData(FDSUtility.UnEscapeKey(secwaiting), new FDSData() { PrecedingComments = new List<string>(seccomments), Internal = clist });
-                            seccomments.Clear();
-                            secwaiting = null;
-                        }
-                        else
-                        {
-                            Exception(i, line, "Line purpose unknown, attempted list entry when not building a list");
-                        }
-                    }
-                    string unescaped = FDSUtility.UnEscape(clistline);
-                    clist.Add(new FDSData()
-                    {
-                        PrecedingComments = new List<string>(ccomments),
-                        Internal = datum[0] == '=' ? FDSUtility.FromBase64(unescaped) : FDSUtility.InterpretType(unescaped)
-                    });
-                    ccomments.Clear();
+                    Console.WriteLine(new string('\t', spacing) + "Trying to include into list: " + string.Join(", ", outList) + "       :    " + trimmedStart);
+                    throw Exception(lineNum, fullLine, $"Spacing grew for no reason (expected {spacing} but got {spaces}) inside a list - possibly forgot a key, or mixed up tabs?");
+                }
+                if (ListPrefixMatcher.IsMatch(firstSymbol))
+                {
+                    string valueText = trimmedLine[1..].TrimStart();
+                    Console.WriteLine(new string('\t', spacing) + $"Try sub-list for {spacing} with {trimmedLine.Length - valueText.Length} on line {startLine}: {valueText}");
+                    FDSData valueData = ParseSubListValue(firstSymbol, valueText, allLines, lineNum, spacing + (trimmedLine.Length - valueText.Length), out lineNum);
+                    valueData.PrecedingComments.AddRange(currentComments);
+                    currentComments.Clear();
+                    outList.Add(valueData);
+                    endLine = lineNum;
+                    Console.WriteLine(new string('\t', spacing) + $"ParseList {lineNum} to size {outList.Count} via {valueData}");
                     continue;
                 }
-                clist = null;
-                string startofline = "";
-                string endofline = "";
-                char type = '\0';
-                for (int spot = 0; spot < datum.Length; spot++)
+                return;
+            }
+        }
+
+        public static FDSData ParseSubListValue(char prefix, string valueText, string[] allLines, int startLine, int spacing, out int endLine)
+        {
+            Console.WriteLine(new string('\t', spacing) + $"ParseSubList {startLine} : {allLines[startLine]}");
+            endLine = startLine;
+            if (prefix == '-' || prefix == '=')
+            {
+                return InterpretBasicObject(prefix, valueText, allLines, startLine);
+            }
+            else if (prefix == '>')
+            {
+                if (valueText.Length == 0)
                 {
-                    if (datum[spot] == ':' || datum[spot] == '=')
+                    throw Exception(startLine, allLines[startLine], $"Complex-list invalid: must specify a value after the '>' symbol.");
+                }
+                char subSymbol = valueText[0];
+                if (ListPrefixMatcher.IsMatch(subSymbol))
+                {
+                    string lineText = valueText[1..].TrimStart(' ');
+                    //int addedSpaces = valueText.Length - lineText.Length;
+                    Console.WriteLine(new string('\t', spacing) + $"Try list for {spacing} with on line {startLine}: {valueText}");
+                    List<FDSData> outList = new List<FDSData>
                     {
-                        type = datum[spot];
-                        startofline = datum.Substring(0, spot);
-                        endofline = spot == datum.Length - 1 ? "" : datum.Substring(spot + 1);
-                        break;
+                        ParseSubListValue(subSymbol, lineText, allLines, startLine, spacing, out endLine)
+                    };
+                    ParseList(allLines, endLine, 1, spacing, out endLine, outList);
+                    return new FDSData(outList);
+                }
+                int keySeparatorIndex = KeySeparatorMatcher.FirstMatchingIndex(valueText);
+                if (keySeparatorIndex == -1)
+                {
+                    throw Exception(startLine, allLines[startLine], "Content inside complex list has unknown purpose - are you missing a symbol after the '>'?");
+                }
+                string key = valueText[..keySeparatorIndex];
+                FDSData valueData;
+                FDSSection outSection = new FDSSection();
+                Console.WriteLine(new string('\t', spacing) + $"Try map for {spacing} as ({valueText}) vs ({valueText}) on line {startLine}");
+                if (keySeparatorIndex == valueText.Length - 1)
+                {
+                    if (valueText[keySeparatorIndex] == '=')
+                    {
+                        throw Exception(startLine, allLines[startLine], "Cannot create a binary subsection - use ':', or put the binary data on the same line.");
                     }
-                }
-                endofline = endofline.TrimStart(' ');
-                if (type == '\0')
-                {
-                    Exception(i, line, "Line purpose unknown");
-                }
-                if (startofline.Length == 0)
-                {
-                    Exception(i, line, "Empty key label!");
-                }
-                if (spaces > pspaces && secwaiting != null)
-                {
-                    FDSSection sect = new FDSSection();
-                    csection.SetRootData(FDSUtility.UnEscapeKey(secwaiting), new FDSData()
-                    {
-                        PrecedingComments = new List<string>(seccomments),
-                        Internal = sect
-                    });
-                    seccomments.Clear();
-                    csection = sect;
-                    spacedsections[spaces] = sect;
-                    secwaiting = null;
-                }
-                if (type == '=')
-                {
-                    csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData()
-                    {
-                        PrecedingComments = new List<string>(ccomments),
-                        Internal = FDSUtility.FromBase64(FDSUtility.UnEscape(endofline))
-                    });
-                    ccomments.Clear();
-                }
-                else if (type == ':')
-                {
-                    if (endofline.Length == 0)
-                    {
-                        secwaiting = startofline;
-                        seccomments = new List<string>(ccomments);
-                        ccomments.Clear();
-                    }
-                    else
-                    {
-                        csection.SetRootData(FDSUtility.UnEscapeKey(startofline), new FDSData()
-                        {
-                            PrecedingComments = new List<string>(ccomments),
-                            Internal = FDSUtility.InterpretType(FDSUtility.UnEscape(endofline))
-                        });
-                        ccomments.Clear();
-                    }
+                    valueData = ParseSubSection(allLines, startLine, 1, spacing, out endLine);
                 }
                 else
                 {
-                    Exception(i, line, "Internal issue: unrecognize 'type' value: " + type);
+                    string keyedValueText = FDSUtility.UnEscape(valueText[(keySeparatorIndex + 1)..].TrimStart(' '));
+                    valueData = InterpretBasicObject(valueText[keySeparatorIndex], keyedValueText, allLines, startLine);
                 }
-                pspaces = spaces;
+                outSection.SetRootData(key, valueData);
+                ParseSection(allLines, endLine, 1, spacing, out endLine, outSection);
+                return new FDSData(outSection);
             }
-            section.PostComments.AddRange(ccomments);
+            else
+            {
+                throw Exception(startLine, allLines[startLine], "Line inside list has unknown purpose - are you missing a symbol?");
+            }
+        }
+
+        public static FDSData InterpretBasicObject(char prefix, string valueText, string[] allLines, int lineNum)
+        {
+            if (prefix == '=')
+            {
+                try
+                {
+                    return new FDSData(FDSUtility.FromBase64(valueText));
+                }
+                catch (FormatException ex)
+                {
+                    throw Exception(lineNum, allLines[lineNum], $"Binary data ({valueText}) invalid - got FormatException {ex.Message}");
+                }
+            }
+            else
+            {
+                return new FDSData(FDSUtility.InterpretType(valueText));
+            }
+        }
+
+        public static FDSData ParseSubSection(string[] allLines, int startLine, int skip, int spacing, out int endLine)
+        {
+            Console.WriteLine(new string('\t', spacing) + $"ParseSubSection {startLine} : {allLines[startLine]}");
+            endLine = startLine;
+            for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
+            {
+                string fullLine = allLines[lineNum];
+                string trimmedStart = fullLine.TrimStart(' ');
+                if (trimmedStart.Length == 0)
+                {
+                    continue;
+                }
+                int spaces = fullLine.Length - trimmedStart.Length;
+                string trimmedLine = trimmedStart.TrimEnd(' ');
+                char firstSymbol = trimmedLine[0];
+                if (firstSymbol == '#')
+                {
+                    continue;
+                }
+                if (spaces < spacing)
+                {
+                    break;
+                }
+                if (spaces > spacing)
+                {
+                    Console.WriteLine(new string('\t', spacing) + $"{spaces} / {spacing} therefore section for {trimmedLine}");
+                    FDSSection subSection = new FDSSection();
+                    ParseSection(allLines, startLine, skip, spaces, out endLine, subSection);
+                    return new FDSData(subSection);
+                }
+                if (ListPrefixMatcher.IsMatch(firstSymbol))
+                {
+                    List<FDSData> subList = new List<FDSData>();
+                    ParseList(allLines, startLine + skip, 0, spacing, out endLine, subList);
+                    return new FDSData(subList);
+                }
+                Console.WriteLine(new string('\t', spacing) + $"ParseSubSection break at {startLine} : {fullLine}");
+                break;
+            }
+            return new FDSData(new FDSSection());
+        }
+
+        public static void ParseSection(string[] allLines, int startLine, int skip, int spacing, out int endLine, FDSSection section)
+        {
+            Console.WriteLine(new string('\t', spacing) + $"ParseSection {startLine} : {allLines[startLine]}");
+            List<string> currentComments = new List<string>();
+            endLine = startLine;
+            for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
+            {
+                string fullLine = allLines[lineNum];
+                string trimmedStart = fullLine.TrimStart(' ');
+                if (trimmedStart.Length == 0)
+                {
+                    continue;
+                }
+                int spaces = fullLine.Length - trimmedStart.Length;
+                string trimmedLine = trimmedStart.TrimEnd(' ');
+                char firstSymbol = trimmedLine[0];
+                if (firstSymbol == '#')
+                {
+                    currentComments.Add(trimmedLine[1..]);
+                    continue;
+                }
+                if (spaces < spacing)
+                {
+                    return;
+                }
+                if (ListPrefixMatcher.IsMatch(firstSymbol))
+                {
+                    throw Exception(lineNum, fullLine, "Tried to build a list without a key - likely forgot to specify a key?");
+                }
+                if (spaces > spacing)
+                {
+                    throw Exception(lineNum, fullLine, $"Spacing grew for no reason (expected {spacing} but got {spaces}) - possibly forgot a key, or mixed up tabs?");
+                }
+                int keySeparatorIndex = KeySeparatorMatcher.FirstMatchingIndex(trimmedLine);
+                if (keySeparatorIndex == -1)
+                {
+                    throw Exception(lineNum, fullLine, "Line inside general section has unknown purpose - are you missing a symbol?");
+                }
+                string key = trimmedLine[..keySeparatorIndex];
+                if (key.Length == 0)
+                {
+                    throw Exception(lineNum, fullLine, "Empty key label - use '\\x' to create an intentionally empty key.");
+                }
+                key = FDSUtility.UnEscapeKey(key);
+                Console.WriteLine(new string('\t', spacing) + $"Core FoundKey {key} at {lineNum}");
+                FDSData valueData;
+                if (keySeparatorIndex == trimmedLine.Length - 1)
+                {
+                    if (trimmedLine[keySeparatorIndex] == '=')
+                    {
+                        throw Exception(lineNum, fullLine, "Cannot create a binary subsection - use ':', or put the binary data on the same line.");
+                    }
+                    valueData = ParseSubSection(allLines, lineNum, 1, spacing, out lineNum);
+                }
+                else
+                {
+                    string valueText = FDSUtility.UnEscape(trimmedLine[(keySeparatorIndex + 1)..].TrimStart(' '));
+                    valueData = InterpretBasicObject(trimmedStart[keySeparatorIndex], valueText, allLines, lineNum);
+                }
+                valueData.PrecedingComments.AddRange(currentComments);
+                currentComments.Clear();
+                section.SetRootData(key, valueData);
+                endLine = lineNum;
+            }
+        }
+
+        public static void Parse(string text, FDSSection section)
+        {
+            text = FDSUtility.CleanFileData(text);
+            string[] allLines = text.SplitFast('\n');
+            ParseSection(allLines, 0, 0, 0, out int endLine, section);
+            for (int lineNum = endLine + 1; lineNum < allLines.Length; lineNum++)
+            {
+                string trimmed = allLines[lineNum].Trim(' ');
+                if (trimmed.Length == 0)
+                {
+                    continue;
+                }
+                if (trimmed.StartsWithFast('#'))
+                {
+                    Console.WriteLine("PC " + trimmed);
+                    section.PostComments.Add(trimmed[1..]);
+                    continue;
+                }
+                throw Exception(lineNum, allLines[lineNum], "Line inside root has unknown purpose - are you missing a symbol?");
+            }
         }
 
         /// <summary>
-        /// Throws an <see cref="FDSInputException"/>.
+        /// Creates an <see cref="FDSInputException"/>.
         /// </summary>
         /// <param name="linenumber">The line number where the exception occurred.</param>
         /// <param name="line">The text of the line that caused the exception.</param>
         /// <param name="reason">The reason for an exception.</param>
-        public static void Exception(int linenumber, string line, string reason)
+        public static FDSInputException Exception(int linenumber, string line, string reason)
         {
-            throw new FDSInputException("[FDS Parsing error] Line " + (linenumber + 1) + ": " + reason + ", from line as follows: `" + line + "`");
+            return new FDSInputException($"[FDS Parsing error] Line {linenumber + 1}: {reason}, from line as follows: {line}");
         }
     }
 }

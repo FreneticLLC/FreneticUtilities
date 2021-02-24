@@ -573,18 +573,60 @@ namespace FreneticUtilities.FreneticDataSyntax
             return null;
         }
 
+        /// <summary>Helper for <see cref="SaveToString(int, string, bool)"/></summary>
+        private void AppendListToString(StringBuilder output, List<FDSData> list, int tabulation, string newline, bool skipFirstTabs)
+        {
+            string tabs = new string('\t', tabulation);
+            foreach (FDSData cdat in list)
+            {
+                foreach (string com in cdat.PrecedingComments)
+                {
+                    output.Append(tabs).Append('#').Append(com).Append(newline);
+                }
+                if (!skipFirstTabs)
+                {
+                    output.Append(tabs);
+                }
+                skipFirstTabs = false;
+                if (cdat.Internal is byte[])
+                {
+                    output.Append("= ");
+                    output.Append(cdat.Outputable()).Append(newline);
+                }
+                else if (cdat.Internal is List<FDSData> subList)
+                {
+                    output.Append(">\t");
+                    AppendListToString(output, subList, tabulation + 1, newline, true);
+                }
+                else if (cdat.Internal is FDSSection subSection)
+                {
+                    output.Append(">\t");
+                    output.Append(subSection.SaveToString(tabulation + 1, newline, true));
+                }
+                else
+                {
+                    output.Append("- ");
+                    output.Append(cdat.Outputable()).Append(newline);
+                }
+            }
+        }
+
         /// <summary>
         /// Converts this FDSSection to a textual representation of itself.
         /// </summary>
-        /// <param name="tabulation">How many tabs to start with. Generally do not set this.</param>
-        /// <param name="newline">What string to use as a new line. Generally do not set this.</param>
-        /// <returns>The string.</returns>
-        public string SaveToString(int tabulation = 0, string newline = null)
+        public string SaveToString()
         {
-            if (newline == null)
-            {
-                newline = "\n";
-            }
+            return SaveToString(0, "\n", false);
+        }
+
+        /// <summary>
+        /// Converts this FDSSection to a textual representation of itself.
+        /// </summary>
+        /// <param name="tabulation">How many tabs to start with. Generally 0.</param>
+        /// <param name="newline">What string to use as a new line. Generally \n.</param>
+        /// <param name="skipFirstTabs">Whether to skip the first piece of tabulation. Generally false.</param>
+        public string SaveToString(int tabulation, string newline, bool skipFirstTabs)
+        {
             string tabs = new string('\t', tabulation);
             StringBuilder outputBuilder = new StringBuilder(Data.Count * 100);
             foreach (KeyValuePair<string, FDSData> entry in Data)
@@ -594,35 +636,24 @@ namespace FreneticUtilities.FreneticDataSyntax
                 {
                     outputBuilder.Append(tabs).Append('#').Append(str).Append(newline);
                 }
-                outputBuilder.Append(tabs).Append(FDSUtility.EscapeKey(entry.Key));
-                if (dat.Internal is FDSSection asSection)
+                if (!skipFirstTabs)
                 {
-                    outputBuilder.Append(':').Append(newline).Append(asSection.SaveToString(tabulation + 1, newline));
+                    outputBuilder.Append(tabs);
+                }
+                skipFirstTabs = false;
+                outputBuilder.Append(FDSUtility.EscapeKey(entry.Key));
+                if (dat.Internal is FDSSection subSection)
+                {
+                    outputBuilder.Append(':').Append(newline).Append(subSection.SaveToString(tabulation + 1, newline, false));
                 }
                 else if (dat.Internal is byte[])
                 {
                     outputBuilder.Append("= ").Append(dat.Outputable()).Append(newline);
                 }
-                else if (dat.Internal is List<FDSData> datums)
+                else if (dat.Internal is List<FDSData> list)
                 {
                     outputBuilder.Append(':').Append(newline);
-                    foreach (FDSData cdat in datums)
-                    {
-                        foreach (string com in cdat.PrecedingComments)
-                        {
-                            outputBuilder.Append(tabs).Append('#').Append(com).Append(newline);
-                        }
-                        outputBuilder.Append(tabs);
-                        if (cdat.Internal is byte[])
-                        {
-                            outputBuilder.Append("= ");
-                        }
-                        else
-                        {
-                            outputBuilder.Append("- ");
-                        }
-                        outputBuilder.Append(cdat.Outputable()).Append(newline);
-                    }
+                    AppendListToString(outputBuilder, list, tabulation, newline, false);
                 }
                 else
                 {
@@ -631,7 +662,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             foreach (string str in PostComments)
             {
-                outputBuilder.Append(tabs).Append('#').Append(str).Append(newline);
+                outputBuilder.Append('#').Append(str).Append(newline);
             }
             return outputBuilder.ToString();
         }

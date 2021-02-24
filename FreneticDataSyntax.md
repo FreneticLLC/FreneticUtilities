@@ -7,7 +7,7 @@ This is a C#/.NET reference implementation of an FDS parser.
 
 ### Status
 
-FreneticDataSyntax is young but capable. It fully supports reading and re-saving the example FDS file below, as well as interaction with it via API methods. Some features are untested or not yet available.
+FreneticDataSyntax is young but capable. It fully supports reading and re-saving the example FDS file below, as well as interaction with it via API methods. Most features are tested and working.
 
 ### Some information (unordered)
 
@@ -21,7 +21,8 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
 - FDS does not guess at data types and cause copy-over errors. Instead, it preserves data exactly as input, while still translating type where possible
     - Eg, input of "3.5" will be read as double with value 3.5, but "3.50" will not be, as the double value will output "3.5", which is an inconsistent copy-over error.
 - FDS uses UTF-8 for data input across all machines, regardless of operating system. This ensures Unicode data is preserved.
-- FDS supports simple data lists.
+- FDS supports data lists.
+- FDS supports maps or lists inside of lists via the `>` syntax.
 - FDS reads any line endings properly (for Windows, old-Mac, and Unix file endings), and outputs with the correct standard line endings (single-newline, Unix-like) except when configured to use a specific ending.
 - FDS explicitly supports 32-bit integers, 64-bit integers ("longs"), 32-bit floats, 64-bit floats ("doubles"), booleans, textual strings, binary arrays.
 - FDS implicitly supports other types, particularly when they can be naturally encoded as a string (such as `decimal`, or just any type that you define your own string encode/decode for).
@@ -33,9 +34,6 @@ FreneticDataSyntax is young but capable. It fully supports reading and re-saving
     - Multi-line keys.
     - Automatic serialization of non-basic types.
     - Files or data bigger than your RAM.
-    - Empty key labels.
-- FDS **DOES NOT YET** support but will one day:
-    - Lists/maps inside of lists
 
 ### Example
 
@@ -44,27 +42,53 @@ The following is an example of FDS syntax:
 ```fds
 # MyFDSFile.fds
 my root section 1:
-    # This represents some data.
-    my_sub_section:
-        # The key is set with a value of 3.
-        my numeric key: 3
-        my decimal number key: 3.14159
-    my other section:
-        my first string key: alpha
-        my second string key: Wow what a system!
+	# This represents some data.
+	my_sub_section:
+		# The key is set with a value of 3.
+		my numeric key: 3
+		my decimal number key: 3.14159
+	my other section:
+		my first string key: alpha
+		my second string key: Wow what a system!
 my second root section:
-    # contains UTF-8 text: Hello world, and all who inhabit it!
-    my binary key= SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
-    # This is a list.
-    my list key:
-    # This will be correct integer type.
-    - 1
-    # This will be text.
-    - two
-    # A binary entry in the list.
-    = SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
-    # Wrap up with more text.
-    - three makes it complete!
+	# contains UTF-8 text: Hello world, and all who inhabit it!
+	my binary key= SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
+	# This is a list.
+	my list key:
+	# This will be correct integer type.
+	- 1
+	# This will be text.
+	- two
+	# This will be boolean. 'false' is the only other valid boolean value.
+	- true
+	# A binary entry in the list.
+	= SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
+	# Wrap up with more text.
+	- three makes it complete!
+this key is empty:
+my third root section:
+	contains a list:
+	- with a text value
+	# This symbol indicates a list entry that is itself a list or map
+	>	- and a sublist
+		- with two values
+	# And the content within can be any list prefix, - or =
+	>	= SGVsbG8gd29ybGQsIGFuZCBhbGwgd2hvIGluaGFiaXQgaXQh
+	>	- and a sublist
+		>	- with a subsublist
+			- with also two values
+		# Or a mapping of any form
+		>	and a submap:
+			- to a sublist
+		>	and another submap:
+			now to a subsubmap:
+			- which is now a list
+			and a subsubmap:
+				that is a subsubsubmap: with a subval
+		>	and a key: to value
+			direct: mapping
+		>	one key: one value
+		>	one nowhere key:
 # That's all, folks!
 ```
 
