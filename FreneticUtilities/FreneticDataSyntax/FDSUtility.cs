@@ -68,7 +68,11 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="filename">The name of the file to save to.</param>
         public static void SaveToFile(this FDSSection section, string filename)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(filename));
+            string pathDir = Path.GetDirectoryName(filename);
+            if (!string.IsNullOrWhiteSpace(pathDir))
+            {
+                Directory.CreateDirectory(pathDir);
+            }
             File.WriteAllBytes(filename + "~1", StringConversionHelper.UTF8Encoding.GetBytes(section.SaveToString()));
             if (File.Exists(filename))
             {
