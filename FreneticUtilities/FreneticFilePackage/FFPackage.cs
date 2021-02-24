@@ -29,6 +29,7 @@ namespace FreneticUtilities.FreneticFilePackage
         {
             FileStream = dataStream;
             ReadHeadersIn(warning);
+            Internal.AccessLock = new LockObject();
         }
         
         private void ReadHeadersIn(Action<string> warning)
@@ -131,6 +132,11 @@ namespace FreneticUtilities.FreneticFilePackage
             /// Where file data starts at in the backing stream.
             /// </summary>
             public long FileDataStart;
+
+            /// <summary>
+            /// The multi-threaded safety access lock object.
+            /// </summary>
+            public LockObject AccessLock;
         }
 
         /// <summary>
@@ -155,6 +161,7 @@ namespace FreneticUtilities.FreneticFilePackage
 
         /// <summary>
         /// Gets the data of a file at the specified path.
+        /// Locks for safe multithreaded access.
         /// </summary>
         /// <param name="fileName">The name of the file, with path separated by '/'.</param>
         /// <returns>The file data.</returns>
@@ -162,16 +169,20 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <exception cref="InvalidOperationException">If there is a file reading error.</exception>
         public byte[] GetFileData(string fileName)
         {
-            fileName = FFPUtilities.CleanFileName(fileName);
-            if (!Files.TryGetValue(fileName, out FFPFile file))
+            lock (Internal.AccessLock)
             {
-                throw new FileNotFoundException("File is not present in the package.", fileName);
+                fileName = FFPUtilities.CleanFileName(fileName);
+                if (!Files.TryGetValue(fileName, out FFPFile file))
+                {
+                    throw new FileNotFoundException("File is not present in the package.", fileName);
+                }
+                return file.ReadFileData();
             }
-            return file.ReadFileData();
         }
 
         /// <summary>
         /// Tries to get the data of a file at the specified path.
+        /// Locks for safe multithreaded access.
         /// </summary>
         /// <param name="fileName">The name of the file, with path separated by '/'.</param>
         /// <param name="data">The file data, if found.</param>
@@ -179,14 +190,17 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <exception cref="InvalidOperationException">If there is a file reading error.</exception>
         public bool TryGetFileData(string fileName, out byte[] data)
         {
-            fileName = FFPUtilities.CleanFileName(fileName);
-            if (!Files.TryGetValue(fileName, out FFPFile file))
+            lock (Internal.AccessLock)
             {
-                data = null;
-                return false;
+                fileName = FFPUtilities.CleanFileName(fileName);
+                if (!Files.TryGetValue(fileName, out FFPFile file))
+                {
+                    data = null;
+                    return false;
+                }
+                data = file.ReadFileData();
+                return true;
             }
-            data = file.ReadFileData();
-            return true;
         }
 
         /// <summary>
