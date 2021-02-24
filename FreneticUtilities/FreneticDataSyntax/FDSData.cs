@@ -111,6 +111,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 {
                     return asList;
                 }
+                else if (Internal is FDSSection section && section.IsEmpty())
+                {
+                    return new List<FDSData>();
+                }
                 else
                 {
                     return new List<FDSData>() { this };
