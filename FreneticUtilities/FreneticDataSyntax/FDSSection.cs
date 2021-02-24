@@ -619,17 +619,13 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Converts this FDSSection to a textual representation of itself.
-        /// </summary>
+        /// <summary>Converts this <see cref="FDSSection"/> to a textual representation of itself.</summary>
         public string SaveToString()
         {
             return SaveToString(0, "\n", false);
         }
 
-        /// <summary>
-        /// Converts this FDSSection to a textual representation of itself.
-        /// </summary>
+        /// <summary>Converts this <see cref="FDSSection"/> to a textual representation of itself.</summary>
         /// <param name="tabulation">How many tabs to start with. Generally 0.</param>
         /// <param name="newline">What string to use as a new line. Generally \n.</param>
         /// <param name="skipFirstTabs">Whether to skip the first piece of tabulation. Generally false.</param>
@@ -673,6 +669,12 @@ namespace FreneticUtilities.FreneticDataSyntax
                 outputBuilder.Append('#').Append(str).Append(newline);
             }
             return outputBuilder.ToString();
+        }
+
+        /// <summary>Implements <see cref="Object.ToString()"/> as a redirect to <see cref="SaveToString()"/>.</summary>
+        public override string ToString()
+        {
+            return SaveToString();
         }
     }
 }
