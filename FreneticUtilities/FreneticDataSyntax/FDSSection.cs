@@ -596,11 +596,19 @@ namespace FreneticUtilities.FreneticDataSyntax
                 else if (cdat.Internal is List<FDSData> subList)
                 {
                     output.Append(">\t");
+                    if (subList.IsEmpty())
+                    {
+                        output.Append('\n');
+                    }
                     AppendListToString(output, subList, tabulation + 1, newline, true);
                 }
                 else if (cdat.Internal is FDSSection subSection)
                 {
                     output.Append(">\t");
+                    if (subSection.IsEmpty())
+                    {
+                        output.Append('\n');
+                    }
                     output.Append(subSection.SaveToString(tabulation + 1, newline, true));
                 }
                 else

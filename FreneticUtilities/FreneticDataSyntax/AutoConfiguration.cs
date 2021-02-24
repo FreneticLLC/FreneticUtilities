@@ -156,7 +156,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// <summary>
             /// A reference to the <see cref="FDSSection"/> no-arguments constructor.
             /// </summary>
-            public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor(new Type[] { });
+            public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor(Array.Empty<Type>());
 
             /// <summary>
             /// A reference to the <see cref="FDSData"/> one-argument constructor.
@@ -171,7 +171,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// <summary>
             /// A reference to the <see cref="List{FDSData}"/> of <see cref="FDSData"/> no-arguments constructor.
             /// </summary>
-            public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor(new Type[] { });
+            public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor(Array.Empty<Type>());
 
             /// <summary>
             /// A mapping of core object types to the method that converts <see cref="FDSData"/> to them.
@@ -290,7 +290,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                     enumeratorMoveNextMethod = FDSDataListEnumeratorMoveNextMethod;
                     enumeratorCurrentGetter = FDSDataListEnumeratorCurrentGetter;
                     listAddMethod = outListType.GetMethod(nameof(ICollection<int>.Add));
-                    outListConstructor = type.GetConstructor(new Type[] { });
+                    outListConstructor = type.GetConstructor(Array.Empty<Type>());
                 }
                 else
                 {

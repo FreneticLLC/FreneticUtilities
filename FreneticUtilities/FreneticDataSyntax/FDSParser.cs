@@ -30,9 +30,9 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// </summary>
         public static AsciiMatcher KeySeparatorMatcher = new AsciiMatcher(":=");
 
+        /// <summary>Helper for <see cref="ParseSection(string[], int, int, int, out int, FDSSection)"/> to parse a list.</summary>
         public static void ParseList(string[] allLines, int startLine, int skip, int spacing, out int endLine, List<FDSData> outList)
         {
-            Console.WriteLine(new string('\t', spacing) + $"ParseList {startLine}");
             List<string> currentComments = new List<string>();
             endLine = startLine;
             for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
@@ -53,33 +53,29 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 if (spaces < spacing)
                 {
-                    Console.WriteLine(new string('\t', spacing) + $"ParseList ending at {lineNum} because has {spaces} / {spacing}");
                     return;
                 }
                 if (spaces > spacing)
                 {
-                    Console.WriteLine(new string('\t', spacing) + "Trying to include into list: " + string.Join(", ", outList) + "       :    " + trimmedStart);
                     throw Exception(lineNum, fullLine, $"Spacing grew for no reason (expected {spacing} but got {spaces}) inside a list - possibly forgot a key, or mixed up tabs?");
                 }
                 if (ListPrefixMatcher.IsMatch(firstSymbol))
                 {
                     string valueText = trimmedLine[1..].TrimStart();
-                    Console.WriteLine(new string('\t', spacing) + $"Try sub-list for {spacing} with {trimmedLine.Length - valueText.Length} on line {startLine}: {valueText}");
                     FDSData valueData = ParseSubListValue(firstSymbol, valueText, allLines, lineNum, spacing + (trimmedLine.Length - valueText.Length), out lineNum);
                     valueData.PrecedingComments.AddRange(currentComments);
                     currentComments.Clear();
                     outList.Add(valueData);
                     endLine = lineNum;
-                    Console.WriteLine(new string('\t', spacing) + $"ParseList {lineNum} to size {outList.Count} via {valueData}");
                     continue;
                 }
                 return;
             }
         }
 
+        /// <summary>Helper for <see cref="ParseSection(string[], int, int, int, out int, FDSSection)"/> to parse a value within a list.</summary>
         public static FDSData ParseSubListValue(char prefix, string valueText, string[] allLines, int startLine, int spacing, out int endLine)
         {
-            Console.WriteLine(new string('\t', spacing) + $"ParseSubList {startLine} : {allLines[startLine]}");
             endLine = startLine;
             if (prefix == '-' || prefix == '=')
             {
@@ -95,8 +91,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                 if (ListPrefixMatcher.IsMatch(subSymbol))
                 {
                     string lineText = valueText[1..].TrimStart(' ');
-                    //int addedSpaces = valueText.Length - lineText.Length;
-                    Console.WriteLine(new string('\t', spacing) + $"Try list for {spacing} with on line {startLine}: {valueText}");
                     List<FDSData> outList = new List<FDSData>
                     {
                         ParseSubListValue(subSymbol, lineText, allLines, startLine, spacing, out endLine)
@@ -112,7 +106,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                 string key = valueText[..keySeparatorIndex];
                 FDSData valueData;
                 FDSSection outSection = new FDSSection();
-                Console.WriteLine(new string('\t', spacing) + $"Try map for {spacing} as ({valueText}) vs ({valueText}) on line {startLine}");
                 if (keySeparatorIndex == valueText.Length - 1)
                 {
                     if (valueText[keySeparatorIndex] == '=')
@@ -136,6 +129,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
+        /// <summary>Helper for <see cref="ParseSection(string[], int, int, int, out int, FDSSection)"/> to intepret an object as text or binary.</summary>
         public static FDSData InterpretBasicObject(char prefix, string valueText, string[] allLines, int lineNum)
         {
             if (prefix == '=')
@@ -155,9 +149,9 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
+        /// <summary>Helper for <see cref="ParseSection(string[], int, int, int, out int, FDSSection)"/> to parse a single sub-section.</summary>
         public static FDSData ParseSubSection(string[] allLines, int startLine, int skip, int spacing, out int endLine)
         {
-            Console.WriteLine(new string('\t', spacing) + $"ParseSubSection {startLine} : {allLines[startLine]}");
             endLine = startLine;
             for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
             {
@@ -180,7 +174,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 if (spaces > spacing)
                 {
-                    Console.WriteLine(new string('\t', spacing) + $"{spaces} / {spacing} therefore section for {trimmedLine}");
                     FDSSection subSection = new FDSSection();
                     ParseSection(allLines, startLine, skip, spaces, out endLine, subSection);
                     return new FDSData(subSection);
@@ -191,15 +184,22 @@ namespace FreneticUtilities.FreneticDataSyntax
                     ParseList(allLines, startLine + skip, 0, spacing, out endLine, subList);
                     return new FDSData(subList);
                 }
-                Console.WriteLine(new string('\t', spacing) + $"ParseSubSection break at {startLine} : {fullLine}");
                 break;
             }
             return new FDSData(new FDSSection());
         }
 
+        /// <summary>
+        /// Internal path to parse a single base section of an FDS file.
+        /// </summary>
+        /// <param name="allLines">The array of all lines of text.</param>
+        /// <param name="startLine">The line index to start parsing at.</param>
+        /// <param name="skip">The additional number of lines to skip (to ensure endLine doesn't get misset).</param>
+        /// <param name="spacing">The minimum valid spacing.</param>
+        /// <param name="endLine">Output: the line number of the section's end.</param>
+        /// <param name="section">The section to store into.</param>
         public static void ParseSection(string[] allLines, int startLine, int skip, int spacing, out int endLine, FDSSection section)
         {
-            Console.WriteLine(new string('\t', spacing) + $"ParseSection {startLine} : {allLines[startLine]}");
             List<string> currentComments = new List<string>();
             endLine = startLine;
             for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
@@ -241,7 +241,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                     throw Exception(lineNum, fullLine, "Empty key label - use '\\x' to create an intentionally empty key.");
                 }
                 key = FDSUtility.UnEscapeKey(key);
-                Console.WriteLine(new string('\t', spacing) + $"Core FoundKey {key} at {lineNum}");
                 FDSData valueData;
                 if (keySeparatorIndex == trimmedLine.Length - 1)
                 {
@@ -263,6 +262,13 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
+        /// <summary>
+        /// Parses the input text into the given <see cref="FDSSection"/> object.
+        /// <para>Generally only for internal use. Use <see cref="FDSSection"/> for most external access.</para>
+        /// </summary>
+        /// <param name="text">The text to parse.</param>
+        /// <param name="section">The section object to output into.</param>
+        /// <exception cref="FDSInputException">If parsing fails.</exception>
         public static void Parse(string text, FDSSection section)
         {
             text = FDSUtility.CleanFileData(text);
@@ -277,7 +283,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 if (trimmed.StartsWithFast('#'))
                 {
-                    Console.WriteLine("PC " + trimmed);
                     section.PostComments.Add(trimmed[1..]);
                     continue;
                 }
