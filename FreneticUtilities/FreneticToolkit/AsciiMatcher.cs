@@ -35,7 +35,6 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Construct the matcher from a string of valid symbols.
         /// </summary>
-        /// <param name="valid">The valid symbol string.</param>
         public AsciiMatcher(string valid)
         {
             for (int i = 0; i < MIN_NON_ASCII; i++)
@@ -51,7 +50,6 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Construct the matcher from a function that evaluates whether any symbol is valid.
         /// </summary>
-        /// <param name="isMatch">The validation function.</param>
         public AsciiMatcher(Func<char, bool> isMatch)
         {
             for (int i = 0; i < MIN_NON_ASCII; i++)
@@ -63,8 +61,6 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Returns whether a character is considered valid.
         /// </summary>
-        /// <param name="c">The character to check.</param>
-        /// <returns>Whether it is valid.</returns>
         public bool IsMatch(char c)
         {
             return c <= MAX_ASCII && Chars[c];
@@ -73,8 +69,6 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Returns whether a string contains at least one matching character.
         /// </summary>
-        /// <param name="s">The string to check.</param>
-        /// <returns>Whether any match was found.</returns>
         public bool ContainsAnyMatch(string s)
         {
             if (s == null)
@@ -94,8 +88,6 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Returns whether a string only contains matching symbols.
         /// </summary>
-        /// <param name="s">The string to check.</param>
-        /// <returns>Whether it is exclusively valid.</returns>
         public bool IsOnlyMatches(string s)
         {
             if (s == null)
@@ -115,8 +107,6 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Returns the string with only matching characters included (and non-matches removed).
         /// </summary>
-        /// <param name="s">The original string.</param>
-        /// <returns>The trimmed string.</returns>
         public string TrimToMatches(string s)
         {
             StringBuilder newString = new StringBuilder(s.Length);
@@ -133,8 +123,6 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>
         /// Returns the string with only non-matching characters included (and matches removed).
         /// </summary>
-        /// <param name="s">The original string.</param>
-        /// <returns>The trimmed string.</returns>
         public string TrimToNonMatches(string s)
         {
             StringBuilder newString = new StringBuilder(s.Length);
@@ -146,6 +134,38 @@ namespace FreneticUtilities.FreneticToolkit
                 }
             }
             return newString.ToString();
+        }
+
+        /// <summary>
+        /// Returns the index of the first character in the string that matches.
+        /// Returns -1 if no match is found.
+        /// </summary>
+        public int FirstMatchingIndex(string s)
+        {
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (IsMatch(s[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Returns the index of the first character in the string that does not match.
+        /// Returns -1 if all characters in the string are valid matches.
+        /// </summary>
+        public int FirstNonMatchingIndex(string s)
+        {
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (!IsMatch(s[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }
