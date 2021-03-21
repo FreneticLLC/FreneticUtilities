@@ -133,7 +133,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// </summary>
         /// <param name="value">The value to test.</param>
         /// <returns>The value, unmodified.</returns>
-        private object ErrorTest(object value)
+        private static object ErrorTest(object value)
         {
             if (value is string errorMessage)
             {

@@ -75,7 +75,7 @@ namespace FreneticUtilities.FreneticFilePackage
             {
                 filesOutput.Add(new FFPBuilderFile()
                 {
-                    Name = file.Substring(folder.Length),
+                    Name = file[folder.Length..],
                     FileObject = file
                 });
             }

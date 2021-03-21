@@ -181,7 +181,7 @@ namespace FreneticUtilities.FreneticExtensions
                 after = "";
                 return input;
             }
-            after = input.Substring(index + match.Length);
+            after = input[(index + match.Length)..];
             return input.Substring(0, index);
         }
 
@@ -201,7 +201,7 @@ namespace FreneticUtilities.FreneticExtensions
                 after = "";
                 return input;
             }
-            after = input.Substring(index + 1);
+            after = input[(index + 1)..];
             return input.Substring(0, index);
         }
 
@@ -221,7 +221,7 @@ namespace FreneticUtilities.FreneticExtensions
                 after = "";
                 return input;
             }
-            after = input.Substring(index + 1);
+            after = input[(index + 1)..];
             return input.Substring(0, index);
         }
 
@@ -241,7 +241,7 @@ namespace FreneticUtilities.FreneticExtensions
                 after = "";
                 return input;
             }
-            after = input.Substring(index + match.Length);
+            after = input[(index + match.Length)..];
             return input.Substring(0, index);
         }
 
@@ -259,7 +259,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(index + 1);
+            return input[(index + 1)..];
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(index + match.Length);
+            return input[(index + match.Length)..];
         }
 
         /// <summary>
@@ -293,7 +293,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(index + 1);
+            return input[(index + 1)..];
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(index + match.Length);
+            return input[(index + match.Length)..];
         }
 
         /// <summary>
@@ -467,7 +467,7 @@ namespace FreneticUtilities.FreneticExtensions
                     startIndex = currentInputIndex + 1;
                 }
             }
-            resultArray[currentResultIndex] = input.Substring(startIndex);
+            resultArray[currentResultIndex] = input[startIndex..];
             return resultArray;
         }
 
@@ -495,7 +495,7 @@ namespace FreneticUtilities.FreneticExtensions
                     startIndex = currentInputIndex + 1;
                 }
             }
-            resultArray[currentResultIndex] = input.Substring(startIndex);
+            resultArray[currentResultIndex] = input[startIndex..];
             return resultArray;
         }
     }

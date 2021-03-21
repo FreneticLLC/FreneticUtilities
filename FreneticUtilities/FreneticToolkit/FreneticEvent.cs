@@ -433,6 +433,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// </summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Dispose(true);
         }
     }
