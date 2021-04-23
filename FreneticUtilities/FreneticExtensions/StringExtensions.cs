@@ -106,7 +106,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The prior portion.</returns>
         public static string Before(this string input, string match)
         {
-            int index = input.IndexOf(match);
+            int index = input.IndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 return input;
@@ -123,7 +123,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The prior portion.</returns>
         public static string Before(this string input, char match)
         {
-            int index = input.IndexOf(match);
+            int index = input.IndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 return input;
@@ -175,7 +175,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The prior portion.</returns>
         public static string BeforeAndAfter(this string input, string match, out string after)
         {
-            int index = input.IndexOf(match);
+            int index = input.IndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 after = "";
@@ -195,7 +195,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The prior portion.</returns>
         public static string BeforeAndAfter(this string input, char match, out string after)
         {
-            int index = input.IndexOf(match);
+            int index = input.IndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 after = "";
@@ -235,7 +235,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The prior portion.</returns>
         public static string BeforeAndAfterLast(this string input, string match, out string after)
         {
-            int index = input.LastIndexOf(match);
+            int index = input.LastIndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 after = "";
@@ -271,7 +271,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The latter portion.</returns>
         public static string AfterLast(this string input, string match)
         {
-            int index = input.LastIndexOf(match);
+            int index = input.LastIndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 return input;
@@ -288,7 +288,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The latter portion.</returns>
         public static string After(this string input, char match)
         {
-            int index = input.IndexOf(match);
+            int index = input.IndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 return input;
@@ -305,7 +305,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The latter portion.</returns>
         public static string After(this string input, string match)
         {
-            int index = input.IndexOf(match);
+            int index = input.IndexOf(match, StringComparison.Ordinal);
             if (index < 0)
             {
                 return input;
