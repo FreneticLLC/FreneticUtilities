@@ -59,7 +59,7 @@ namespace FreneticUtilities.FreneticFilePackage
             // Prior version update code goes here if/when needed.
             if (fileVersion > 1)
             {
-                warning("File version '" + fileVersion + "' is newer than this code supports. Read error may occur.");
+                warning($"File version '{fileVersion}' is newer than this code supports. Read error may occur.");
             }
             int fileCount = GetInt();
             Files = new Dictionary<string, FFPFile>(fileCount * 2);
@@ -75,13 +75,16 @@ namespace FreneticUtilities.FreneticFilePackage
                 file.Internal.Encoding = (FFPEncoding)GetByte();
                 file.Length = GetLong();
                 int nameLength = GetInt();
-                byte[] nameBytes = new byte[nameLength];
-                FFPUtilities.ReadBytesGuaranteed(FileStream, nameBytes, nameLength);
-                file.FullName = FFPUtilities.CleanFileName(StringConversionHelper.UTF8Encoding.GetString(nameBytes));
+                if (nameLength < 0 || nameLength >= helperBytes.Length)
+                {
+                    throw new InvalidOperationException($"Invalid (too long or too short) filename of size {nameLength}, must be within range 0-{helperBytes.Length}");
+                }
+                FFPUtilities.ReadBytesGuaranteed(FileStream, helperBytes, nameLength);
+                file.FullName = FFPUtilities.CleanFileName(StringConversionHelper.UTF8Encoding.GetString(helperBytes, 0, nameLength));
                 file.SimpleName = file.FullName.AfterLast('/');
                 if (Files.ContainsKey(file.FullName))
                 {
-                    throw new InvalidOperationException("Cannot form a package with duplicate file names. Duplicate file name: " + file.FullName);
+                    throw new InvalidOperationException($"Cannot form a package with duplicate file names. Duplicate file name: {file.FullName}");
                 }
                 Files.Add(file.FullName, file);
                 RootFolder.AddFile(file.FullName, file);
@@ -89,7 +92,7 @@ namespace FreneticUtilities.FreneticFilePackage
             Internal.FileDataStart = FileStream.Position;
         }
 
-        private readonly byte[] helperBytes = new byte[8];
+        private readonly byte[] helperBytes = new byte[512];
 
         private byte GetByte()
         {
