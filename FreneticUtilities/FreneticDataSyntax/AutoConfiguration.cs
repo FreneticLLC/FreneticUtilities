@@ -9,14 +9,14 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime;
-using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Reflection.Emit;
-using FreneticUtilities.FreneticToolkit;
+using System.Runtime;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
 using FreneticUtilities.FreneticExtensions;
+using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
