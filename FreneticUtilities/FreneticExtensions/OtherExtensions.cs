@@ -56,7 +56,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return small;
             }
-            return $"{largeValue} and {smallValue}";
+            return $"{large} and {small}";
         }
 
         /// <summary>
