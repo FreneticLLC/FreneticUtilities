@@ -42,7 +42,21 @@ namespace FreneticUtilities.FreneticExtensions
         /// </summary>
         private static string AutoFormatResult(int largeValue, string largeValueName, int smallValue, string smallValueName)
         {
-            return $"{largeValue} {largeValueName}{AutoS(largeValue)} and {smallValue} {smallValueName}{AutoS(smallValue)}";
+            if (smallValue == 0 && largeValue == 0)
+            {
+                return $"0 {smallValueName}s";
+            }
+            string large = $"{largeValue} {largeValueName}{AutoS(largeValue)}";
+            string small = $"{smallValue} {smallValueName}{AutoS(smallValue)}";
+            if (smallValue == 0)
+            {
+                return large;
+            }
+            if (largeValue == 0)
+            {
+                return small;
+            }
+            return $"{largeValue} and {smallValue}";
         }
 
         /// <summary>
