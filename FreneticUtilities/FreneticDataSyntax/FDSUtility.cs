@@ -68,14 +68,19 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="filename">The name of the file to save to.</param>
         public static void SaveToFile(this FDSSection section, string filename)
         {
+            byte[] data = StringConversionHelper.UTF8Encoding.GetBytes(section.SaveToString());
             string pathDir = Path.GetDirectoryName(filename);
             if (!string.IsNullOrWhiteSpace(pathDir))
             {
                 Directory.CreateDirectory(pathDir);
             }
-            File.WriteAllBytes(filename + "~1", StringConversionHelper.UTF8Encoding.GetBytes(section.SaveToString()));
+            File.WriteAllBytes(filename + "~1", data);
             if (File.Exists(filename))
             {
+                if (File.Exists(filename + "~2"))
+                {
+                    File.Delete(filename + "~2");
+                }
                 File.Move(filename, filename + "~2");
             }
             File.Move(filename + "~1", filename);
