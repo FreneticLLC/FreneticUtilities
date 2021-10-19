@@ -24,7 +24,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <summary>
         /// An <see cref="AsciiMatcher"/> for file-name-valid symbols.
         /// </summary>
-        public static AsciiMatcher FileNameValidator = new AsciiMatcher("abcdefghijklmnopqrstuvwxyz0123456789_. /");
+        public static AsciiMatcher FileNameValidator = new AsciiMatcher(AsciiMatcher.LowercaseLetters + AsciiMatcher.Digits + "_. /");
 
         /// <summary>
         /// Cleans a string to only valid symbols for a file name to contain.

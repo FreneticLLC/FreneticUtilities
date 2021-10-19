@@ -28,6 +28,9 @@ namespace FreneticUtilities.FreneticToolkit
             public bool[] Chars;
         }
 
+        /// <summary>Reference constant strings for building common matchers.</summary>
+        public const string LowercaseLetters = "abcdefghijklmnopqrstuvwxyz", UppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", BothCaseLetters = LowercaseLetters + UppercaseLetters, Digits = "0123456789";
+
         /// <summary>Internal data for this instance.</summary>
         public InternalData Internal = new InternalData() { Chars = new bool[InternalData.MIN_NON_ASCII] };
 
