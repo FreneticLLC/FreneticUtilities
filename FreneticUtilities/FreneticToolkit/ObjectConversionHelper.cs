@@ -13,9 +13,7 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticToolkit
 {
-    /// <summary>
-    /// A special helper for converting arbitrary Object input to and from various types.
-    /// </summary>
+    /// <summary>A special helper for converting arbitrary Object input to and from various types.</summary>
     public static class ObjectConversionHelper
     {
         /// <summary>
@@ -25,8 +23,12 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="input">The string to get the value from.</param>
         /// <param name="defaultValue">The default value to use.</param>
         /// <returns>a nullable long-integer value.</returns>
-        public static long? ObjectToLong(Object input, long? defaultValue = null)
+        public static long? ObjectToLong(object input, long? defaultValue = null)
         {
+            if (input is null)
+            {
+                return defaultValue;
+            }
             switch (input)
             {
                 case long _long:
@@ -67,8 +69,12 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="input">The string to get the value from.</param>
         /// <param name="defaultValue">The default value to use.</param>
         /// <returns>a nullable unsigned long-integer value.</returns>
-        public static ulong? ObjectToULong(Object input, ulong? defaultValue = null)
+        public static ulong? ObjectToULong(object input, ulong? defaultValue = null)
         {
+            if (input is null)
+            {
+                return defaultValue;
+            }
             switch (input)
             {
                 case ulong _ulong:

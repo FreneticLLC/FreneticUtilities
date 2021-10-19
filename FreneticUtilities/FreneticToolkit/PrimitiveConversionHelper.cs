@@ -15,9 +15,7 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticToolkit
 {
-    /// <summary>
-    /// Helper class for primitive conversion.
-    /// </summary>
+    /// <summary>Helper class for primitive value conversions.</summary>
     public static class PrimitiveConversionHelper
     {
         #region helpers

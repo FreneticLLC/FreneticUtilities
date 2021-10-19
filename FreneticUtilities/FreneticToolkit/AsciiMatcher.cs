@@ -12,63 +12,54 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticToolkit
 {
-    /// <summary>
-    /// Helper class to match ASCII characters efficiently.
-    /// </summary>
+    /// <summary>Helper class to match ASCII characters efficiently.</summary>
     public class AsciiMatcher
     {
-        /// <summary>
-        /// Maximum value considered part of the ASCII range (127).
-        /// </summary>
-        public static readonly int MAX_ASCII = 127;
+        /// <summary>Internal data for <see cref="AsciiMatcher"/>.</summary>
+        public struct InternalData
+        {
+            /// <summary>Maximum value considered part of the ASCII range (127).</summary>
+            public static readonly int MAX_ASCII = 127;
 
-        /// <summary>
-        /// Minimum value considered outside the ASCII range (128) (<see cref="MAX_ASCII"/> + 1).
-        /// </summary>
-        public static readonly int MIN_NON_ASCII = MAX_ASCII + 1;
+            /// <summary>Minimum value considered outside the ASCII range (128) (<see cref="MAX_ASCII"/> + 1).</summary>
+            public static readonly int MIN_NON_ASCII = MAX_ASCII + 1;
 
-        /// <summary>
-        /// Array of booleans, sized as <see cref="MIN_NON_ASCII"/>, such that "Chars[c]" where 'c' is any ASCII character is the validity of that character.
-        /// </summary>
-        public bool[] Chars = new bool[MIN_NON_ASCII];
+            /// <summary>Array of booleans, sized as <see cref="MIN_NON_ASCII"/>, such that "Chars[c]" where 'c' is any ASCII character is the validity of that character.</summary>
+            public bool[] Chars;
+        }
 
-        /// <summary>
-        /// Construct the matcher from a string of valid symbols.
-        /// </summary>
+        /// <summary>Internal data for this instance.</summary>
+        public InternalData Internal = new InternalData() { Chars = new bool[InternalData.MIN_NON_ASCII] };
+
+        /// <summary>Construct the matcher from a string of valid symbols.</summary>
         public AsciiMatcher(string valid)
         {
-            for (int i = 0; i < MIN_NON_ASCII; i++)
+            for (int i = 0; i < InternalData.MIN_NON_ASCII; i++)
             {
-                Chars[i] = false;
+                Internal.Chars[i] = false;
             }
             for (int i = 0; i < valid.Length; i++)
             {
-                Chars[valid[i]] = true;
+                Internal.Chars[valid[i]] = true;
             }
         }
 
-        /// <summary>
-        /// Construct the matcher from a function that evaluates whether any symbol is valid.
-        /// </summary>
+        /// <summary>Construct the matcher from a function that evaluates whether any symbol is valid.</summary>
         public AsciiMatcher(Func<char, bool> isMatch)
         {
-            for (int i = 0; i < MIN_NON_ASCII; i++)
+            for (char i = (char)0; i < InternalData.MIN_NON_ASCII; i++)
             {
-                Chars[i] = isMatch((char)i);
+                Internal.Chars[i] = isMatch(i);
             }
         }
 
-        /// <summary>
-        /// Returns whether a character is considered valid.
-        /// </summary>
+        /// <summary>Returns whether a character is considered valid.</summary>
         public bool IsMatch(char c)
         {
-            return c <= MAX_ASCII && Chars[c];
+            return c <= InternalData.MAX_ASCII && Internal.Chars[c];
         }
 
-        /// <summary>
-        /// Returns whether a string contains at least one matching character.
-        /// </summary>
+        /// <summary>Returns whether a string contains at least one matching character.</summary>
         public bool ContainsAnyMatch(string s)
         {
             if (s == null)
@@ -85,9 +76,7 @@ namespace FreneticUtilities.FreneticToolkit
             return false;
         }
 
-        /// <summary>
-        /// Returns whether a string only contains matching symbols.
-        /// </summary>
+        /// <summary>Returns whether a string only contains matching symbols.</summary>
         public bool IsOnlyMatches(string s)
         {
             if (s == null)
@@ -104,9 +93,7 @@ namespace FreneticUtilities.FreneticToolkit
             return true;
         }
 
-        /// <summary>
-        /// Returns the string with only matching characters included (and non-matches removed).
-        /// </summary>
+        /// <summary>Returns the string with only matching characters included (and non-matches removed).</summary>
         public string TrimToMatches(string s)
         {
             StringBuilder newString = new StringBuilder(s.Length);
@@ -120,9 +107,7 @@ namespace FreneticUtilities.FreneticToolkit
             return newString.ToString();
         }
 
-        /// <summary>
-        /// Returns the string with only non-matching characters included (and matches removed).
-        /// </summary>
+        /// <summary>Returns the string with only non-matching characters included (and matches removed).</summary>
         public string TrimToNonMatches(string s)
         {
             StringBuilder newString = new StringBuilder(s.Length);

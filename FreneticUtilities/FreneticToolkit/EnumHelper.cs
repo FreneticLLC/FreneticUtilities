@@ -15,9 +15,7 @@ using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticUtilities.FreneticToolkit
 {
-    /// <summary>
-    /// Helper for <see cref="Enum"/> types.
-    /// </summary>
+    /// <summary>Helper for <see cref="Enum"/> types.</summary>
     /// <typeparam name="T">The enum type.</typeparam>
     public static class EnumHelper<T> where T : Enum
     {
@@ -75,19 +73,13 @@ namespace FreneticUtilities.FreneticToolkit
         /// </summary>
         public static readonly HashSet<T> ValueSet;
 
-        /// <summary>
-        /// Gets the underlying type for the enum type.
-        /// </summary>
+        /// <summary>Gets the underlying type for the enum type.</summary>
         public static readonly Type UnderlyingType;
 
-        /// <summary>
-        /// Whether this is a flags enum.
-        /// </summary>
+        /// <summary>Whether this is a flags enum.</summary>
         public static readonly bool IsFlags;
 
-        /// <summary>
-        /// A long converter function. Should only be used for very special case situations - usually, a normal cast works fine.
-        /// </summary>
+        /// <summary>A long converter function. Should only be used for very special case situations - usually, a normal cast works fine.</summary>
         public static readonly Func<T, long> LongConverter;
 
         /// <summary>
@@ -111,9 +103,7 @@ namespace FreneticUtilities.FreneticToolkit
             FlagTester = CreateFlagTester();
         }
 
-        /// <summary>
-        /// This is a gross hack used since C# handles enum types poorly. This should be destroyed and replaced as soon as C# does it better. (Or perhaps a T4 generator should be used?)
-        /// </summary>
+        /// <summary>This is a gross hack used since C# handles enum types poorly. This should be destroyed and replaced as soon as C# does it better. (Or perhaps a T4 generator should be used?)</summary>
         /// <returns>A long converter function.</returns>
         static Func<T, long> CreateLongConverter()
         {
@@ -126,9 +116,7 @@ namespace FreneticUtilities.FreneticToolkit
             return (Func<T, long>)method.CreateDelegate(typeof(Func<T, long>));
         }
 
-        /// <summary>
-        /// This is a gross hack used since C# handles enum types poorly. This should be destroyed and replaced as soon as C# does it better. (Or perhaps a T4 generator should be used?)
-        /// </summary>
+        /// <summary>This is a gross hack used since C# handles enum types poorly. This should be destroyed and replaced as soon as C# does it better. (Or perhaps a T4 generator should be used?)</summary>
         /// <returns>A flag tester function.</returns>
         static Func<T, T, bool> CreateFlagTester()
         {
@@ -149,11 +137,11 @@ namespace FreneticUtilities.FreneticToolkit
         /// Returns whether the name was found.
         /// </summary>
         /// <param name="name">The name input.</param>
-        /// <param name="val">The value output (when returning true).</param>
+        /// <param name="value">The value output (when returning true).</param>
         /// <returns>Success state.</returns>
-        public static bool TryParseIgnoreCase(string name, out T val)
+        public static bool TryParseIgnoreCase(string name, out T value)
         {
-            return LoweredNameValueMap.TryGetValue(name.ToLowerFast(), out val);
+            return LoweredNameValueMap.TryGetValue(name.ToLowerFast(), out value);
         }
 
         /// <summary>
@@ -161,11 +149,11 @@ namespace FreneticUtilities.FreneticToolkit
         /// Returns whether the name was found.
         /// </summary>
         /// <param name="name">The name input.</param>
-        /// <param name="val">The value output (when returning true).</param>
+        /// <param name="value">The value output (when returning true).</param>
         /// <returns>Success state.</returns>
-        public static bool TryParse(string name, out T val)
+        public static bool TryParse(string name, out T value)
         {
-            return NameValueMap.TryGetValue(name, out val);
+            return NameValueMap.TryGetValue(name, out value);
         }
 
         /// <summary>
@@ -190,9 +178,7 @@ namespace FreneticUtilities.FreneticToolkit
             return NameValueMap[name];
         }
 
-        /// <summary>
-        /// Returns whether the name is defined in the enumeration, ignoring case.
-        /// </summary>
+        /// <summary>Returns whether the name is defined in the enumeration, ignoring case.</summary>
         /// <param name="name">The name to test.</param>
         /// <returns>Whether it's defined.</returns>
         public static bool IsNameDefinedIgnoreCase(string name)
@@ -200,9 +186,7 @@ namespace FreneticUtilities.FreneticToolkit
             return LoweredNameSet.Contains(name.ToLowerFast());
         }
 
-        /// <summary>
-        /// Returns whether the name is defined in the enumeration.
-        /// </summary>
+        /// <summary>Returns whether the name is defined in the enumeration.</summary>
         /// <param name="name">The name to test.</param>
         /// <returns>Whether it's defined.</returns>
         public static bool IsNameDefined(string name)
@@ -210,47 +194,41 @@ namespace FreneticUtilities.FreneticToolkit
             return Names.Contains(name);
         }
 
-        /// <summary>
-        /// Returns whether the value is defined in the enumeration.
-        /// </summary>
-        /// <param name="val">The value to test.</param>
+        /// <summary>Returns whether the value is defined in the enumeration.</summary>
+        /// <param name="value">The value to test.</param>
         /// <returns>Whether it's defined.</returns>
-        public static bool IsDefined(T val)
+        public static bool IsDefined(T value)
         {
-            return ValueSet.Contains(val);
+            return ValueSet.Contains(value);
         }
 
-        /// <summary>
-        /// Returns whether the mainVal (as a bitflag set) has the required testVal (as a bitflag set).
-        /// </summary>
-        /// <param name="mainVal">The set of flags present.</param>
-        /// <param name="testVal">The set of flags required.</param>
+        /// <summary>Returns whether the <paramref name="mainValue"/> (as a bitflag set) has the required <paramref name="testValue"/> (as a bitflag set).</summary>
+        /// <param name="mainValue">The set of flags present.</param>
+        /// <param name="testValue">The set of flags required.</param>
         /// <returns>Whether the flags are present as required.</returns>
-        public static bool HasFlag(T mainVal, T testVal)
+        public static bool HasFlag(T mainValue, T testValue)
         {
-            return FlagTester(mainVal, testVal);
+            return FlagTester(mainValue, testValue);
         }
 
         /// <summary>
         /// Gets the name for a value (if it is defined).
         /// Returns success state.
         /// </summary>
-        /// <param name="val">The value.</param>
+        /// <param name="value">The value.</param>
         /// <param name="name">The name output (when returning true).</param>
         /// <returns>Success state.</returns>
-        public static bool TryGetName(T val, out string name)
+        public static bool TryGetName(T value, out string name)
         {
-            return ValueNameMap.TryGetValue(val, out name);
+            return ValueNameMap.TryGetValue(value, out name);
         }
 
-        /// <summary>
-        /// Gets the name for a value (if it is defined).
-        /// </summary>
-        /// <param name="val">The value.</param>
+        /// <summary>Gets the name for a value (if it is defined).</summary>
+        /// <param name="value">The value.</param>
         /// <returns>The name.</returns>
-        public static string GetName(T val)
+        public static string GetName(T value)
         {
-            return ValueNameMap[val];
+            return ValueNameMap[value];
         }
     }
 }

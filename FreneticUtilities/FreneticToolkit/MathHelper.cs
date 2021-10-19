@@ -13,9 +13,7 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticToolkit
 {
-    /// <summary>
-    /// A special helper for various mathematical functions.
-    /// </summary>
+    /// <summary>A special helper for various mathematical functions.</summary>
     public static class MathHelper
     {
         /// <summary>
@@ -46,22 +44,20 @@ namespace FreneticUtilities.FreneticToolkit
             return onlyMSB << 1;
         }
 
-        /// <summary>
-        /// Steps a value towards a goal by a specified amount, automatically moving the correct direction (positive or negative) and preventing going past the goal.
-        /// </summary>
+        /// <summary>Steps a value towards a goal by a specified amount, automatically moving the correct direction (positive or negative) and preventing going past the goal.</summary>
         /// <param name="start">The initial value.</param>
         /// <param name="target">The goal value.</param>
-        /// <param name="amount">The amount to step by.</param>
+        /// <param name="stepAmount">The amount to step by.</param>
         /// <returns>The result.</returns>
-        public static double StepTowards(double start, double target, double amount)
+        public static double StepTowards(double start, double target, double stepAmount)
         {
-            if (start < target - amount)
+            if (start < target - stepAmount)
             {
-                return start + amount;
+                return start + stepAmount;
             }
-            else if (start > target + amount)
+            else if (start > target + stepAmount)
             {
-                return start - amount;
+                return start - stepAmount;
             }
             else
             {
@@ -69,9 +65,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Returns whether a number is close to another number, within a specified range.
-        /// </summary>
+        /// <summary>Returns whether a number is close to another number, within a specified range.</summary>
         /// <param name="one">The first number.</param>
         /// <param name="target">The second number.</param>
         /// <param name="amount">The range.</param>
@@ -81,9 +75,7 @@ namespace FreneticUtilities.FreneticToolkit
             return Math.Abs(one - target) < amount;
         }
 
-        /// <summary>
-        /// Clamps an integer value to within a range.
-        /// </summary>
+        /// <summary>Clamps an integer value to within a range.</summary>
         /// <param name="value">The current value.</param>
         /// <param name="minimum">The minimum value.</param>
         /// <param name="maximum">The maximum value.</param>
@@ -93,9 +85,7 @@ namespace FreneticUtilities.FreneticToolkit
             return Math.Min(Math.Max(value, minimum), maximum);
         }
 
-        /// <summary>
-        /// Clamps a float value to within a range.
-        /// </summary>
+        /// <summary>Clamps a float value to within a range.</summary>
         /// <param name="value">The current value.</param>
         /// <param name="minimum">The minimum value.</param>
         /// <param name="maximum">The maximum value.</param>
@@ -105,9 +95,7 @@ namespace FreneticUtilities.FreneticToolkit
             return Math.Min(Math.Max(value, minimum), maximum);
         }
 
-        /// <summary>
-        /// Clamps a double value to within a range.
-        /// </summary>
+        /// <summary>Clamps a double value to within a range.</summary>
         /// <param name="value">The current value.</param>
         /// <param name="minimum">The minimum value.</param>
         /// <param name="maximum">The maximum value.</param>

@@ -14,9 +14,7 @@ using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticUtilities.FreneticToolkit
 {
-    /// <summary>
-    /// A special helper for converting <see cref="string"/> input to and from various types.
-    /// </summary>
+    /// <summary>A special helper for converting <see cref="string"/> input to and from various types.</summary>
     public static class StringConversionHelper
     {
         /// <summary>
@@ -209,14 +207,6 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         /// <summary>
-        /// Local utility used for <see cref="DateTimeToString(DateTimeOffset, bool)"/>.
-        /// </summary>
-        private static string QPad(int input, int length = 2)
-        {
-            return input.ToString().PadLeft(length, '0');
-        }
-
-        /// <summary>
         /// Returns a string representation of the specified time.
         /// <para>Format is "YYYY/MM/DD hh:mm:ss UTC+OO:oo".</para>
         /// <para>YYYY = 4 digit year, MM = 2 digit month, DD = 2 digit day.</para>
@@ -230,16 +220,22 @@ namespace FreneticUtilities.FreneticToolkit
         /// <returns>The time as a string.</returns>
         public static string DateTimeToString(DateTimeOffset input, bool showMilliseconds)
         {
-            string utcoffset;
-            if (input.Offset.TotalMilliseconds < 0)
+            static string QPad(int input, int length = 2)
             {
-                // TODO: Are minutes correctly handled here (for negative offset)?
-                utcoffset = "-" + QPad((int)Math.Abs(Math.Floor(input.Offset.TotalHours))) + ":" + QPad(input.Offset.Minutes);
+                return input.ToString().PadLeft(length, '0');
+            }
+            TimeSpan offset = input.Offset;
+            string utcoffset;
+            if (offset.TotalMilliseconds < 0)
+            {
+                offset *= -1;
+                utcoffset = "-";
             }
             else
             {
-                utcoffset = "+" + QPad(((int)Math.Floor(input.Offset.TotalHours))) + ":" + QPad(input.Offset.Minutes);
+                utcoffset = "+";
             }
+            utcoffset += QPad(((int)Math.Floor(offset.TotalHours))) + ":" + QPad(offset.Minutes);
             return QPad(input.Year, 4) + "/" + QPad(input.Month) + "/" + QPad(input.Day) + " " + QPad(input.Hour) + ":" + QPad(input.Minute) + ":" + QPad(input.Second)
                 + (showMilliseconds ? ":" + QPad(input.Millisecond, 4) : "") + " UTC" + utcoffset;
         }
