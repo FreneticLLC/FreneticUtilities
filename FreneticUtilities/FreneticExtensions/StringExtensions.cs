@@ -111,7 +111,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(0, index);
+            return input[..index];
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(0, index);
+            return input[..index];
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(0, index);
+            return input[..index];
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 return input;
             }
-            return input.Substring(0, index);
+            return input[..index];
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace FreneticUtilities.FreneticExtensions
                 return input;
             }
             after = input[(index + match.Length)..];
-            return input.Substring(0, index);
+            return input[..index];
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace FreneticUtilities.FreneticExtensions
                 return input;
             }
             after = input[(index + 1)..];
-            return input.Substring(0, index);
+            return input[..index];
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace FreneticUtilities.FreneticExtensions
                 return input;
             }
             after = input[(index + 1)..];
-            return input.Substring(0, index);
+            return input[..index];
         }
 
         /// <summary>
@@ -242,7 +242,75 @@ namespace FreneticUtilities.FreneticExtensions
                 return input;
             }
             after = input[(index + match.Length)..];
-            return input.Substring(0, index);
+            return input[..index];
+        }
+
+        /// <summary>
+        /// Gets the parts of a string before and after a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <param name="match">The end marker.</param>
+        /// <returns>Both portions as (before, after).</returns>
+        public static (string, string) BeforeAndAfter(this string input, string match)
+        {
+            int index = input.IndexOf(match, StringComparison.Ordinal);
+            if (index < 0)
+            {
+                return (input, "");
+            }
+            return (input[..index], input[(index + match.Length)..]);
+        }
+
+        /// <summary>
+        /// Gets the parts of a string before and after a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <param name="match">The end marker.</param>
+        /// <returns>Both portions as (before, after).</returns>
+        public static (string, string) BeforeAndAfter(this string input, char match)
+        {
+            int index = input.IndexOf(match, StringComparison.Ordinal);
+            if (index < 0)
+            {
+                return (input, "");
+            }
+            return (input[..index], input[(index + 1)..]);
+        }
+
+        /// <summary>
+        /// Gets the parts of a string before and after the last occurence of a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <param name="match">The end marker.</param>
+        /// <returns>Both portions as (before, after).</returns>
+        public static (string, string) BeforeAndAfterLast(this string input, char match)
+        {
+            int index = input.LastIndexOf(match);
+            if (index < 0)
+            {
+                return (input, "");
+            }
+            return (input[..index], input[(index + 1)..]);
+        }
+
+        /// <summary>
+        /// Gets the parts of a string before and after the last occurence of a specified portion.
+        /// <para>If no match is found, the full input string will be returned as the 'before', and the after will be an empty string.</para>
+        /// </summary>
+        /// <param name="input">The original string.</param>
+        /// <param name="match">The end marker.</param>
+        /// <returns>Both portions as (before, after).</returns>
+        public static (string, string) BeforeAndAfterLast(this string input, string match)
+        {
+            int index = input.LastIndexOf(match, StringComparison.Ordinal);
+            if (index < 0)
+            {
+                return (input, "");
+            }
+            return (input[0..index], input[(index + match.Length)..]);
         }
 
         /// <summary>

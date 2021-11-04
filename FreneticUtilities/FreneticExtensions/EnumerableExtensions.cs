@@ -36,6 +36,24 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Creates a dictionary mapping the first item in each pair to the second item in the pair.
+        /// <para>This will throw an <see cref="ArgumentException"/> if there are duplicate keys.</para>
+        /// </summary>
+        /// <typeparam name="TKey">Key type.</typeparam>
+        /// <typeparam name="TValue">Value type.</typeparam>
+        /// <param name="pairSet">List of (key, value) pairs.</param>
+        /// <returns>The new dictionary.</returns>
+        public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairSet)
+        {
+            Dictionary<TKey, TValue> resultDictionary = new Dictionary<TKey, TValue>();
+            foreach ((TKey, TValue) pair in pairSet)
+            {
+                resultDictionary.Add(pair.Item1, pair.Item2);
+            }
+            return resultDictionary;
+        }
+
+        /// <summary>
         /// Creates a dictionary mapping the keys array to the values array, such that keys[i] maps to values[i], for all integer "i" in range.
         /// <para>This will throw an <see cref="ArgumentException"/> if there are duplicate keys, or the two lists do not have the same size.</para>
         /// </summary>
@@ -43,7 +61,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <typeparam name="TValue">Value type.</typeparam>
         /// <param name="keys">Key list.</param>
         /// <param name="values">Value list.</param>
-        /// <returns>Dictionary.</returns>
+        /// <returns>The new dictionary.</returns>
         public static Dictionary<TKey, TValue> ToDictionaryWithNoDup<TKey, TValue>(this IList<TKey> keys, IList<TValue> values)
         {
             int listLength = keys.Count;
@@ -67,7 +85,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <typeparam name="TValue">Value type.</typeparam>
         /// <param name="keys">Key list.</param>
         /// <param name="values">Value list.</param>
-        /// <returns>Dictionary.</returns>
+        /// <returns>The new dictionary.</returns>
         public static Dictionary<TKey, TValue> ToDictionaryWith<TKey, TValue>(this IList<TKey> keys, IList<TValue> values)
         {
             int listLength = keys.Count;
