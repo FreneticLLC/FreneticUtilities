@@ -212,6 +212,27 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Returns a subset of <paramref name="list"/> that contains only the entries with a distinct value for <paramref name="property"/>.
+        /// </summary>
+        /// <typeparam name="T">The expected Enumerable type.</typeparam>
+        /// <typeparam name="R">The type of the property.</typeparam>
+        /// <param name="property">A function to get a unique property from a list entry.</param>
+        /// <param name="list">The list with duplicates.</param>
+        /// <returns>The list without duplicates.</returns>
+        public static IEnumerable<T> DistinctBy<T, R>(this IEnumerable<T> list, Func<T, R> property)
+        {
+            HashSet<R> seen = new HashSet<R>();
+            foreach (T entry in list)
+            {
+                R prop = property(entry);
+                if (seen.Add(prop))
+                {
+                    yield return entry;
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns an array where additional objects are joined into the array.
         /// No checks are done, the two arrays are simply combined into one larger array.
         /// </summary>
