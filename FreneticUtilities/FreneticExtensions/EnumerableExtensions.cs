@@ -201,6 +201,17 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Flattens a list of lists of <typeparamref name="T"/> to a list of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The expected Enumerable type.</typeparam>
+        /// <param name="list">The list of lists.</param>
+        /// <returns>The flattened list.</returns>
+        public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> list)
+        {
+            return list.SelectMany(x => x);
+        }
+
+        /// <summary>
         /// Returns an array where additional objects are joined into the array.
         /// No checks are done, the two arrays are simply combined into one larger array.
         /// </summary>
