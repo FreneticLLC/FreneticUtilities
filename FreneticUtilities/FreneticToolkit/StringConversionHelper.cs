@@ -22,7 +22,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <para>This is not equivalent to <see cref="Encoding.UTF8"/> as that will output BOM when converting a <see cref="string"/> to binary data (which is usually bad).</para>
         /// <para>This instance, by contrast, is guaranteed to not do that.</para>
         /// </summary>
-        public static readonly UTF8Encoding UTF8Encoding = new UTF8Encoding(false);
+        public static readonly UTF8Encoding UTF8Encoding = new(false);
 
         /// <summary>
         /// Converts a string value to the unsigned short-integer value it represents.
@@ -202,7 +202,7 @@ namespace FreneticUtilities.FreneticToolkit
                     return null;
                 }
             }
-            TimeSpan offset = new TimeSpan(offsetHours, offsetMinutes, 0);
+            TimeSpan offset = new(offsetHours, offsetMinutes, 0);
             return new DateTimeOffset(year, month, day, hour, minute, second, millisecond, offset);
         }
 

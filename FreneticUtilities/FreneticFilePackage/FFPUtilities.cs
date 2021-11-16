@@ -24,7 +24,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <summary>
         /// An <see cref="AsciiMatcher"/> for file-name-valid symbols.
         /// </summary>
-        public static AsciiMatcher FileNameValidator = new AsciiMatcher(AsciiMatcher.LowercaseLetters + AsciiMatcher.Digits + "_. /");
+        public static AsciiMatcher FileNameValidator = new(AsciiMatcher.LowercaseLetters + AsciiMatcher.Digits + "_. /");
 
         /// <summary>
         /// Cleans a string to only valid symbols for a file name to contain.
@@ -49,9 +49,9 @@ namespace FreneticUtilities.FreneticFilePackage
                 case FFPEncoding.RAW:
                     return input;
                 case FFPEncoding.GZIP:
-                    MemoryStream inputStream = new MemoryStream(input);
-                    using (MemoryStream outputStream = new MemoryStream())
-                    using (GZipStream GZStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                    MemoryStream inputStream = new(input);
+                    using (MemoryStream outputStream = new())
+                    using (GZipStream GZStream = new(inputStream, CompressionMode.Decompress))
                     {
                         GZStream.CopyTo(outputStream);
                         GZStream.Flush();
@@ -69,8 +69,8 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <returns>The output data (compressed).</returns>
         public static byte[] CompressGZip(byte[] input)
         {
-            MemoryStream outputStream = new MemoryStream();
-            using (GZipStream GZStream = new GZipStream(outputStream, CompressionMode.Compress))
+            MemoryStream outputStream = new();
+            using (GZipStream GZStream = new(outputStream, CompressionMode.Compress))
             {
                 GZStream.Write(input, 0, input.Length);
             }
@@ -121,8 +121,8 @@ namespace FreneticUtilities.FreneticFilePackage
                 case FFPEncoding.RAW:
                     return input;
                 case FFPEncoding.GZIP:
-                    MemoryStream outputStream = new MemoryStream();
-                    using (GZipStream gzStream = new GZipStream(outputStream, CompressionMode.Compress))
+                    MemoryStream outputStream = new();
+                    using (GZipStream gzStream = new(outputStream, CompressionMode.Compress))
                     {
                         input.CopyTo(gzStream);
                     }

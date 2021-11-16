@@ -27,7 +27,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The new dictionary.</returns>
         public static Dictionary<TValue, TKey> SwapKeyValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
         {
-            Dictionary<TValue, TKey> toReturn = new Dictionary<TValue, TKey>(dictionary.Count);
+            Dictionary<TValue, TKey> toReturn = new(dictionary.Count);
             foreach (KeyValuePair<TKey, TValue> pair in dictionary)
             {
                 toReturn.Add(pair.Value, pair.Key);
@@ -45,7 +45,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The new dictionary.</returns>
         public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairSet)
         {
-            Dictionary<TKey, TValue> resultDictionary = new Dictionary<TKey, TValue>();
+            Dictionary<TKey, TValue> resultDictionary = new();
             foreach ((TKey, TValue) pair in pairSet)
             {
                 resultDictionary.Add(pair.Item1, pair.Item2);
@@ -69,7 +69,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 throw new ArgumentException("Value list does not have same length as key list! (" + keys.Count + ", " + values.Count + ")");
             }
-            Dictionary<TKey, TValue> resultDictionary = new Dictionary<TKey, TValue>(listLength * 2);
+            Dictionary<TKey, TValue> resultDictionary = new(listLength * 2);
             for (int i = 0; i < listLength; i++)
             {
                 resultDictionary.Add(keys[i], values[i]);
@@ -93,7 +93,7 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 throw new ArgumentException("Value list does not have same length as key list! (" + keys.Count + ", " + values.Count + ")");
             }
-            Dictionary<TKey, TValue> resultDictionary = new Dictionary<TKey, TValue>(listLength * 2);
+            Dictionary<TKey, TValue> resultDictionary = new(listLength * 2);
             for (int i = 0; i < listLength; i++)
             {
                 resultDictionary[keys[i]] = values[i];
@@ -212,27 +212,6 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
-        /// Returns a subset of <paramref name="list"/> that contains only the entries with a distinct value for <paramref name="property"/>.
-        /// </summary>
-        /// <typeparam name="T">The expected Enumerable type.</typeparam>
-        /// <typeparam name="R">The type of the property.</typeparam>
-        /// <param name="property">A function to get a unique property from a list entry.</param>
-        /// <param name="list">The list with duplicates.</param>
-        /// <returns>The list without duplicates.</returns>
-        public static IEnumerable<T> DistinctBy<T, R>(this IEnumerable<T> list, Func<T, R> property)
-        {
-            HashSet<R> seen = new HashSet<R>();
-            foreach (T entry in list)
-            {
-                R prop = property(entry);
-                if (seen.Add(prop))
-                {
-                    yield return entry;
-                }
-            }
-        }
-
-        /// <summary>
         /// Returns an array where additional objects are joined into the array.
         /// No checks are done, the two arrays are simply combined into one larger array.
         /// </summary>
@@ -260,7 +239,7 @@ namespace FreneticUtilities.FreneticExtensions
         /// <returns>The joined result.</returns>
         public static List<T> JoinWith<T>(this IEnumerable<T> originalList, IEnumerable<T> addtionalObjects)
         {
-            List<T> result = new List<T>(originalList.Count() + addtionalObjects.Count());
+            List<T> result = new(originalList.Count() + addtionalObjects.Count());
             result.AddRange(originalList);
             result.AddRange(addtionalObjects);
             return result;

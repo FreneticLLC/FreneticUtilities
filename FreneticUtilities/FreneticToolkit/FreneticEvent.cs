@@ -16,10 +16,10 @@ namespace FreneticUtilities.FreneticToolkit
     public class FreneticEvent<T> where T : FreneticEventArgs
     {
         /// <summary>All event handlers for this event.</summary>
-        public List<HandlerSet> Handlers = new List<HandlerSet>();
+        public List<HandlerSet> Handlers = new();
 
         /// <summary>A map of sources to what they handle.</summary>
-        public Dictionary<object, List<HandlerIndex>> HandlersBySource = new Dictionary<object, List<HandlerIndex>>();
+        public Dictionary<object, List<HandlerIndex>> HandlersBySource = new();
 
         /// <summary>Represents the index of a handler in the event handler list.</summary>
         public class HandlerIndex
@@ -41,7 +41,7 @@ namespace FreneticUtilities.FreneticToolkit
             public int Index;
 
             /// <summary>The event handlers contained in the set.</summary>
-            public List<KeyValuePair<HandlerIndex, FreneticEventFirer<T>>> Handlers = new List<KeyValuePair<HandlerIndex, FreneticEventFirer<T>>>();
+            public List<KeyValuePair<HandlerIndex, FreneticEventFirer<T>>> Handlers = new();
         }
 
         /// <summary>Helper for various usages, primarily scheduling.</summary>
@@ -113,7 +113,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="complete">Action to fire when completed.</param>
         public void Fire(T eventArgs, Action complete)
         {
-            List<FreneticEventWaiter> fews = new List<FreneticEventWaiter>();
+            List<FreneticEventWaiter> fews = new();
             Fire(eventArgs, fews);
             if (fews.Count == 0)
             {
@@ -216,7 +216,7 @@ namespace FreneticUtilities.FreneticToolkit
             set = new HandlerSet();
             Handlers.Add(set);
             buildset:
-            HandlerIndex indexObject = new HandlerIndex() { SetObject = set, SetIndex = set.Handlers.Count };
+            HandlerIndex indexObject = new() { SetObject = set, SetIndex = set.Handlers.Count };
             if (!HandlersBySource.TryGetValue(sourceTracker, out List<HandlerIndex> trackerIndices))
             {
                 trackerIndices = new List<HandlerIndex>();
@@ -293,20 +293,20 @@ namespace FreneticUtilities.FreneticToolkit
         public bool Used = false;
 
         /// <summary>The marker for completetion of the waiter.</summary>
-        public ManualResetEvent MRECompletion = new ManualResetEvent(false);
+        public ManualResetEvent MRECompletion = new(false);
 
         /// <summary>Locked until the first pass of the wait run is complete.</summary>
-        public ManualResetEvent MREFirst = new ManualResetEvent(false);
+        public ManualResetEvent MREFirst = new(false);
 
         /// <summary>Locked until the wait is entirely complete.</summary>
-        public ManualResetEvent MREFinalComplete = new ManualResetEvent(false);
+        public ManualResetEvent MREFinalComplete = new(false);
 
         /// <summary>Waits for a delay in seconds.</summary>
         /// <param name="delay">The delay, in seconds.</param>
         public void Wait(double delay)
         {
             Used = true;
-            ManualResetEvent mre = new ManualResetEvent(false);
+            ManualResetEvent mre = new(false);
             MREFirst.Set();
             MRECompletion.Set();
             Helper.ScheduleSync(() =>
@@ -418,7 +418,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <returns>A waiter if needed.</returns>
         public FreneticEventWaiter FireWait(FreneticEventHelper helper, T eventArgs)
         {
-            FreneticEventWaiter few = new FreneticEventWaiter() { Helper = helper };
+            FreneticEventWaiter few = new() { Helper = helper };
             helper.StartAsync(() =>
             {
                 FireWaiter(eventArgs, few);

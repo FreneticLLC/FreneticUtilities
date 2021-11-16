@@ -68,7 +68,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <summary>
         /// Locker used to prevent overlapping file reads across multiple threads.
         /// </summary>
-        public LockObject Locker = new LockObject();
+        public LockObject Locker = new();
 
         /// <summary>
         /// Returns a byte array of the actual file data.

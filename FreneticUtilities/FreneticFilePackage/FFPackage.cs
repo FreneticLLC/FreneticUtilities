@@ -66,7 +66,7 @@ namespace FreneticUtilities.FreneticFilePackage
             RootFolder = new FFPFolder();
             for (int i = 0; i < fileCount; i++)
             {
-                FFPFile file = new FFPFile()
+                FFPFile file = new()
                 {
                     Package = this
                 };

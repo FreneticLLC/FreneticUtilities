@@ -30,7 +30,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <summary>
         /// The contents of the package.
         /// </summary>
-        public Dictionary<string, object> Contents = new Dictionary<string, object>();
+        public Dictionary<string, object> Contents = new();
 
         /// <summary>
         /// Adds a file to the folder.
@@ -62,16 +62,16 @@ namespace FreneticUtilities.FreneticFilePackage
             {
                 if (!folder.Contents.TryGetValue(path[i], out object value))
                 {
-                    FFPFolder createdFolder = new FFPFolder();
+                    FFPFolder createdFolder = new();
                     folder.Contents.Add(path[i], createdFolder);
                     folder = createdFolder;
                     continue;
                 }
-                if (!(value is FFPFolder newFolder))
+                if (value is not FFPFolder newFolder)
                 {
                     if (overwrite)
                     {
-                        FFPFolder createdFolder = new FFPFolder();
+                        FFPFolder createdFolder = new();
                         folder.Contents[path[i]] = createdFolder;
                         folder = createdFolder;
                         continue;
@@ -119,7 +119,7 @@ namespace FreneticUtilities.FreneticFilePackage
                 {
                     return value;
                 }
-                if (!(value is FFPFolder newFolder))
+                if (value is not FFPFolder newFolder)
                 {
                     return "Part of the path is a file, not a folder.";
                 }

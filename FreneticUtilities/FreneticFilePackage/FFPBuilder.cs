@@ -70,7 +70,7 @@ namespace FreneticUtilities.FreneticFilePackage
         private static FFPBuilderFile[] GetFilesIn(string folder)
         {
             folder = Path.GetFullPath(folder);
-            List<FFPBuilderFile> filesOutput = new List<FFPBuilderFile>();
+            List<FFPBuilderFile> filesOutput = new();
             foreach (string file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories))
             {
                 filesOutput.Add(new FFPBuilderFile()
@@ -115,7 +115,7 @@ namespace FreneticUtilities.FreneticFilePackage
         /// <exception cref="InvalidOperationException">If there are duplicate files, or the file cannot be created.</exception>
         public static void CreateFromFiles(FFPBuilderFile[] files, Stream output, Options options)
         {
-            HashSet<string> fileSet = new HashSet<string>();
+            HashSet<string> fileSet = new();
             for (int i = 0; i < files.Length; i++)
             {
                 files[i].Name = FFPUtilities.CleanFileName(files[i].Name);

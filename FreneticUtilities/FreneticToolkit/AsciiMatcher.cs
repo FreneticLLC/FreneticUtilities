@@ -32,7 +32,7 @@ namespace FreneticUtilities.FreneticToolkit
         public const string LowercaseLetters = "abcdefghijklmnopqrstuvwxyz", UppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", BothCaseLetters = LowercaseLetters + UppercaseLetters, Digits = "0123456789";
 
         /// <summary>Internal data for this instance.</summary>
-        public InternalData Internal = new InternalData() { Chars = new bool[InternalData.MIN_NON_ASCII] };
+        public InternalData Internal = new() { Chars = new bool[InternalData.MIN_NON_ASCII] };
 
         /// <summary>Construct the matcher from a string of valid symbols.</summary>
         public AsciiMatcher(string valid)
@@ -99,7 +99,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>Returns the string with only matching characters included (and non-matches removed).</summary>
         public string TrimToMatches(string s)
         {
-            StringBuilder newString = new StringBuilder(s.Length);
+            StringBuilder newString = new(s.Length);
             for (int i = 0; i < s.Length; i++)
             {
                 if (IsMatch(s[i]))
@@ -113,7 +113,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>Returns the string with only non-matching characters included (and matches removed).</summary>
         public string TrimToNonMatches(string s)
         {
-            StringBuilder newString = new StringBuilder(s.Length);
+            StringBuilder newString = new(s.Length);
             for (int i = 0; i < s.Length; i++)
             {
                 if (!IsMatch(s[i]))
