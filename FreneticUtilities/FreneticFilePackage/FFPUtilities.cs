@@ -16,19 +16,13 @@ using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticFilePackage
 {
-    /// <summary>
-    /// Helper utilities for <see cref="FFPackage"/>.
-    /// </summary>
+    /// <summary>Helper utilities for <see cref="FFPackage"/>.</summary>
     public static class FFPUtilities
     {
-        /// <summary>
-        /// An <see cref="AsciiMatcher"/> for file-name-valid symbols.
-        /// </summary>
+        /// <summary>An <see cref="AsciiMatcher"/> for file-name-valid symbols.</summary>
         public static AsciiMatcher FileNameValidator = new(AsciiMatcher.LowercaseLetters + AsciiMatcher.Digits + "_. /");
 
-        /// <summary>
-        /// Cleans a string to only valid symbols for a file name to contain.
-        /// </summary>
+        /// <summary>Cleans a string to only valid symbols for a file name to contain.</summary>
         /// <param name="input">The input string.</param>
         /// <returns>The cleaned file name.</returns>
         public static string CleanFileName(string input)
@@ -36,9 +30,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return FileNameValidator.TrimToMatches(input.ToLowerFast().Replace('\\', '/')).Trim('/', ' ');
         }
 
-        /// <summary>
-        /// Decodes data stored with a specified encoding.
-        /// </summary>
+        /// <summary>Decodes data stored with a specified encoding.</summary>
         /// <param name="input">The input binary data.</param>
         /// <param name="encoding">The encoding in use.</param>
         /// <returns>The output data.</returns>
@@ -62,9 +54,7 @@ namespace FreneticUtilities.FreneticFilePackage
             }
         }
 
-        /// <summary>
-        /// Compresses the data using the GZip compression algorithm.
-        /// </summary>
+        /// <summary>Compresses the data using the GZip compression algorithm.</summary>
         /// <param name="input">The input data (uncompressed).</param>
         /// <returns>The output data (compressed).</returns>
         public static byte[] CompressGZip(byte[] input)
@@ -77,9 +67,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return outputStream.ToArray();
         }
 
-        /// <summary>
-        /// Encodes data stored with a specified encoding.
-        /// </summary>
+        /// <summary>Encodes data stored with a specified encoding.</summary>
         /// <param name="input">The input binary data.</param>
         /// <param name="encoding">The encoding in use.</param>
         /// <returns>The output data.</returns>
@@ -92,9 +80,7 @@ namespace FreneticUtilities.FreneticFilePackage
                 _ => throw new NotSupportedException("Cannot decode from encoding: " + encoding),
             };
         }
-        /// <summary>
-        /// Provides a decoding stream for data stored with a specified encoding.
-        /// </summary>
+        /// <summary>Provides a decoding stream for data stored with a specified encoding.</summary>
         /// <param name="input">The input binary data stream.</param>
         /// <param name="encoding">The encoding in use.</param>
         /// <returns>The output data stream.</returns>
@@ -108,9 +94,7 @@ namespace FreneticUtilities.FreneticFilePackage
             };
         }
 
-        /// <summary>
-        /// Provides an encoding stream for data stored with a specified encoding.
-        /// </summary>
+        /// <summary>Provides an encoding stream for data stored with a specified encoding.</summary>
         /// <param name="input">The input binary data stream.</param>
         /// <param name="encoding">The encoding in use.</param>
         /// <returns>The output data stream.</returns>
@@ -132,9 +116,7 @@ namespace FreneticUtilities.FreneticFilePackage
             }
         }
 
-        /// <summary>
-        /// Reads a required number of bytes from the input stream. Does not return until all bytes are read.
-        /// </summary>
+        /// <summary>Reads a required number of bytes from the input stream. Does not return until all bytes are read.</summary>
         /// <param name="input">The input stream.</param>
         /// <param name="outputArray">The output byte array.</param>
         /// <param name="length">The length to read.</param>

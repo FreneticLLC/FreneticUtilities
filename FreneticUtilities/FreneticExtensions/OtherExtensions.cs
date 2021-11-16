@@ -12,14 +12,10 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticExtensions
 {
-    /// <summary>
-    /// Helper extensions for various types without better extension files.
-    /// </summary>
+    /// <summary>Helper extensions for various types without better extension files.</summary>
     public static class OtherExtensions
     {
-        /// <summary>
-        /// Gets a Gaussian random value from a Random object.
-        /// </summary>
+        /// <summary>Gets a Gaussian random value from a Random object.</summary>
         /// <param name="input">The random object.</param>
         /// <returns>The Gaussian value.</returns>
         public static double NextGaussian(this Random input)
@@ -29,17 +25,13 @@ namespace FreneticUtilities.FreneticExtensions
             return Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
         }
 
-        /// <summary>
-        /// Utility for "AutoFormatResult" to automatically apply an "s" when needed.
-        /// </summary>
+        /// <summary>Utility for "AutoFormatResult" to automatically apply an "s" when needed.</summary>
         private static string AutoS(int val)
         {
             return val == 1 ? "" : "s";
         }
 
-        /// <summary>
-        /// Utility for <see cref="SimpleFormat(TimeSpan, bool)"/> for building a result.
-        /// </summary>
+        /// <summary>Utility for <see cref="SimpleFormat(TimeSpan, bool)"/> for building a result.</summary>
         private static string AutoFormatResult(int largeValue, string largeValueName, int smallValue, string smallValueName)
         {
             if (smallValue == 0 && largeValue == 0)

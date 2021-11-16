@@ -14,9 +14,7 @@ using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
-    /// <summary>
-    /// Utilities for the FreneticDataSyntax engine.
-    /// </summary>
+    /// <summary>Utilities for the FreneticDataSyntax engine.</summary>
     public static class FDSUtility
     {
         /// <summary>
@@ -90,9 +88,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Converts a Base64 string to a byte array.
-        /// </summary>
+        /// <summary>Converts a Base64 string to a byte array.</summary>
         /// <param name="inputString">The input string to convert.</param>
         /// <returns>The byte array output.</returns>
         public static byte[] FromBase64(string inputString)
@@ -104,9 +100,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return Convert.FromBase64String(inputString);
         }
 
-        /// <summary>
-        /// Cleans file line endings, tabs, and any other data that may cause issues.
-        /// </summary>
+        /// <summary>Cleans file line endings, tabs, and any other data that may cause issues.</summary>
         /// <param name="contents">The original file data.</param>
         /// <returns>The cleaned file data.</returns>
         public static string CleanFileData(string contents)
@@ -118,24 +112,16 @@ namespace FreneticUtilities.FreneticDataSyntax
             return contents.Replace(">\t", ">   ").Replace("\t", "    "); // 4 spaces
         }
 
-        /// <summary>
-        /// Values used internally by <see cref="FDSUtility"/> that generally don't need external reference.
-        /// </summary>
+        /// <summary>Values used internally by <see cref="FDSUtility"/> that generally don't need external reference.</summary>
         public static class Internal
         {
-            /// <summary>
-            /// A premade, reusable, empty byte array, for <see cref="FromBase64(string)"/> to return when the input is empty.
-            /// </summary>
+            /// <summary>A premade, reusable, empty byte array, for <see cref="FromBase64(string)"/> to return when the input is empty.</summary>
             public static readonly byte[] EMPTY_BYTES = Array.Empty<byte>();
 
-            /// <summary>
-            /// Quick-matcher for text codes that need to be escaped by <see cref="Escape(string)"/>.
-            /// </summary>
+            /// <summary>Quick-matcher for text codes that need to be escaped by <see cref="Escape(string)"/>.</summary>
             public static AsciiMatcher NeedsEscapingMatcher = new("\\\t\n\r");
 
-            /// <summary>
-            /// Quick-matcher for text codes that need to be escaped by <see cref="EscapeKey(string)"/>.
-            /// </summary>
+            /// <summary>Quick-matcher for text codes that need to be escaped by <see cref="EscapeKey(string)"/>.</summary>
             public static AsciiMatcher NeedsKeyEscapingMatcher = new(".:=");
         }
 
@@ -166,9 +152,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return str;
         }
 
-        /// <summary>
-        /// Escapes a string for usage as a section key.
-        /// </summary>
+        /// <summary>Escapes a string for usage as a section key.</summary>
         /// <param name="str">The string to escape.</param>
         /// <returns>The escaped string.</returns>
         public static string EscapeKey(string str)
@@ -204,9 +188,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return str;
         }
 
-        /// <summary>
-        /// UnEscapes a string for usage as a section key.
-        /// </summary>
+        /// <summary>UnEscapes a string for usage as a section key.</summary>
         /// <param name="str">The string to unescape.</param>
         /// <returns>The unescaped string.</returns>
         public static string UnEscapeKey(string str)
@@ -218,9 +200,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return str;
         }
 
-        /// <summary>
-        /// Interprets the type of the input text.
-        /// </summary>
+        /// <summary>Interprets the type of the input text.</summary>
         /// <param name="input">The input text.</param>
         /// <returns>The correctly typed result.</returns>
         public static object InterpretType(string input)
@@ -244,9 +224,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return input;
         }
 
-        /// <summary>
-        /// Processes an input object to standardize it for FDS.
-        /// </summary>
+        /// <summary>Processes an input object to standardize it for FDS.</summary>
         /// <param name="input">The original input object.</param>
         /// <returns>The cleaned proper FDS object.</returns>
         public static object ProcessObject(object input)

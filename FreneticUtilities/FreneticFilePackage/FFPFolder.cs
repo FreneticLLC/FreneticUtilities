@@ -12,14 +12,10 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticFilePackage
 {
-    /// <summary>
-    /// A folder within a package.
-    /// </summary>
+    /// <summary>A folder within a package.</summary>
     public class FFPFolder
     {
-        /// <summary>
-        /// Splits a string into a path.
-        /// </summary>
+        /// <summary>Splits a string into a path.</summary>
         /// <param name="path">The string of the path, separated by '/'.</param>
         /// <returns>The split path.</returns>
         public static string[] SplitPath(string path)
@@ -27,14 +23,10 @@ namespace FreneticUtilities.FreneticFilePackage
             return path.Split('/');
         }
 
-        /// <summary>
-        /// The contents of the package.
-        /// </summary>
+        /// <summary>The contents of the package.</summary>
         public Dictionary<string, object> Contents = new();
 
-        /// <summary>
-        /// Adds a file to the folder.
-        /// </summary>
+        /// <summary>Adds a file to the folder.</summary>
         /// <param name="path">The full file path, separated by the '/' character.</param>
         /// <param name="file">The actual file.</param>
         /// <param name="overwrite">Whether to overwrite existing files.</param>
@@ -44,9 +36,7 @@ namespace FreneticUtilities.FreneticFilePackage
             AddFile(SplitPath(path), file, overwrite);
         }
 
-        /// <summary>
-        /// Adds a file to the folder.
-        /// </summary>
+        /// <summary>Adds a file to the folder.</summary>
         /// <param name="path">The full file path.</param>
         /// <param name="file">The actual file.</param>
         /// <param name="overwrite">Whether to overwrite existing files.</param>
@@ -101,9 +91,7 @@ namespace FreneticUtilities.FreneticFilePackage
             }
         }
 
-        /// <summary>
-        /// Gets the object at a specified path.
-        /// </summary>
+        /// <summary>Gets the object at a specified path.</summary>
         /// <param name="path">The path.</param>
         /// <returns>The object.</returns>
         public object GetObjectAt(string[] path)
@@ -128,9 +116,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return "Path is empty.";
         }
 
-        /// <summary>
-        /// Performs an inline error test on a value, throwing an exception if an error is found.
-        /// </summary>
+        /// <summary>Performs an inline error test on a value, throwing an exception if an error is found.</summary>
         /// <param name="value">The value to test.</param>
         /// <returns>The value, unmodified.</returns>
         private static object ErrorTest(object value)
@@ -142,9 +128,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return value;
         }
 
-        /// <summary>
-        /// Returns whether a file exists at the specified path.
-        /// </summary>
+        /// <summary>Returns whether a file exists at the specified path.</summary>
         /// <param name="path">The path.</param>
         /// <returns>Whether the file exists.</returns>
         public bool HasFile(string[] path)
@@ -152,9 +136,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return GetObjectAt(path) is FFPFile;
         }
 
-        /// <summary>
-        /// Returns whether a file exists at the specified path.
-        /// </summary>
+        /// <summary>Returns whether a file exists at the specified path.</summary>
         /// <param name="path">The path, separated by the '/' symbol.</param>
         /// <returns>Whether the file exists.</returns>
         public bool HasFile(string path)
@@ -162,9 +144,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return HasFile(SplitPath(path));
         }
 
-        /// <summary>
-        /// Returns whether a sub-folder exists at the specified path.
-        /// </summary>
+        /// <summary>Returns whether a sub-folder exists at the specified path.</summary>
         /// <param name="path">The path.</param>
         /// <returns>Whether the sub-folder exists.</returns>
         public bool HasSubFolder(string[] path)
@@ -172,9 +152,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return GetObjectAt(path) is FFPFolder;
         }
 
-        /// <summary>
-        /// Returns whether a sub-folder exists at the specified path.
-        /// </summary>
+        /// <summary>Returns whether a sub-folder exists at the specified path.</summary>
         /// <param name="path">The path, separated by the '/' symbol.</param>
         /// <returns>Whether the sub-folder exists.</returns>
         public bool HasSubFolder(string path)
@@ -182,9 +160,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return HasSubFolder(SplitPath(path));
         }
 
-        /// <summary>
-        /// Gets a sub-folder at the specified path.
-        /// </summary>
+        /// <summary>Gets a sub-folder at the specified path.</summary>
         /// <param name="path">The path.</param>
         /// <returns>The folder.</returns>
         /// <exception cref="InvalidOperationException">If the path does not point to a folder.</exception>
@@ -197,10 +173,8 @@ namespace FreneticUtilities.FreneticFilePackage
             }
             throw new InvalidOperationException("Path is not a folder.");
         }
-        
-        /// <summary>
-        /// Gets a sub-folder at the specified path.
-        /// </summary>
+
+        /// <summary>Gets a sub-folder at the specified path.</summary>
         /// <param name="path">The path, separated by the '/' symbol.</param>
         /// <returns>The folder.</returns>
         /// <exception cref="InvalidOperationException">If the path does not point to a folder.</exception>
@@ -209,9 +183,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return GetSubFolder(SplitPath(path));
         }
 
-        /// <summary>
-        /// Tries to get a sub-folder at the specified path.
-        /// </summary>
+        /// <summary>Tries to get a sub-folder at the specified path.</summary>
         /// <param name="path">The path.</param>
         /// <param name="folder">The folder, if found.</param>
         /// <returns>Whether a folder was gotten.</returns>
@@ -222,9 +194,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return folder != null;
         }
 
-        /// <summary>
-        /// Tries to get a sub-folder at the specified path.
-        /// </summary>
+        /// <summary>Tries to get a sub-folder at the specified path.</summary>
         /// <param name="path">The path, separated by the '/' symbol.</param>
         /// <param name="folder">The folder, if found.</param>
         /// <returns>Whether a folder was gotten.</returns>
@@ -233,9 +203,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return TryGetSubFolder(SplitPath(path), out folder);
         }
 
-        /// <summary>
-        /// Gets a file at the specified path.
-        /// </summary>
+        /// <summary>Gets a file at the specified path.</summary>
         /// <param name="path">The path.</param>
         /// <returns>The file.</returns>
         /// <exception cref="InvalidOperationException">If the path does not point to a file.</exception>
@@ -249,9 +217,7 @@ namespace FreneticUtilities.FreneticFilePackage
             throw new InvalidOperationException("Path is not a file.");
         }
 
-        /// <summary>
-        /// Gets a file at the specified path.
-        /// </summary>
+        /// <summary>Gets a file at the specified path.</summary>
         /// <param name="path">The path, separated by the '/' symbol.</param>
         /// <returns>The file.</returns>
         /// <exception cref="InvalidOperationException">If the path does not point to a file.</exception>
@@ -260,9 +226,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return GetFile(SplitPath(path));
         }
 
-        /// <summary>
-        /// Gets a file at the specified path.
-        /// </summary>
+        /// <summary>Gets a file at the specified path.</summary>
         /// <param name="path">The path.</param>
         /// <param name="file">The file, if found.</param>
         /// <returns>Whether a file was gotten.</returns>
@@ -273,9 +237,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return file != null;
         }
 
-        /// <summary>
-        /// Gets a file at the specified path.
-        /// </summary>
+        /// <summary>Gets a file at the specified path.</summary>
         /// <param name="path">The path, separated by the '/' symbol.</param>
         /// <param name="file">The file, if found.</param>
         /// <returns>Whether a file was gotten.</returns>
@@ -284,9 +246,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return TryGetFile(SplitPath(path), out file);
         }
 
-        /// <summary>
-        /// Enumerates all files (not folders) contained in this folder.
-        /// </summary>
+        /// <summary>Enumerates all files (not folders) contained in this folder.</summary>
         /// <returns>The file enumerable.</returns>
         public IEnumerable<string> EnumerateFiles()
         {
@@ -299,9 +259,7 @@ namespace FreneticUtilities.FreneticFilePackage
             }
         }
 
-        /// <summary>
-        /// Enumerates all folders (not files) contained in this folder.
-        /// </summary>
+        /// <summary>Enumerates all folders (not files) contained in this folder.</summary>
         /// <returns>The folders enumerable.</returns>
         public IEnumerable<string> EnumerateFolders()
         {

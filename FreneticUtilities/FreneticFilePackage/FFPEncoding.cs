@@ -12,18 +12,12 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticFilePackage
 {
-    /// <summary>
-    /// The valid options for how to encode a file in a <see cref="FFPackage"/>.
-    /// </summary>
+    /// <summary>The valid options for how to encode a file in a <see cref="FFPackage"/>.</summary>
     public enum FFPEncoding : byte
     {
-        /// <summary>
-        /// The binary data in the file is the actual data.
-        /// </summary>
+        /// <summary>The binary data in the file is the actual data.</summary>
         RAW = 0,
-        /// <summary>
-        /// The binary data in the file is encoded by the GZip compression algorithm.
-        /// </summary>
+        /// <summary>The binary data in the file is encoded by the GZip compression algorithm.</summary>
         GZIP = 1
     }
 }

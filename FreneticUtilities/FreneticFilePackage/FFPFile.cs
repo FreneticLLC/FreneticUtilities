@@ -14,65 +14,41 @@ using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticFilePackage
 {
-    /// <summary>
-    /// Represents a single file in a <see cref="FFPackage"/>.
-    /// </summary>
+    /// <summary>Represents a single file in a <see cref="FFPackage"/>.</summary>
     public class FFPFile
     {
-        /// <summary>
-        /// The internal data for this <see cref="FFPFile"/>.
-        /// </summary>
+        /// <summary>The internal data for this <see cref="FFPFile"/>.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// The index in the backing stream this file starts at.
-            /// </summary>
+            /// <summary>The index in the backing stream this file starts at.</summary>
             public long StartPosition;
 
-            /// <summary>
-            /// The length in the backing stream.
-            /// </summary>
+            /// <summary>The length in the backing stream.</summary>
             public long FileLength;
 
-            /// <summary>
-            /// The encoding in use.
-            /// </summary>
+            /// <summary>The encoding in use.</summary>
             public FFPEncoding Encoding;
         }
 
-        /// <summary>
-        /// The internal data for this <see cref="FFPFile"/>.
-        /// </summary>
+        /// <summary>The internal data for this <see cref="FFPFile"/>.</summary>
         public InternalData Internal;
 
-        /// <summary>
-        /// The backing file package.
-        /// </summary>
+        /// <summary>The backing file package.</summary>
         public FFPackage Package;
 
-        /// <summary>
-        /// The length of the file.
-        /// </summary>
+        /// <summary>The length of the file.</summary>
         public long Length;
 
-        /// <summary>
-        /// The full name of the file, with any path data.
-        /// </summary>
+        /// <summary>The full name of the file, with any path data.</summary>
         public string FullName;
 
-        /// <summary>
-        /// The simple name of the file (path data removed).
-        /// </summary>
+        /// <summary>The simple name of the file (path data removed).</summary>
         public string SimpleName;
 
-        /// <summary>
-        /// Locker used to prevent overlapping file reads across multiple threads.
-        /// </summary>
+        /// <summary>Locker used to prevent overlapping file reads across multiple threads.</summary>
         public LockObject Locker = new();
 
-        /// <summary>
-        /// Returns a byte array of the actual file data.
-        /// </summary>
+        /// <summary>Returns a byte array of the actual file data.</summary>
         /// <returns>The actual file data.</returns>
         public byte[] ReadFileData()
         {

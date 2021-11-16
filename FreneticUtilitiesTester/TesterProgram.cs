@@ -18,14 +18,10 @@ using FreneticUtilities.FreneticFilePackage;
 
 namespace FreneticUtilitiesTester
 {
-    /// <summary>
-    /// Entry point for the tester program.
-    /// </summary>
+    /// <summary>Entry point for the tester program.</summary>
     public static class TesterProgram
     {
-        /// <summary>
-        /// Initializes the program cleanly, fixing the system culture info to prevent glitches.
-        /// </summary>
+        /// <summary>Initializes the program cleanly, fixing the system culture info to prevent glitches.</summary>
         public static void InitClean()
         {
             string x = ((new Random().Next(5) + 12) / (double)10).ToString();
@@ -41,9 +37,7 @@ namespace FreneticUtilitiesTester
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
         }
 
-        /// <summary>
-        /// Entry point main method for the tester program.
-        /// </summary>
+        /// <summary>Entry point main method for the tester program.</summary>
         /// <param name="args">Command line arguments.</param>
         public static void Main(string[] args)
         {
@@ -140,9 +134,7 @@ namespace FreneticUtilitiesTester
             }
         }
 
-        /// <summary>
-        /// Outputs the contents of a folder to console.
-        /// </summary>
+        /// <summary>Outputs the contents of a folder to console.</summary>
         /// <param name="tabs">How much to tab out.</param>
         /// <param name="folder">The folder.</param>
         /// <param name="outputPath">The path to output data to.</param>
@@ -169,9 +161,7 @@ namespace FreneticUtilitiesTester
             }
         }
 
-        /// <summary>
-        /// Outputs the contents of a folder to console.
-        /// </summary>
+        /// <summary>Outputs the contents of a folder to console.</summary>
         /// <param name="tabs">How much to tab out.</param>
         /// <param name="folder">The folder.</param>
         public static void OutputFolder(int tabs, FFPFolder folder)

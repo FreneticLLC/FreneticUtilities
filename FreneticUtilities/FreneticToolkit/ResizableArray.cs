@@ -20,19 +20,13 @@ namespace FreneticUtilities.FreneticToolkit
     /// </summary>
     public class ResizableArray<T> : IEnumerable<T>
     {
-        /// <summary>
-        /// The internal value array. Length may not necessarily match <see cref="Length"/>.
-        /// </summary>
+        /// <summary>The internal value array. Length may not necessarily match <see cref="Length"/>.</summary>
         public T[] Internal;
 
-        /// <summary>
-        /// The actual number of elements in this list.
-        /// </summary>
+        /// <summary>The actual number of elements in this list.</summary>
         public int Length = 0;
 
-        /// <summary>
-        /// Gets or sets the object at an index in the list.
-        /// </summary>
+        /// <summary>Gets or sets the object at an index in the list.</summary>
         public T this[int index]
         {
             get
@@ -53,26 +47,20 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Constructs an empty list.
-        /// </summary>
+        /// <summary>Constructs an empty list.</summary>
         public ResizableArray()
         {
             Internal = Array.Empty<T>();
         }
 
-        /// <summary>
-        /// Constructs an empty list with a pre-chosen capacity.
-        /// </summary>
+        /// <summary>Constructs an empty list with a pre-chosen capacity.</summary>
         /// <param name="capacity">The estimated capacity.</param>
         public ResizableArray(int capacity)
         {
             Internal = new T[capacity];
         }
 
-        /// <summary>
-        /// Constructs a list from a pre-existing enumerable set.
-        /// </summary>
+        /// <summary>Constructs a list from a pre-existing enumerable set.</summary>
         /// <param name="set">The pre-existing values.</param>
         public ResizableArray(IEnumerable<T> set)
         {
@@ -83,9 +71,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Makes sure the list has enough capacity to hold a given number of elements without resizing.
-        /// </summary>
+        /// <summary>Makes sure the list has enough capacity to hold a given number of elements without resizing.</summary>
         /// <param name="capacity">The capacity ensure.</param>
         public void EnsureCapacity(int capacity)
         {
@@ -100,9 +86,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Adds an element to the end of the list.
-        /// </summary>
+        /// <summary>Adds an element to the end of the list.</summary>
         /// <param name="x">The value to add.</param>
         public void Add(T x)
         {
@@ -113,9 +97,7 @@ namespace FreneticUtilities.FreneticToolkit
             Internal[Length++] = x;
         }
 
-        /// <summary>
-        /// Adds a range of values to the list.
-        /// </summary>
+        /// <summary>Adds a range of values to the list.</summary>
         /// <param name="set">The set of values to add.</param>
         public void AddRange(IEnumerable<T> set)
         {
@@ -135,9 +117,7 @@ namespace FreneticUtilities.FreneticToolkit
             Length = 0;
         }
 
-        /// <summary>
-        /// Clears the list in a manner that takes longer to compute than <see cref="Clear"/>, but prevents memory leaks.
-        /// </summary>
+        /// <summary>Clears the list in a manner that takes longer to compute than <see cref="Clear"/>, but prevents memory leaks.</summary>
         public void FullClear()
         {
             for (int i = 0; i < Length; i++)
@@ -147,66 +127,46 @@ namespace FreneticUtilities.FreneticToolkit
             Length = 0;
         }
 
-        /// <summary>
-        /// Gets an enumerator over this list, for loops.
-        /// </summary>
+        /// <summary>Gets an enumerator over this list, for loops.</summary>
         public IEnumerator<T> GetEnumerator()
         {
             return new ResArrEnumerator(this);
         }
 
-        /// <summary>
-        /// Gets an enumerator over this list, for loops.
-        /// </summary>
+        /// <summary>Gets an enumerator over this list, for loops.</summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
 
-        /// <summary>
-        /// Helper class for enumerating the <see cref="ResizableArray{T}"/>.
-        /// </summary>
+        /// <summary>Helper class for enumerating the <see cref="ResizableArray{T}"/>.</summary>
         public struct ResArrEnumerator : IEnumerator<T>
         {
-            /// <summary>
-            /// The current index in the list.
-            /// </summary>
+            /// <summary>The current index in the list.</summary>
             public int Index;
 
-            /// <summary>
-            /// The relevant original list.
-            /// </summary>
+            /// <summary>The relevant original list.</summary>
             public ResizableArray<T> Array;
 
-            /// <summary>
-            /// Constructs the enumerator.
-            /// </summary>
+            /// <summary>Constructs the enumerator.</summary>
             public ResArrEnumerator(ResizableArray<T> arr)
             {
                 Array = arr;
                 Index = -1;
             }
 
-            /// <summary>
-            /// Gets the current value.
-            /// </summary>
+            /// <summary>Gets the current value.</summary>
             public T Current => Index < Array.Length ? Array[Index] : default;
 
-            /// <summary>
-            /// Gets the current value.
-            /// </summary>
+            /// <summary>Gets the current value.</summary>
             object IEnumerator.Current => Index < Array.Length ? Array[Index] : default;
 
-            /// <summary>
-            /// Disposes the enumerator (does nothing).
-            /// </summary>
+            /// <summary>Disposes the enumerator (does nothing).</summary>
             public void Dispose()
             {
             }
 
-            /// <summary>
-            /// Moves to the next element in the array.
-            /// </summary>
+            /// <summary>Moves to the next element in the array.</summary>
             /// <returns>True if there's another element available, otherwise false.</returns>
             public bool MoveNext()
             {
@@ -214,9 +174,7 @@ namespace FreneticUtilities.FreneticToolkit
                 return Index < Array.Length;
             }
 
-            /// <summary>
-            /// Resets the enumerator to start of the list.
-            /// </summary>
+            /// <summary>Resets the enumerator to start of the list.</summary>
             public void Reset()
             {
                 Index = -1;

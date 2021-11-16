@@ -14,19 +14,13 @@ using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticFilePackage
 {
-    /// <summary>
-    /// A helper class to create new <see cref="FFPackage"/>s.
-    /// </summary>
+    /// <summary>A helper class to create new <see cref="FFPackage"/>s.</summary>
     public static class FFPBuilder
     {
-        /// <summary>
-        /// Represents a single file that will go into a <see cref="FFPackage"/>.
-        /// </summary>
+        /// <summary>Represents a single file that will go into a <see cref="FFPackage"/>.</summary>
         public class FFPBuilderFile
         {
-            /// <summary>
-            /// The name (in the final package) of the file.
-            /// </summary>
+            /// <summary>The name (in the final package) of the file.</summary>
             public string Name;
 
             /// <summary>
@@ -38,14 +32,10 @@ namespace FreneticUtilities.FreneticFilePackage
             public object FileObject;
         }
 
-        /// <summary>
-        /// Options for building a <see cref="FFPackage"/>.
-        /// </summary>
+        /// <summary>Options for building a <see cref="FFPackage"/>.</summary>
         public class Options
         {
-            /// <summary>
-            /// Whether GZip compression is allowed.
-            /// </summary>
+            /// <summary>Whether GZip compression is allowed.</summary>
             public bool MayGZip = true;
 
             /// <summary>
@@ -82,9 +72,7 @@ namespace FreneticUtilities.FreneticFilePackage
             return filesOutput.ToArray();
         }
 
-        /// <summary>
-        /// Creates a <see cref="FFPackage"/> from a file system folder and saves it to a new file.
-        /// </summary>
+        /// <summary>Creates a <see cref="FFPackage"/> from a file system folder and saves it to a new file.</summary>
         /// <param name="folder">The file system folder.</param>
         /// <param name="outputFile">The file to output to.</param>
         /// <param name="options">The building options.</param>
@@ -95,9 +83,7 @@ namespace FreneticUtilities.FreneticFilePackage
             CreateFromFiles(inputFiles, output, options);
             output.Flush(true);
         }
-        /// <summary>
-        /// Creates a <see cref="FFPackage"/> from a file system folder.
-        /// </summary>
+        /// <summary>Creates a <see cref="FFPackage"/> from a file system folder.</summary>
         /// <param name="folder">The file system folder.</param>
         /// <param name="output">The stream to output to.</param>
         /// <param name="options">The building options.</param>
@@ -106,9 +92,7 @@ namespace FreneticUtilities.FreneticFilePackage
             CreateFromFiles(GetFilesIn(folder), output, options);
         }
 
-        /// <summary>
-        /// Creates a <see cref="FFPackage"/> from an array of on-disk files, in-memory files, and stream-backed files.
-        /// </summary>
+        /// <summary>Creates a <see cref="FFPackage"/> from an array of on-disk files, in-memory files, and stream-backed files.</summary>
         /// <param name="files">List of files.</param>
         /// <param name="output">The stream to output to.</param>
         /// <param name="options">The building options.</param>

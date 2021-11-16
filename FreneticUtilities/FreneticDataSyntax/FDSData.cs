@@ -12,30 +12,22 @@ using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
-    /// <summary>
-    /// Represents a piece of data within an FDS Section.
-    /// </summary>
+    /// <summary>Represents a piece of data within an FDS Section.</summary>
     public class FDSData : IEquatable<FDSData>
     {
-        /// <summary>
-        /// Constructs an empty <see cref="FDSData"/> instance.
-        /// </summary>
+        /// <summary>Constructs an empty <see cref="FDSData"/> instance.</summary>
         public FDSData()
         {
         }
 
-        /// <summary>
-        /// Constructs an <see cref="FDSData"/> instance of the specified object.
-        /// </summary>
+        /// <summary>Constructs an <see cref="FDSData"/> instance of the specified object.</summary>
         /// <param name="_internal">The object.</param>
         public FDSData(object _internal)
         {
             Internal = _internal;
         }
 
-        /// <summary>
-        /// Constructs an <see cref="FDSData"/> instance of the specified object and the specified comments.
-        /// </summary>
+        /// <summary>Constructs an <see cref="FDSData"/> instance of the specified object and the specified comments.</summary>
         /// <param name="_internal">The object.</param>
         /// <param name="comment">The comments to apply (newline separated).</param>
         public FDSData(object _internal, string comment)
@@ -44,14 +36,10 @@ namespace FreneticUtilities.FreneticDataSyntax
             AddComment(comment);
         }
 
-        /// <summary>
-        /// The list of comments preceding this data piece.
-        /// </summary>
+        /// <summary>The list of comments preceding this data piece.</summary>
         public List<string> PrecedingComments = new List<string>();
 
-        /// <summary>
-        /// Adds a preceding comment to this data piece.
-        /// </summary>
+        /// <summary>Adds a preceding comment to this data piece.</summary>
         /// <param name="comment">The comment to add.</param>
         public void AddComment(string comment)
         {
@@ -59,14 +47,10 @@ namespace FreneticUtilities.FreneticDataSyntax
             PrecedingComments.AddRange(comment.Split('\n').Select(str => str.TrimEnd()));
         }
 
-        /// <summary>
-        /// The internal represented data.
-        /// </summary>
+        /// <summary>The internal represented data.</summary>
         public object Internal;
 
-        /// <summary>
-        /// Gets the internal represented data as a string. Can stringify non-string values.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a string. Can stringify non-string values.</summary>
         public string AsString
         {
             get
@@ -82,9 +66,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a boolean.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a boolean.</summary>
         public bool AsBool
         {
             get
@@ -100,9 +82,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a list of data.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a list of data.</summary>
         public List<FDSData> AsDataList
         {
             get
@@ -122,9 +102,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a list of strings.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a list of strings.</summary>
         public List<string> AsStringList
         {
             get
@@ -139,9 +117,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a C# decimal value. Returns null if not a valid decimal.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a C# decimal value. Returns null if not a valid decimal.</summary>
         public decimal? AsDecimal
         {
             get
@@ -174,9 +150,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a double-precision (64-bit) floating point value. Returns null if not a valid double.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a double-precision (64-bit) floating point value. Returns null if not a valid double.</summary>
         public double? AsDouble
         {
             get
@@ -205,9 +179,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a single-precision (32-bit) floating point value. Returns null if not a valid float.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a single-precision (32-bit) floating point value. Returns null if not a valid float.</summary>
         public float? AsFloat
         {
             get
@@ -221,9 +193,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a 64-bit signed integer. Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a 64-bit signed integer. Returns null if not a valid integer.</summary>
         public long? AsLong
         {
             get
@@ -244,9 +214,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a 32-bit signed integer. Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a 32-bit signed integer. Returns null if not a valid integer.</summary>
         public int? AsInt
         {
             get
@@ -260,9 +228,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a 16-bit signed integer. Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a 16-bit signed integer. Returns null if not a valid integer.</summary>
         public short? AsShort
         {
             get
@@ -276,9 +242,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as an 8-bit signed integer (sbyte). Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as an 8-bit signed integer (sbyte). Returns null if not a valid integer.</summary>
         public sbyte? AsSByte
         {
             get
@@ -292,9 +256,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a 64-bit unsigned integer. Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a 64-bit unsigned integer. Returns null if not a valid integer.</summary>
         public ulong? AsULong
         {
             get
@@ -318,9 +280,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a 32-bit unsigned integer. Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a 32-bit unsigned integer. Returns null if not a valid integer.</summary>
         public uint? AsUInt
         {
             get
@@ -334,9 +294,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as a 16-bit unsigned integer. Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as a 16-bit unsigned integer. Returns null if not a valid integer.</summary>
         public ushort? AsUShort
         {
             get
@@ -350,9 +308,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as an 8-bit unsigned integer (byte). Returns null if not a valid integer.
-        /// </summary>
+        /// <summary>Gets the internal represented data as an 8-bit unsigned integer (byte). Returns null if not a valid integer.</summary>
         public byte? AsByte
         {
             get
@@ -366,9 +322,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Gets the internal represented data as an array of bytes. Returns null if not a valid array of bytes.
-        /// </summary>
+        /// <summary>Gets the internal represented data as an array of bytes. Returns null if not a valid array of bytes.</summary>
         public byte[] AsByteArray
         {
             get
@@ -377,9 +331,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Returns the output-able string representation of this data.
-        /// </summary>
+        /// <summary>Returns the output-able string representation of this data.</summary>
         /// <returns>The resultant data.</returns>
         public string Outputable()
         {

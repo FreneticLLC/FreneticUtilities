@@ -20,25 +20,17 @@ using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
-    /// <summary>
-    /// Extend this class to create an automatic FDS configuration utility.
-    /// </summary>
+    /// <summary>Extend this class to create an automatic FDS configuration utility.</summary>
     public abstract class AutoConfiguration
     {
-        /// <summary>
-        /// Adds comment lines to a configuration value.
-        /// </summary>
+        /// <summary>Adds comment lines to a configuration value.</summary>
         [AttributeUsage(AttributeTargets.Field)]
         public class ConfigComment : Attribute
         {
-            /// <summary>
-            /// The comments to add (separated via newline).
-            /// </summary>
+            /// <summary>The comments to add (separated via newline).</summary>
             public string Comments;
 
-            /// <summary>
-            /// Construct the config comment.
-            /// </summary>
+            /// <summary>Construct the config comment.</summary>
             /// <param name="_comment">The comment to add.</param>
             public ConfigComment(string _comment)
             {
@@ -46,141 +38,87 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Internal tooling for <see cref="AutoConfiguration"/>.
-        /// </summary>
+        /// <summary>Internal tooling for <see cref="AutoConfiguration"/>.</summary>
         public static class Internal
         {
-            /// <summary>
-            /// Represents type-specific data for <see cref="AutoConfiguration"/>.
-            /// </summary>
+            /// <summary>Represents type-specific data for <see cref="AutoConfiguration"/>.</summary>
             public class AutoConfigData
             {
-                /// <summary>
-                /// Callable function that saves the config data to an FDS document.
-                /// </summary>
+                /// <summary>Callable function that saves the config data to an FDS document.</summary>
                 public Func<AutoConfiguration, FDSSection> SaveSection;
 
-                /// <summary>
-                /// Callable action that loads the config data from an FDS document.
-                /// </summary>
+                /// <summary>Callable action that loads the config data from an FDS document.</summary>
                 public Action<AutoConfiguration, FDSSection> LoadSection;
             }
 
-            /// <summary>
-            /// Helper class that represents the tools needed to convert <see cref="FDSData"/> to the final output type.
-            /// </summary>
+            /// <summary>Helper class that represents the tools needed to convert <see cref="FDSData"/> to the final output type.</summary>
             public class DataConverter
             {
-                /// <summary>
-                /// Method that gets the data from an <see cref="FDSData"/> instance.
-                /// </summary>
+                /// <summary>Method that gets the data from an <see cref="FDSData"/> instance.</summary>
                 public MethodInfo Getter;
 
-                /// <summary>
-                /// Method that gets the value of the data from a nullable instance (if needed).
-                /// </summary>
+                /// <summary>Method that gets the value of the data from a nullable instance (if needed).</summary>
                 public MethodInfo ValueGrabber;
             }
 
-            /// <summary>
-            /// Static map of C# class type to the internal executable data needed to process it.
-            /// </summary>
+            /// <summary>Static map of C# class type to the internal executable data needed to process it.</summary>
             public static ConcurrentDictionary<Type, AutoConfigData> TypeMap = new ConcurrentDictionary<Type, AutoConfigData>();
 
-            /// <summary>
-            /// Locker for generating new config data.
-            /// </summary>
+            /// <summary>Locker for generating new config data.</summary>
             public static LockObject GenerationLock = new LockObject();
 
-            /// <summary>
-            /// A reference to the <see cref="AutoConfiguration.Save"/> method.
-            /// </summary>
+            /// <summary>A reference to the <see cref="AutoConfiguration.Save"/> method.</summary>
             public static MethodInfo ConfigSaveMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Save));
 
-            /// <summary>
-            /// A reference to the <see cref="AutoConfiguration.Load"/> method.
-            /// </summary>
+            /// <summary>A reference to the <see cref="AutoConfiguration.Load"/> method.</summary>
             public static MethodInfo ConfigLoadMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Load));
-            
-            /// <summary>
-            /// A reference to the <see cref="FDSSection.SetRootData(string, FDSData)"/> method.
-            /// </summary>
+
+            /// <summary>A reference to the <see cref="FDSSection.SetRootData(string, FDSData)"/> method.</summary>
             public static MethodInfo SectionSetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.SetRootData), new Type[] { typeof(string), typeof(FDSData) });
 
-            /// <summary>
-            /// A reference to the <see cref="FDSSection.GetSection(string)"/> method.
-            /// </summary>
+            /// <summary>A reference to the <see cref="FDSSection.GetSection(string)"/> method.</summary>
             public static MethodInfo SectionGetSectionMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetSection), new Type[] { typeof(string) });
 
-            /// <summary>
-            /// A reference to the <see cref="FDSSection.GetRootData(string)"/> method.
-            /// </summary>
+            /// <summary>A reference to the <see cref="FDSSection.GetRootData(string)"/> method.</summary>
             public static MethodInfo SectionGetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetRootData), new Type[] { typeof(string) });
 
-            /// <summary>
-            /// A reference to the <see cref="FixNull{T}(T?)"/> method.
-            /// </summary>
+            /// <summary>A reference to the <see cref="FixNull{T}(T?)"/> method.</summary>
             public static MethodInfo FixNullMethod = typeof(Internal).GetMethod(nameof(FixNull));
 
-            /// <summary>
-            /// A reference to the <see cref="List{FDSData}.Add"/> method for lists of <see cref="FDSData"/>.
-            /// </summary>
+            /// <summary>A reference to the <see cref="List{FDSData}.Add"/> method for lists of <see cref="FDSData"/>.</summary>
             public static MethodInfo FDSDataListAddMethod = typeof(List<FDSData>).GetMethod(nameof(List<FDSData>.Add));
 
-            /// <summary>
-            /// A reference to the <see cref="List{FDSData}.GetEnumerator"/> method for lists of <see cref="FDSData"/>.
-            /// </summary>
+            /// <summary>A reference to the <see cref="List{FDSData}.GetEnumerator"/> method for lists of <see cref="FDSData"/>.</summary>
             public static MethodInfo FDSDataListGetEnumeratorMethod = typeof(List<FDSData>).GetMethod(nameof(List<FDSData>.GetEnumerator));
 
-            /// <summary>
-            /// A reference to the <see cref="List{FDSData}.Enumerator.MoveNext"/> method for a list of <see cref="FDSData"/>.
-            /// </summary>
+            /// <summary>A reference to the <see cref="List{FDSData}.Enumerator.MoveNext"/> method for a list of <see cref="FDSData"/>.</summary>
             public static MethodInfo FDSDataListEnumeratorMoveNextMethod = typeof(List<FDSData>.Enumerator).GetMethod(nameof(List<FDSData>.Enumerator.MoveNext));
 
-            /// <summary>
-            /// A reference to the <see cref="IDisposable.Dispose"/> method.
-            /// </summary>
+            /// <summary>A reference to the <see cref="IDisposable.Dispose"/> method.</summary>
             public static MethodInfo IDisposableDisposeMethod = typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose));
 
-            /// <summary>
-            /// A reference to the <see cref="List{FDSData}.Enumerator.Current"/> property getter for a list of <see cref="FDSData"/>.
-            /// </summary>
+            /// <summary>A reference to the <see cref="List{FDSData}.Enumerator.Current"/> property getter for a list of <see cref="FDSData"/>.</summary>
             public static MethodInfo FDSDataListEnumeratorCurrentGetter = typeof(List<FDSData>.Enumerator).GetProperty(nameof(List<FDSData>.Enumerator.Current)).GetMethod;
 
-            /// <summary>
-            /// A reference to the <see cref="FDSData.AsDataList"/> property getter method.
-            /// </summary>
+            /// <summary>A reference to the <see cref="FDSData.AsDataList"/> property getter method.</summary>
             public static MethodInfo FDSDataAsDataListGetter = typeof(FDSData).GetProperty(nameof(FDSData.AsDataList)).GetMethod;
 
-            /// <summary>
-            /// A reference to the <see cref="FDSSection"/> no-arguments constructor.
-            /// </summary>
+            /// <summary>A reference to the <see cref="FDSSection"/> no-arguments constructor.</summary>
             public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor(Array.Empty<Type>());
 
-            /// <summary>
-            /// A reference to the <see cref="FDSData"/> one-argument constructor.
-            /// </summary>
+            /// <summary>A reference to the <see cref="FDSData"/> one-argument constructor.</summary>
             public static ConstructorInfo FDSDataObjectConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object) });
 
-            /// <summary>
-            /// A reference to the <see cref="FDSData"/> two-arguments constructor.
-            /// </summary>
+            /// <summary>A reference to the <see cref="FDSData"/> two-arguments constructor.</summary>
             public static ConstructorInfo FDSDataObjectCommentConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object), typeof(string) });
 
-            /// <summary>
-            /// A reference to the <see cref="List{FDSData}"/> of <see cref="FDSData"/> no-arguments constructor.
-            /// </summary>
+            /// <summary>A reference to the <see cref="List{FDSData}"/> of <see cref="FDSData"/> no-arguments constructor.</summary>
             public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor(Array.Empty<Type>());
 
-            /// <summary>
-            /// A mapping of core object types to the method that converts <see cref="FDSData"/> to them.
-            /// </summary>
+            /// <summary>A mapping of core object types to the method that converts <see cref="FDSData"/> to them.</summary>
             public static Dictionary<Type, DataConverter> FDSDataFieldsByType = new Dictionary<Type, DataConverter>(64);
 
-            /// <summary>
-            /// Init required static data.
-            /// </summary>
+            /// <summary>Init required static data.</summary>
             static Internal()
             {
                 static void register(Type type, string propertyName)
@@ -211,9 +149,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 register(typeof(byte[]), nameof(FDSData.AsByteArray));
             }
 
-            /// <summary>
-            /// Utility method to perform "Nullable<typeparamref name="T"/>.Value" since CIL is very bad at emitting this properly.
-            /// </summary>
+            /// <summary>Utility method to perform "Nullable<typeparamref name="T"/>.Value" since CIL is very bad at emitting this properly.</summary>
             /// <typeparam name="T">The ValueType that will be Nullable.</typeparam>
             /// <param name="val">The instance to convert.</param>
             /// <returns>The non-nullable value.</returns>
@@ -222,14 +158,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return val.Value;
             }
 
-            /// <summary>
-            /// A mapping of types to methods that load a list of that type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
-            /// </summary>
+            /// <summary>A mapping of types to methods that load a list of that type from a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
             public static Dictionary<Type, MethodInfo> ListLoaders = new Dictionary<Type, MethodInfo>(32);
 
-            /// <summary>
-            /// A mapping of types to methods that save a list of that type to a <see cref="List{T}"/> of <see cref="FDSData"/>.
-            /// </summary>
+            /// <summary>A mapping of types to methods that save a list of that type to a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
             public static Dictionary<Type, MethodInfo> ListSavers = new Dictionary<Type, MethodInfo>(32);
 
             /// <summary>
@@ -266,9 +198,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 return generated;
             }
 
-            /// <summary>
-            /// Generates a method that loads a list of the specified type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
-            /// </summary>
+            /// <summary>Generates a method that loads a list of the specified type from a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
             /// <param name="type">The type to convert to/from.</param>
             /// <param name="doLoad">True indicates load, false indicates save.</param>
             /// <returns>The generated method.</returns>
@@ -395,9 +325,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
             }
 
-            /// <summary>
-            /// Generate the raw internal data for the specific config class type.
-            /// </summary>
+            /// <summary>Generate the raw internal data for the specific config class type.</summary>
             /// <param name="type">The config class type.</param>
             /// <returns>The config data.</returns>
             public static AutoConfigData GenerateData(Type type)
@@ -471,14 +399,10 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Internal-use only data.
-        /// </summary>
+        /// <summary>Internal-use only data.</summary>
         public Internal.AutoConfigData InternalData;
 
-        /// <summary>
-        /// Inits the <see cref="AutoConfiguration"/>.
-        /// </summary>
+        /// <summary>Inits the <see cref="AutoConfiguration"/>.</summary>
         public AutoConfiguration()
         {
             Type type = GetType();
@@ -488,18 +412,14 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Saves this <see cref="AutoConfiguration"/> to an <see cref="FDSSection"/>.
-        /// </summary>
+        /// <summary>Saves this <see cref="AutoConfiguration"/> to an <see cref="FDSSection"/>.</summary>
         /// <returns>The section object with all save data.</returns>
         public FDSSection Save()
         {
             return InternalData.SaveSection(this);
         }
 
-        /// <summary>
-        /// Loads this <see cref="AutoConfiguration"/> from an <see cref="FDSSection"/>.
-        /// </summary>
+        /// <summary>Loads this <see cref="AutoConfiguration"/> from an <see cref="FDSSection"/>.</summary>
         /// <param name="section">The section to load from.</param>
         public void Load(FDSSection section)
         {

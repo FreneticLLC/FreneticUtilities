@@ -20,14 +20,10 @@ namespace FreneticUtilities.FreneticDataSyntax
     /// </summary>
     public static class FDSParser
     {
-        /// <summary>
-        /// Matcher for list prefix symbols (dash, equals, greater than).
-        /// </summary>
+        /// <summary>Matcher for list prefix symbols (dash, equals, greater than).</summary>
         public static AsciiMatcher ListPrefixMatcher = new AsciiMatcher("-=>");
 
-        /// <summary>
-        /// Matcher for symbols that separate a key from a value.
-        /// </summary>
+        /// <summary>Matcher for symbols that separate a key from a value.</summary>
         public static AsciiMatcher KeySeparatorMatcher = new AsciiMatcher(":=");
 
         /// <summary>Helper for <see cref="ParseSection(string[], int, int, int, out int, FDSSection)"/> to parse a list.</summary>
@@ -189,9 +185,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return new FDSData(new FDSSection());
         }
 
-        /// <summary>
-        /// Internal path to parse a single base section of an FDS file.
-        /// </summary>
+        /// <summary>Internal path to parse a single base section of an FDS file.</summary>
         /// <param name="allLines">The array of all lines of text.</param>
         /// <param name="startLine">The line index to start parsing at.</param>
         /// <param name="skip">The additional number of lines to skip (to ensure endLine doesn't get misset).</param>
@@ -290,9 +284,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Creates an <see cref="FDSInputException"/>.
-        /// </summary>
+        /// <summary>Creates an <see cref="FDSInputException"/>.</summary>
         /// <param name="linenumber">The line number where the exception occurred.</param>
         /// <param name="line">The text of the line that caused the exception.</param>
         /// <param name="reason">The reason for an exception.</param>

@@ -12,9 +12,7 @@ using System.Text;
 
 namespace FreneticUtilities.FreneticExtensions
 {
-    /// <summary>
-    /// Helper extensions for <see cref="string"/>.
-    /// </summary>
+    /// <summary>Helper extensions for <see cref="string"/>.</summary>
     public static class StringExtensions
     {
         /// <summary>
@@ -394,9 +392,7 @@ namespace FreneticUtilities.FreneticExtensions
             return input.Length > index && index > 0 && input[index] == character;
         }
 
-        /// <summary>
-        /// Returns whether the string starts with a null character.
-        /// </summary>
+        /// <summary>Returns whether the string starts with a null character.</summary>
         /// <param name="input">The input string.</param>
         /// <returns>True if the first character of the string is a null, otherwise false.</returns>
         public static bool StartsWithNull(this string input)
@@ -404,9 +400,7 @@ namespace FreneticUtilities.FreneticExtensions
             return input.Length > 0 && input[0] == '\0';
         }
 
-        /// <summary>
-        /// Returns whether the string starts with the specified character.
-        /// </summary>
+        /// <summary>Returns whether the string starts with the specified character.</summary>
         /// <param name="input">The input string.</param>
         /// <param name="firstChar">The character being checked.</param>
         /// <returns>True if the first character of the string is equal to the specified character, otherwise false.</returns>
@@ -415,9 +409,7 @@ namespace FreneticUtilities.FreneticExtensions
             return input.Length > 0 && input[0] == firstChar;
         }
 
-        /// <summary>
-        /// Returns whether the string ends with a null character.
-        /// </summary>
+        /// <summary>Returns whether the string ends with a null character.</summary>
         /// <param name="input">The input string.</param>
         /// <returns>True if the last character of the string is a null, otherwise false.</returns>
         public static bool EndsWithNull(this string input)
@@ -425,9 +417,7 @@ namespace FreneticUtilities.FreneticExtensions
             return input.Length > 0 && input[^1] == '\0';
         }
 
-        /// <summary>
-        /// Returns whether the string ends with the specified character.
-        /// </summary>
+        /// <summary>Returns whether the string ends with the specified character.</summary>
         /// <param name="input">The input string.</param>
         /// <param name="firstChar">The character being checked for.</param>
         /// <returns>True if the last character of the string is equal to the specified character, otherwise false.</returns>
@@ -495,9 +485,7 @@ namespace FreneticUtilities.FreneticExtensions
             return true;
         }
 
-        /// <summary>
-        /// Counts instances of a character in a string.
-        /// </summary>
+        /// <summary>Counts instances of a character in a string.</summary>
         /// <param name="input">The input string.</param>
         /// <param name="charToCount">The character to count.</param>
         /// <returns>The number of times the character is in the string (0 if none).</returns>
@@ -514,9 +502,7 @@ namespace FreneticUtilities.FreneticExtensions
             return finalCount;
         }
 
-        /// <summary>
-        /// Quickly split a string around a splitter character, with an optional max split count.
-        /// </summary>
+        /// <summary>Quickly split a string around a splitter character, with an optional max split count.</summary>
         /// <param name="input">The original string.</param>
         /// <param name="splitChar">What to split it by.</param>
         /// <returns>The split string pieces.</returns>
@@ -539,9 +525,7 @@ namespace FreneticUtilities.FreneticExtensions
             return resultArray;
         }
 
-        /// <summary>
-        /// Quickly split a string around a splitter character, with a max split count.
-        /// </summary>
+        /// <summary>Quickly split a string around a splitter character, with a max split count.</summary>
         /// <param name="input">The original string.</param>
         /// <param name="splitChar">What to split it by.</param>
         /// <param name="maxCount">The maximum number of times to split it.

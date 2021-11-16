@@ -19,9 +19,7 @@ namespace FreneticUtilities.FreneticToolkit
     public static class PrimitiveConversionHelper
     {
         #region helpers
-        /// <summary>
-        /// Helper for filling a 16-bit byte union helper struct section from byte array input.
-        /// </summary>
+        /// <summary>Helper for filling a 16-bit byte union helper struct section from byte array input.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyInputBytes16(out ByteUnionBase16 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
         {
@@ -32,9 +30,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Helper for filling a 16-bit byte union helper struct section from byte array input.
-        /// </summary>
+        /// <summary>Helper for filling a 16-bit byte union helper struct section from byte array input.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyInputBytes16(out ByteUnionBase16 unionBytes, byte[] inputBytes, int offset)
         {
@@ -46,9 +42,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Helper for filling an array of 2 bytes from a 16-bit byte union helper struct section.
-        /// </summary>
+        /// <summary>Helper for filling an array of 2 bytes from a 16-bit byte union helper struct section.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyOutputBytes16(in ByteUnionBase16 unionBytes, byte[] outputBytes, int offset)
         {
@@ -74,9 +68,7 @@ namespace FreneticUtilities.FreneticToolkit
             };
         }
 
-        /// <summary>
-        /// Helper for filling a 32-bit byte union helper struct section from byte array input.
-        /// </summary>
+        /// <summary>Helper for filling a 32-bit byte union helper struct section from byte array input.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyInputBytes32(out ByteUnionBase32 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
         {
@@ -89,9 +81,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Helper for filling a 32-bit byte union helper struct section from byte array input.
-        /// </summary>
+        /// <summary>Helper for filling a 32-bit byte union helper struct section from byte array input.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyInputBytes32(out ByteUnionBase32 unionBytes, byte[] inputBytes, int offset)
         {
@@ -105,9 +95,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Helper for filling an array of 4 bytes from a 32-bit byte union helper struct section.
-        /// </summary>
+        /// <summary>Helper for filling an array of 4 bytes from a 32-bit byte union helper struct section.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyOutputBytes32(in ByteUnionBase32 unionBytes, byte[] outputBytes, int offset)
         {
@@ -137,9 +125,7 @@ namespace FreneticUtilities.FreneticToolkit
             };
         }
 
-        /// <summary>
-        /// Helper for filling a 64-bit byte union helper struct section from byte array input.
-        /// </summary>
+        /// <summary>Helper for filling a 64-bit byte union helper struct section from byte array input.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyInputBytes64(out ByteUnionBase64 unionBytes, byte[] inputBytes) // TODO: Span<byte>?
         {
@@ -156,9 +142,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Helper for filling a 64-bit byte union helper struct section from byte array input.
-        /// </summary>
+        /// <summary>Helper for filling a 64-bit byte union helper struct section from byte array input.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyInputBytes64(out ByteUnionBase64 unionBytes, byte[] inputBytes, int offset)
         {
@@ -176,9 +160,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Helper for filling an array of 8 bytes from a 64-bit byte union helper struct section.
-        /// </summary>
+        /// <summary>Helper for filling an array of 8 bytes from a 64-bit byte union helper struct section.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyOutputBytes64(in ByteUnionBase64 unionBytes, byte[] outputBytes, int offset)
         {
@@ -797,9 +779,7 @@ namespace FreneticUtilities.FreneticToolkit
         #endregion
 
         #region inter-conversion
-        /// <summary>
-        /// Converts a 64-bit unsigned long integer to a 64-bit double-width floating point number.
-        /// </summary>
+        /// <summary>Converts a 64-bit unsigned long integer to a 64-bit double-width floating point number.</summary>
         /// <param name="inputUlong">The input ulong.</param>
         /// <returns>The output double64.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -813,9 +793,7 @@ namespace FreneticUtilities.FreneticToolkit
             }
         }
 
-        /// <summary>
-        /// Converts a 64-bit double-width floating point number to a 64-bit unsigned long integer.
-        /// </summary>
+        /// <summary>Converts a 64-bit double-width floating point number to a 64-bit unsigned long integer.</summary>
         /// <param name="inputDouble">The input double64.</param>
         /// <returns>The output ulong64.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

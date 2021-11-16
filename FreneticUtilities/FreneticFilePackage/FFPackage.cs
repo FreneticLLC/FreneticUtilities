@@ -15,14 +15,10 @@ using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticFilePackage
 {
-    /// <summary>
-    /// The centerpoint class for the Frenetic File Package system. Handles a single file package.
-    /// </summary>
+    /// <summary>The centerpoint class for the Frenetic File Package system. Handles a single file package.</summary>
     public class FFPackage
     {
-        /// <summary>
-        /// Construct a <see cref="FFPackage"/> from a data stream. Generally a <see cref="FileStream"/> is the stream type to use.
-        /// </summary>
+        /// <summary>Construct a <see cref="FFPackage"/> from a data stream. Generally a <see cref="FileStream"/> is the stream type to use.</summary>
         /// <param name="dataStream">The stream.</param>
         /// <param name="warning">An action to give warnings. Can be null if warnings should be ignored.</param>
         public FFPackage(Stream dataStream, Action<string> warning)
@@ -31,7 +27,7 @@ namespace FreneticUtilities.FreneticFilePackage
             ReadHeadersIn(warning);
             Internal.AccessLock = new LockObject();
         }
-        
+
         private void ReadHeadersIn(Action<string> warning)
         {
             FileStream.Seek(0, SeekOrigin.Begin);
@@ -126,40 +122,26 @@ namespace FreneticUtilities.FreneticFilePackage
             return value;
         }
 
-        /// <summary>
-        /// The internal data for this <see cref="FFPackage"/>.
-        /// </summary>
+        /// <summary>The internal data for this <see cref="FFPackage"/>.</summary>
         public struct InternalData
         {
-            /// <summary>
-            /// Where file data starts at in the backing stream.
-            /// </summary>
+            /// <summary>Where file data starts at in the backing stream.</summary>
             public long FileDataStart;
 
-            /// <summary>
-            /// The multi-threaded safety access lock object.
-            /// </summary>
+            /// <summary>The multi-threaded safety access lock object.</summary>
             public LockObject AccessLock;
         }
 
-        /// <summary>
-        /// The internal data for this <see cref="FFPackage"/>.
-        /// </summary>
+        /// <summary>The internal data for this <see cref="FFPackage"/>.</summary>
         public InternalData Internal;
 
-        /// <summary>
-        /// The backing data stream.
-        /// </summary>
+        /// <summary>The backing data stream.</summary>
         public Stream FileStream;
 
-        /// <summary>
-        /// A mapping of all files contained within the <see cref="FFPackage"/>.
-        /// </summary>
+        /// <summary>A mapping of all files contained within the <see cref="FFPackage"/>.</summary>
         public Dictionary<string, FFPFile> Files;
 
-        /// <summary>
-        /// The root <see cref="FFPFolder"/> of this <see cref="FFPackage"/>.
-        /// </summary>
+        /// <summary>The root <see cref="FFPFolder"/> of this <see cref="FFPackage"/>.</summary>
         public FFPFolder RootFolder;
 
         /// <summary>
@@ -206,9 +188,7 @@ namespace FreneticUtilities.FreneticFilePackage
             }
         }
 
-        /// <summary>
-        /// Gets the number of files in this <see cref="FFPackage"/>.
-        /// </summary>
+        /// <summary>Gets the number of files in this <see cref="FFPackage"/>.</summary>
         public int FileCount
         {
             get

@@ -12,14 +12,10 @@ using FreneticUtilities.FreneticExtensions;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
-    /// <summary>
-    /// Represents a FreneticDataSyntax section or file.
-    /// </summary>
+    /// <summary>Represents a FreneticDataSyntax section or file.</summary>
     public class FDSSection
     {
-        /// <summary>
-        /// Constructs the FDS Section from textual data.
-        /// </summary>
+        /// <summary>Constructs the FDS Section from textual data.</summary>
         /// <param name="contents">The contents of the data file.</param>
         /// <exception cref="FDSInputException">If parsing fails.</exception>
         public FDSSection(string contents)
@@ -27,17 +23,13 @@ namespace FreneticUtilities.FreneticDataSyntax
             FDSParser.Parse(contents, this);
         }
 
-        /// <summary>
-        /// Constructs the FDS section from no data, preparing it for usage as a new section.
-        /// </summary>
+        /// <summary>Constructs the FDS section from no data, preparing it for usage as a new section.</summary>
         public FDSSection()
         {
             // Do nothing, we're init'd enough!
         }
 
-        /// <summary>
-        /// All data contained by this section.
-        /// </summary>
+        /// <summary>All data contained by this section.</summary>
         public Dictionary<string, FDSData> Data = new Dictionary<string, FDSData>();
 
         /// <summary>
@@ -46,9 +38,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// </summary>
         public Dictionary<string, FDSData> DataLowered = new Dictionary<string, FDSData>();
 
-        /// <summary>
-        /// Comments at the end of the section (usually only on the file root section).
-        /// </summary>
+        /// <summary>Comments at the end of the section (usually only on the file root section).</summary>
         public List<string> PostComments = new List<string>();
 
         /// <summary>
@@ -58,17 +48,13 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// </summary>
         public char SectionPathSplit = FDSUtility.DefaultSectionPathSplit;
 
-        /// <summary>
-        /// Returns a boolean indicating whether the section is empty.
-        /// </summary>
+        /// <summary>Returns a boolean indicating whether the section is empty.</summary>
         public bool IsEmpty()
         {
             return Data.IsEmpty();
         }
 
-        /// <summary>
-        /// Returns the set of all keys at the root of this section.
-        /// </summary>
+        /// <summary>Returns the set of all keys at the root of this section.</summary>
         /// <returns>All keys.</returns>
         public IEnumerable<string> GetRootKeys()
         {
@@ -305,9 +291,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             sec.SetRootData(key[(lind + 1)..], data);
         }
 
-        /// <summary>
-        /// Defaults data to the section (IE, sets it if not present).
-        /// </summary>
+        /// <summary>Defaults data to the section (IE, sets it if not present).</summary>
         /// <param name="key">The key to set data from.</param>
         /// <param name="input">The key to set data to.</param>
         public void Default(string key, object input)
@@ -315,9 +299,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             DefaultData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = new List<string>() });
         }
 
-        /// <summary>
-        /// Defaults data to the section (IE, sets it if not present).
-        /// </summary>
+        /// <summary>Defaults data to the section (IE, sets it if not present).</summary>
         /// <param name="key">The key to set data from.</param>
         /// <param name="data">The key to set data to.</param>
         public void DefaultData(string key, FDSData data)
@@ -344,9 +326,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
         }
 
-        /// <summary>
-        /// Checks if a key exists in the FDS section.
-        /// </summary>
+        /// <summary>Checks if a key exists in the FDS section.</summary>
         /// <param name="key">The key to check for.</param>
         /// <returns>Whether the key is present.</returns>
         public bool HasKey(string key)
@@ -354,9 +334,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return GetData(key) != null;
         }
 
-        /// <summary>
-        /// Checks if a key exists in the root of the FDS section.
-        /// </summary>
+        /// <summary>Checks if a key exists in the root of the FDS section.</summary>
         /// <param name="key">The key to check for.</param>
         /// <returns>Whether the key is present.</returns>
         public bool HasRootKey(string key)
@@ -364,9 +342,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return GetRootData(key) != null;
         }
 
-        /// <summary>
-        /// Checks if a case-insensitive key exists in the FDS section.
-        /// </summary>
+        /// <summary>Checks if a case-insensitive key exists in the FDS section.</summary>
         /// <param name="key">The key to check for.</param>
         /// <returns>Whether the key is present.</returns>
         public bool HasKeyLowered(string key)
@@ -374,9 +350,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return GetDataLowered(key) != null;
         }
 
-        /// <summary>
-        /// Checks if a case-insensitive key exists in the root of the FDS section.
-        /// </summary>
+        /// <summary>Checks if a case-insensitive key exists in the root of the FDS section.</summary>
         /// <param name="key">The key to check for.</param>
         /// <returns>Whether the key is present.</returns>
         public bool HasRootKeyLowered(string key)
@@ -457,9 +431,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return GetSectionInternal(key.ToLowerFast(), true, true);
         }
 
-        /// <summary>
-        /// Gets a sub-section of this FDS section.
-        /// </summary>
+        /// <summary>Gets a sub-section of this FDS section.</summary>
         /// <param name="key">The key of the section.</param>
         /// <param name="allowNull">Whether to allow null returns, otherwise enforce the section's existence. If true, can throw an FDSInputException!</param>
         /// <param name="lowered">Whether to read lowercase section names. If set, expects lowercased input key!</param>
@@ -497,9 +469,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return current;
         }
 
-        /// <summary>
-        /// Sets data direct on the root level.
-        /// </summary>
+        /// <summary>Sets data direct on the root level.</summary>
         /// <param name="key">The key to set data to.</param>
         /// <param name="data">The data to read.</param>
         public void SetRootData(string key, FDSData data)
@@ -523,9 +493,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             return null;
         }
 
-        /// <summary>
-        /// Removes data direct from the root level.
-        /// </summary>
+        /// <summary>Removes data direct from the root level.</summary>
         /// <param name="key">The key to remove.</param>
         public void RemoveRoot(string key)
         {
@@ -533,9 +501,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             DataLowered.Remove(key.ToLowerFast());
         }
 
-        /// <summary>
-        /// Removes data from the section.
-        /// </summary>
+        /// <summary>Removes data from the section.</summary>
         /// <param name="key">The key to remove.</param>
         public void Remove(string key)
         {

@@ -11,15 +11,11 @@ using System.Text;
 
 namespace FreneticUtilities.FreneticDataSyntax
 {
-    /// <summary>
-    /// Represents an exception thrown while inputting data to an FDS section.
-    /// </summary>
+    /// <summary>Represents an exception thrown while inputting data to an FDS section.</summary>
     [Serializable]
     public class FDSInputException : Exception
     {
-        /// <summary>
-        /// Construct the FDS exception.
-        /// </summary>
+        /// <summary>Construct the FDS exception.</summary>
         /// <param name="message">The message explaining the error.</param>
         public FDSInputException(string message)
             : base(message)

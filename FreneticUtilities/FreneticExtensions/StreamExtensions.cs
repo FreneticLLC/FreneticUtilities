@@ -13,14 +13,10 @@ using System.Text;
 
 namespace FreneticUtilities.FreneticExtensions
 {
-    /// <summary>
-    /// Helper extensions for <see cref="Stream"/>.
-    /// </summary>
+    /// <summary>Helper extensions for <see cref="Stream"/>.</summary>
     public static class StreamExtensions
     {
-        /// <summary>
-        /// Returns all the lines of text within a readable stream.
-        /// </summary>
+        /// <summary>Returns all the lines of text within a readable stream.</summary>
         /// <param name="input">The input stream.</param>
         /// <returns>All lines of text, separated.</returns>
         public static IEnumerable<string> AllLinesOfText(this Stream input)

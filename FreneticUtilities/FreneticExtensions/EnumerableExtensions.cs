@@ -13,14 +13,10 @@ using System.Threading.Tasks;
 
 namespace FreneticUtilities.FreneticExtensions
 {
-    /// <summary>
-    /// Helper extensions for <see cref="IEnumerable{T}"/>, <see cref="IList{T}"/>, and related types.
-    /// </summary>
+    /// <summary>Helper extensions for <see cref="IEnumerable{T}"/>, <see cref="IList{T}"/>, and related types.</summary>
     public static class EnumerableExtensions
     {
-        /// <summary>
-        /// Generates a new dictionary with keys and values swapped around.
-        /// </summary>
+        /// <summary>Generates a new dictionary with keys and values swapped around.</summary>
         /// <typeparam name="TKey">The original key type.</typeparam>
         /// <typeparam name="TValue">The original value type.</typeparam>
         /// <param name="dictionary">The original dictionary.</param>
@@ -133,9 +129,7 @@ namespace FreneticUtilities.FreneticExtensions
             }
         }
 
-        /// <summary>
-        /// Stops an enumerable processing when a function returns true for an item.
-        /// </summary>
+        /// <summary>Stops an enumerable processing when a function returns true for an item.</summary>
         /// <typeparam name="T">List item type.</typeparam>
         /// <param name="list">Item list.</param>
         /// <param name="stopFunction">Function that controls when to stop (true return = stop, false return = continue).</param>
@@ -152,9 +146,7 @@ namespace FreneticUtilities.FreneticExtensions
             }
         }
 
-        /// <summary>
-        /// Gets a value from a Dictionary, or creates a new value (and adds it to the dictionary).
-        /// </summary>
+        /// <summary>Gets a value from a Dictionary, or creates a new value (and adds it to the dictionary).</summary>
         /// <typeparam name="TKey">The key type.</typeparam>
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="dictionary">The dictionary.</param>
@@ -172,9 +164,7 @@ namespace FreneticUtilities.FreneticExtensions
             return created;
         }
 
-        /// <summary>
-        /// Converts a <see cref="System.Collections.IEnumerator"/> to a generic Enumerable.
-        /// </summary>
+        /// <summary>Converts a <see cref="System.Collections.IEnumerator"/> to a generic Enumerable.</summary>
         /// <typeparam name="T">The expected Enumerable type.</typeparam>
         /// <param name="enumerator">The original Enumerator.</param>
         /// <returns>The enumerable.</returns>
@@ -186,9 +176,7 @@ namespace FreneticUtilities.FreneticExtensions
             }
         }
 
-        /// <summary>
-        /// Converts an <see cref="IEnumerator{T}"/> to an Enumerable.
-        /// </summary>
+        /// <summary>Converts an <see cref="IEnumerator{T}"/> to an Enumerable.</summary>
         /// <typeparam name="T">The expected Enumerable type.</typeparam>
         /// <param name="enumerator">The original Enumerator.</param>
         /// <returns>The enumerable.</returns>
@@ -200,9 +188,7 @@ namespace FreneticUtilities.FreneticExtensions
             }
         }
 
-        /// <summary>
-        /// Flattens a list of lists of <typeparamref name="T"/> to a list of <typeparamref name="T"/>.
-        /// </summary>
+        /// <summary>Flattens a list of lists of <typeparamref name="T"/> to a list of <typeparamref name="T"/>.</summary>
         /// <typeparam name="T">The expected Enumerable type.</typeparam>
         /// <param name="list">The list of lists.</param>
         /// <returns>The flattened list.</returns>
@@ -245,9 +231,7 @@ namespace FreneticUtilities.FreneticExtensions
             return result;
         }
 
-        /// <summary>
-        /// Returns whether a stream is empty. Invert of "Any()" call.
-        /// </summary>
+        /// <summary>Returns whether a stream is empty. Invert of "Any()" call.</summary>
         /// <typeparam name="T">The stream type.</typeparam>
         /// <param name="inp">The input stream.</param>
         /// <returns>Whether the stream is empty.</returns>
