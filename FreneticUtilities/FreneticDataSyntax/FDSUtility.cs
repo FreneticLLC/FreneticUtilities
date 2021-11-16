@@ -131,12 +131,12 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// <summary>
             /// Quick-matcher for text codes that need to be escaped by <see cref="Escape(string)"/>.
             /// </summary>
-            public static AsciiMatcher NeedsEscapingMatcher = new AsciiMatcher("\\\t\n\r");
+            public static AsciiMatcher NeedsEscapingMatcher = new("\\\t\n\r");
 
             /// <summary>
             /// Quick-matcher for text codes that need to be escaped by <see cref="EscapeKey(string)"/>.
             /// </summary>
-            public static AsciiMatcher NeedsKeyEscapingMatcher = new AsciiMatcher(".:=");
+            public static AsciiMatcher NeedsKeyEscapingMatcher = new(".:=");
         }
 
         /// <summary>
