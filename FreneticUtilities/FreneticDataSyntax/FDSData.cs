@@ -37,7 +37,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>The list of comments preceding this data piece.</summary>
-        public List<string> PrecedingComments = new List<string>();
+        public List<string> PrecedingComments = new();
 
         /// <summary>Adds a preceding comment to this data piece.</summary>
         /// <param name="comment">The comment to add.</param>
@@ -108,7 +108,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             get
             {
                 List<FDSData> dat = AsDataList;
-                List<string> newlist = new List<string>(dat.Count);
+                List<string> newlist = new(dat.Count);
                 for (int i = 0; i < dat.Count; i++)
                 {
                     newlist.Add(dat[i].Internal.ToString());
@@ -337,7 +337,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         {
             if (Internal is List<FDSData> list)
             {
-                StringBuilder outputBuilder = new StringBuilder();
+                StringBuilder outputBuilder = new();
                 foreach (FDSData dat in list)
                 {
                     outputBuilder.Append(dat.Outputable()).Append('|');
@@ -370,7 +370,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <summary>Implements <see cref="Object.Equals(object)"/> by redirecting to <see cref="Internal"/></summary>
         public override bool Equals(object obj)
         {
-            if (!(obj is FDSData data))
+            if (obj is not FDSData data)
             {
                 return false;
             }

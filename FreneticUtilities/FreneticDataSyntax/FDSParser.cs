@@ -21,15 +21,15 @@ namespace FreneticUtilities.FreneticDataSyntax
     public static class FDSParser
     {
         /// <summary>Matcher for list prefix symbols (dash, equals, greater than).</summary>
-        public static AsciiMatcher ListPrefixMatcher = new AsciiMatcher("-=>");
+        public static AsciiMatcher ListPrefixMatcher = new("-=>");
 
         /// <summary>Matcher for symbols that separate a key from a value.</summary>
-        public static AsciiMatcher KeySeparatorMatcher = new AsciiMatcher(":=");
+        public static AsciiMatcher KeySeparatorMatcher = new(":=");
 
         /// <summary>Helper for <see cref="ParseSection(string[], int, int, int, out int, FDSSection)"/> to parse a list.</summary>
         public static void ParseList(string[] allLines, int startLine, int skip, int spacing, out int endLine, List<FDSData> outList)
         {
-            List<string> currentComments = new List<string>();
+            List<string> currentComments = new();
             endLine = startLine;
             for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
             {
@@ -87,7 +87,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 if (ListPrefixMatcher.IsMatch(subSymbol))
                 {
                     string lineText = valueText[1..].TrimStart(' ');
-                    List<FDSData> outList = new List<FDSData>
+                    List<FDSData> outList = new()
                     {
                         ParseSubListValue(subSymbol, lineText, allLines, startLine, spacing, out endLine)
                     };
@@ -101,7 +101,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 string key = valueText[..keySeparatorIndex];
                 FDSData valueData;
-                FDSSection outSection = new FDSSection();
+                FDSSection outSection = new();
                 if (keySeparatorIndex == valueText.Length - 1)
                 {
                     if (valueText[keySeparatorIndex] == '=')
@@ -170,13 +170,13 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 if (spaces > spacing)
                 {
-                    FDSSection subSection = new FDSSection();
+                    FDSSection subSection = new();
                     ParseSection(allLines, startLine, skip, spaces, out endLine, subSection);
                     return new FDSData(subSection);
                 }
                 if (ListPrefixMatcher.IsMatch(firstSymbol))
                 {
-                    List<FDSData> subList = new List<FDSData>();
+                    List<FDSData> subList = new();
                     ParseList(allLines, startLine + skip, 0, spacing, out endLine, subList);
                     return new FDSData(subList);
                 }
@@ -194,7 +194,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="section">The section to store into.</param>
         public static void ParseSection(string[] allLines, int startLine, int skip, int spacing, out int endLine, FDSSection section)
         {
-            List<string> currentComments = new List<string>();
+            List<string> currentComments = new();
             endLine = startLine;
             for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
             {

@@ -62,10 +62,10 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
 
             /// <summary>Static map of C# class type to the internal executable data needed to process it.</summary>
-            public static ConcurrentDictionary<Type, AutoConfigData> TypeMap = new ConcurrentDictionary<Type, AutoConfigData>();
+            public static ConcurrentDictionary<Type, AutoConfigData> TypeMap = new();
 
             /// <summary>Locker for generating new config data.</summary>
-            public static LockObject GenerationLock = new LockObject();
+            public static LockObject GenerationLock = new();
 
             /// <summary>A reference to the <see cref="AutoConfiguration.Save"/> method.</summary>
             public static MethodInfo ConfigSaveMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Save));
@@ -116,14 +116,14 @@ namespace FreneticUtilities.FreneticDataSyntax
             public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor(Array.Empty<Type>());
 
             /// <summary>A mapping of core object types to the method that converts <see cref="FDSData"/> to them.</summary>
-            public static Dictionary<Type, DataConverter> FDSDataFieldsByType = new Dictionary<Type, DataConverter>(64);
+            public static Dictionary<Type, DataConverter> FDSDataFieldsByType = new(64);
 
             /// <summary>Init required static data.</summary>
             static Internal()
             {
                 static void register(Type type, string propertyName)
                 {
-                    DataConverter converter = new DataConverter()
+                    DataConverter converter = new()
                     {
                         Getter = typeof(FDSData).GetProperty(propertyName).GetMethod,
                     };
@@ -159,10 +159,10 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
 
             /// <summary>A mapping of types to methods that load a list of that type from a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
-            public static Dictionary<Type, MethodInfo> ListLoaders = new Dictionary<Type, MethodInfo>(32);
+            public static Dictionary<Type, MethodInfo> ListLoaders = new(32);
 
             /// <summary>A mapping of types to methods that save a list of that type to a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
-            public static Dictionary<Type, MethodInfo> ListSavers = new Dictionary<Type, MethodInfo>(32);
+            public static Dictionary<Type, MethodInfo> ListSavers = new(32);
 
             /// <summary>
             /// Gets or creates a method that loads a list of the specified type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
@@ -235,7 +235,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                     listAddMethod = FDSDataListAddMethod;
                     outListConstructor = FDSDataListConstructor;
                 }
-                DynamicMethod genMethod = new DynamicMethod("ListConvert", outListType, new Type[] { inListType }, typeof(AutoConfiguration).Module, true);
+                DynamicMethod genMethod = new("ListConvert", outListType, new Type[] { inListType }, typeof(AutoConfiguration).Module, true);
                 ILGenerator targetILGen = genMethod.GetILGenerator();
                 targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=paramInList)
                 if (doLoad)
@@ -339,13 +339,13 @@ namespace FreneticUtilities.FreneticDataSyntax
                     result = new AutoConfigData();
                     TypeMap[type] = result;
                     // FDSSection Save(AutoConfiguration config) {
-                    DynamicMethod saveMethod = new DynamicMethod("Save", typeof(FDSSection), new Type[] { typeof(AutoConfiguration) }, typeof(AutoConfiguration).Module, true);
+                    DynamicMethod saveMethod = new("Save", typeof(FDSSection), new Type[] { typeof(AutoConfiguration) }, typeof(AutoConfiguration).Module, true);
                     ILGenerator saveILGen = saveMethod.GetILGenerator();
                     LocalBuilder saveOutputLocal = saveILGen.DeclareLocal(typeof(FDSSection)); // FDSSection output;
                     saveILGen.Emit(OpCodes.Newobj, SectionConstructor); // output = new FDSSection();
                     saveILGen.Emit(OpCodes.Stloc, saveOutputLocal);
                     // void Load(AutoConfiguration config, FDSSection section) {
-                    DynamicMethod loadMethod = new DynamicMethod("Load", typeof(void), new Type[] { typeof(AutoConfiguration), typeof(FDSSection) }, typeof(AutoConfiguration).Module, true);
+                    DynamicMethod loadMethod = new("Load", typeof(void), new Type[] { typeof(AutoConfiguration), typeof(FDSSection) }, typeof(AutoConfiguration).Module, true);
                     ILGenerator loadILGen = loadMethod.GetILGenerator();
                     foreach (FieldInfo field in type.GetRuntimeFields())
                     {

@@ -30,16 +30,16 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>All data contained by this section.</summary>
-        public Dictionary<string, FDSData> Data = new Dictionary<string, FDSData>();
+        public Dictionary<string, FDSData> Data = new();
 
         /// <summary>
         /// Lowercase-stored data for this section.
         /// For lookup assistance only.
         /// </summary>
-        public Dictionary<string, FDSData> DataLowered = new Dictionary<string, FDSData>();
+        public Dictionary<string, FDSData> DataLowered = new();
 
         /// <summary>Comments at the end of the section (usually only on the file root section).</summary>
-        public List<string> PostComments = new List<string>();
+        public List<string> PostComments = new();
 
         /// <summary>
         /// The section path splitter for this section.
@@ -287,7 +287,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 throw new FDSInputException("Invalid SetData key: Ends in a path splitter!");
             }
 
-            FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
+            FDSSection sec = GetSectionInternal(key[..lind], false, false);
             sec.SetRootData(key[(lind + 1)..], data);
         }
 
@@ -318,7 +318,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 throw new FDSInputException("Invalid SetData key: Ends in a path splitter!");
             }
 
-            FDSSection sec = GetSectionInternal(key.Substring(0, lind), false, false);
+            FDSSection sec = GetSectionInternal(key[..lind], false, false);
             string k = key[(lind + 1)..];
             if (sec.GetRootData(k) == null)
             {
@@ -375,7 +375,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return null;
             }
-            FDSSection sec = GetSection(key.Substring(0, lind));
+            FDSSection sec = GetSection(key[..lind]);
             if (sec == null)
             {
                 return null;
@@ -401,7 +401,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return null;
             }
-            FDSSection sec = GetSectionInternal(key.Substring(0, lind), true, true);
+            FDSSection sec = GetSectionInternal(key[..lind], true, true);
             if (sec == null)
             {
                 return null;
@@ -461,7 +461,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                     {
                         throw new FDSInputException("Key contains non-section contents!");
                     }
-                    FDSSection temp = new FDSSection();
+                    FDSSection temp = new();
                     current.SetRootData(dat[i], new FDSData() { Internal = temp, PrecedingComments = new List<string>() });
                     current = temp;
                 }
@@ -515,7 +515,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             {
                 return;
             }
-            FDSSection sec = GetSection(key.Substring(0, lind));
+            FDSSection sec = GetSection(key[..lind]);
             if (sec == null)
             {
                 return;
@@ -542,7 +542,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <summary>Helper for <see cref="SaveToString(int, string, bool)"/></summary>
         private void AppendListToString(StringBuilder output, List<FDSData> list, int tabulation, string newline, bool skipFirstTabs)
         {
-            string tabs = new string('\t', tabulation);
+            string tabs = new('\t', tabulation);
             foreach (FDSData cdat in list)
             {
                 foreach (string com in cdat.PrecedingComments)
@@ -597,8 +597,8 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <param name="skipFirstTabs">Whether to skip the first piece of tabulation. Generally false.</param>
         public string SaveToString(int tabulation, string newline, bool skipFirstTabs)
         {
-            string tabs = new string('\t', tabulation);
-            StringBuilder outputBuilder = new StringBuilder(Data.Count * 100);
+            string tabs = new('\t', tabulation);
+            StringBuilder outputBuilder = new(Data.Count * 100);
             foreach (KeyValuePair<string, FDSData> entry in Data)
             {
                 FDSData dat = entry.Value;
