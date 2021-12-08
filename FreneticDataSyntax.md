@@ -109,11 +109,11 @@ Example of an `AutoConfiguration` class:
 
         public string Text = "Wow\nText here!";
 
-        public List<string> StringList = new List<string>() { "alpha", "bravo string", "string number three" };
+        public List<string> StringList = new() { "alpha", "bravo string", "string number three" };
 
-        public List<int> IntList = new List<int>() { 1, 7, 12, 42, 96 };
+        public List<int> IntList = new() { 1, 7, 12, 42, 96 };
 
-        public List<short> ShortList = new List<short>() { 5 };
+        public List<short> ShortList = new() { 5 };
 
         public class SubClass : AutoConfiguration
         {
@@ -123,7 +123,7 @@ Example of an `AutoConfiguration` class:
             public byte[] WeirdArray = new byte[] { 7, 12, 42 };
         }
 
-        public SubClass SubData = new SubClass();
+        public SubClass SubData = new();
     }
 ```
 

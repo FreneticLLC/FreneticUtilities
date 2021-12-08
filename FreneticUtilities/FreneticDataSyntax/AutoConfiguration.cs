@@ -360,11 +360,18 @@ namespace FreneticUtilities.FreneticDataSyntax
                         if (typeof(AutoConfiguration).IsAssignableFrom(field.FieldType))
                         {
                             saveILGen.Emit(OpCodes.Call, ConfigSaveMethod); // Call config.Save() (stack=output,name,out-data)
+                            // /\ save | load \/
                             loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
                             loadILGen.Emit(OpCodes.Ldfld, field); // load the relevant field (stack=sub-config)
                             loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=sub-config,section)
                             loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=sub-config,section,name)
                             loadILGen.Emit(OpCodes.Call, SectionGetSectionMethod); // Call section.GetSection(name) (stack=sub-config,sub-section)
+                            loadILGen.Emit(OpCodes.Dup); // duplicate the value (stack=sub-config,sub-section,sub-section)
+                            Label afterIfLabel = loadILGen.DefineLabel(); // if (value is null) {
+                            loadILGen.Emit(OpCodes.Brtrue, afterIfLabel); // If the value is non-null, jump to after-the-if, otherwise continue ahead (stack=sub-config,sub-section)
+                            loadILGen.Emit(OpCodes.Pop); // Pop the redundant null off (stack=sub-config)
+                            loadILGen.Emit(OpCodes.Newobj, SectionConstructor); // new FDSSection(); (stack=sub-config,new-section)
+                            loadILGen.MarkLabel(afterIfLabel); // }
                             loadILGen.Emit(OpCodes.Call, ConfigLoadMethod); // Call sub_config.Load(section) (stack now clear)
                         }
                         else
@@ -373,8 +380,18 @@ namespace FreneticUtilities.FreneticDataSyntax
                             loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=config,section)
                             loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=config,section,name)
                             loadILGen.Emit(OpCodes.Call, SectionGetRootDataMethod); // call section.GetRootData(name) (stack=config,data)
+                            loadILGen.Emit(OpCodes.Dup); // duplicate the value (stack=config,data,data)
+                            Label afterIfLabel = loadILGen.DefineLabel(); // if (value is not null) {
+                            loadILGen.Emit(OpCodes.Brfalse, afterIfLabel); // If the value is null, jump to after-the-if, otherwise continue ahead (stack=config,data)
                             EmitTypeConverter(field.FieldType, loadILGen, true); // call the type converter needed (stack=config,out-data)
                             loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
+                            Label afterElseLabel = loadILGen.DefineLabel();
+                            loadILGen.Emit(OpCodes.Br, afterElseLabel); // }
+                            loadILGen.MarkLabel(afterIfLabel); // else {
+                            loadILGen.Emit(OpCodes.Pop); // remove the out-data copy from stack (stack=config)
+                            loadILGen.Emit(OpCodes.Pop); // remove the config from stack (stack now clear)
+                            loadILGen.MarkLabel(afterElseLabel); // }
+                            // /\ load | save \/
                             EmitTypeConverter(field.FieldType, saveILGen, false); // call the type converter needed (stack=output,name,out-data-cleaned)
                         }
                         ConfigComment comment = field?.GetCustomAttribute<ConfigComment>();
