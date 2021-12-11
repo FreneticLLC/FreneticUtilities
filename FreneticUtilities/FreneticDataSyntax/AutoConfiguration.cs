@@ -4,6 +4,10 @@
 // See README.md or LICENSE.txt in the FreneticUtilities source root for the contents of the license.
 //
 
+#if DEBUG
+#define VALIDATE
+#endif
+
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -45,10 +49,38 @@ namespace FreneticUtilities.FreneticDataSyntax
             public class AutoConfigData
             {
                 /// <summary>Callable function that saves the config data to an FDS document.</summary>
-                public Func<AutoConfiguration, FDSSection> SaveSection;
+                public Func<AutoConfiguration, bool, FDSSection> SaveSection;
 
                 /// <summary>Callable action that loads the config data from an FDS document.</summary>
                 public Action<AutoConfiguration, FDSSection> LoadSection;
+
+                /// <summary>All fields for this instance, mapped from Name.ToLowerFast() to full field data.</summary>
+                public Dictionary<string, SingleFieldData> Fields = new();
+            }
+
+            /// <summary>Container for important data about a single field in an <see cref="AutoConfiguration"/> class.</summary>
+            public class SingleFieldData
+            {
+                /// <summary>The full name of the field.</summary>
+                public string Name;
+
+                /// <summary>The index of this field for special data arrays.</summary>
+                public int Index;
+
+                /// <summary>The raw C# field reference.</summary>
+                public FieldInfo Field;
+
+                /// <summary>Whether this is a sub-section.</summary>
+                public bool IsSection;
+
+                /// <summary>A function to get the current value of the field.</summary>
+                public Func<AutoConfiguration, object> GetValue;
+
+                /// <summary>A function to set the current value of the field.</summary>
+                public Action<AutoConfiguration, object> SetValue;
+
+                /// <summary>The default value of this field.</summary>
+                public object Default;
             }
 
             /// <summary>Helper class that represents the tools needed to convert <see cref="FDSData"/> to the final output type.</summary>
@@ -67,10 +99,19 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// <summary>Locker for generating new config data.</summary>
             public static LockObject GenerationLock = new();
 
-            /// <summary>A reference to the <see cref="AutoConfiguration.Save"/> method.</summary>
+            /// <summary>A 1-value type array, with the value being <see cref="AutoConfiguration"/>.</summary>
+            public static Type[] AutoConfigArray = new Type[] { typeof(AutoConfiguration) };
+
+            /// <summary>Array of types for input to <see cref="AutoConfigData.SaveSection"/>.</summary>
+            public static Type[] SaveMethodInputTypeArray = new Type[] { typeof(AutoConfiguration), typeof(bool) };
+
+            /// <summary>Array of types for input to <see cref="AutoConfigData.LoadSection"/>.</summary>
+            public static Type[] LoadMethodInputTypeArray = new Type[] { typeof(AutoConfiguration), typeof(FDSSection) };
+
+            /// <summary>A reference to the <see cref="Save"/> method.</summary>
             public static MethodInfo ConfigSaveMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Save));
 
-            /// <summary>A reference to the <see cref="AutoConfiguration.Load"/> method.</summary>
+            /// <summary>A reference to the <see cref="Load"/> method.</summary>
             public static MethodInfo ConfigLoadMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Load));
 
             /// <summary>A reference to the <see cref="FDSSection.SetRootData(string, FDSData)"/> method.</summary>
@@ -114,6 +155,12 @@ namespace FreneticUtilities.FreneticDataSyntax
 
             /// <summary>A reference to the <see cref="List{FDSData}"/> of <see cref="FDSData"/> no-arguments constructor.</summary>
             public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor(Array.Empty<Type>());
+
+            /// <summary>A reference to <see cref="InternalData"/>.</summary>
+            public static FieldInfo AutoConfigurationInternalDataField = typeof(AutoConfiguration).GetField(nameof(InternalData));
+
+            /// <summary>A reference to <see cref="LocalInternal.IsFieldModified"/>.</summary>
+            public static FieldInfo AutoConfigurationModifiedArrayField = typeof(LocalInternal).GetField(nameof(LocalInternal.IsFieldModified));
 
             /// <summary>A mapping of core object types to the method that converts <see cref="FDSData"/> to them.</summary>
             public static Dictionary<Type, DataConverter> FDSDataFieldsByType = new(64);
@@ -159,10 +206,10 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
 
             /// <summary>A mapping of types to methods that load a list of that type from a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
-            public static Dictionary<Type, MethodInfo> ListLoaders = new(32);
+            public static Dictionary<Type, DynamicMethod> ListLoaders = new(32);
 
             /// <summary>A mapping of types to methods that save a list of that type to a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
-            public static Dictionary<Type, MethodInfo> ListSavers = new(32);
+            public static Dictionary<Type, DynamicMethod> ListSavers = new(32);
 
             /// <summary>
             /// Gets or creates a method that loads a list of the specified type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
@@ -170,13 +217,13 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// </summary>
             /// <param name="type">The list type to load to, like typeof 'List&lt;int&gt;'.</param>
             /// <returns>The method that loads to it.</returns>
-            public static MethodInfo GetListLoader(Type type)
+            public static DynamicMethod GetListLoader(Type type)
             {
-                if (ListLoaders.TryGetValue(type, out MethodInfo method))
+                if (ListLoaders.TryGetValue(type, out DynamicMethod method))
                 {
                     return method;
                 }
-                MethodInfo generated = CreateListConverter(type, true);
+                DynamicMethod generated = CreateListConverter(type, true);
                 ListLoaders[type] = generated;
                 return generated;
             }
@@ -187,13 +234,13 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// </summary>
             /// <param name="type">The list type to save from, like typeof 'List&lt;int&gt;'.</param>
             /// <returns>The method that saves from it.</returns>
-            public static MethodInfo GetListSaver(Type type)
+            public static DynamicMethod GetListSaver(Type type)
             {
-                if (ListSavers.TryGetValue(type, out MethodInfo method))
+                if (ListSavers.TryGetValue(type, out DynamicMethod method))
                 {
                     return method;
                 }
-                MethodInfo generated = CreateListConverter(type, false);
+                DynamicMethod generated = CreateListConverter(type, false);
                 ListSavers[type] = generated;
                 return generated;
             }
@@ -202,7 +249,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// <param name="type">The type to convert to/from.</param>
             /// <param name="doLoad">True indicates load, false indicates save.</param>
             /// <returns>The generated method.</returns>
-            public static MethodInfo CreateListConverter(Type type, bool doLoad)
+            public static DynamicMethod CreateListConverter(Type type, bool doLoad)
             {
                 Type listSubType = type.GetGenericArguments()[0];
                 Type inListType, outListType, inSubType, outSubType, enumeratorType;
@@ -236,7 +283,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                     outListConstructor = FDSDataListConstructor;
                 }
                 DynamicMethod genMethod = new("ListConvert", outListType, new Type[] { inListType }, typeof(AutoConfiguration).Module, true);
-                ILGenerator targetILGen = genMethod.GetILGenerator();
+                ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"ListConvert_{inListType.Name}");
                 targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=paramInList)
                 if (doLoad)
                 {
@@ -295,8 +342,9 @@ namespace FreneticUtilities.FreneticDataSyntax
             /// <param name="type">The type to convert to/from.</param>
             /// <param name="targetILGen">The IL Generator to emit to.</param>
             /// <param name="doLoad">True indicates load, false indicates save.</param>
-            public static void EmitTypeConverter(Type type, ILGenerator targetILGen, bool doLoad)
+            public static void EmitTypeConverter(Type type, ILGeneratorTracker targetILGen, bool doLoad)
             {
+                targetILGen.Comment($"Convert value to {type.FullName}");
                 if (FDSDataFieldsByType.TryGetValue(type, out DataConverter converter))
                 {
                     if (doLoad)
@@ -325,6 +373,90 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
             }
 
+            /// <summary>Types that can be duplicated by just returning the same instance.</summary>
+            public static HashSet<Type> StandardTypes = new() {
+                typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(short), typeof(ushort),
+                typeof(byte), typeof(sbyte), typeof(char),
+                typeof(float), typeof(double), typeof(decimal),
+                typeof(bool), typeof(string) };
+
+            /// <summary>Duplicates common object types properly automatically.</summary>
+            public static object Duplicate(object origObj)
+            {
+                // This method is dirty, but only has to be called once per field per AutoConfig, during startup, so isn't *too* perf relevant.
+                Type t = origObj.GetType();
+                if (StandardTypes.Contains(t))
+                {
+                    return origObj;
+                }
+                if (origObj is AutoConfiguration)
+                {
+                    return null;
+                }
+                if (origObj is IDictionary dict)
+                {
+                    IDictionary result = t.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>()) as IDictionary;
+                    foreach (DictionaryEntry subPair in dict)
+                    {
+                        result.Add(Duplicate(subPair.Key), Duplicate(subPair.Value));
+                    }
+                    return result;
+                }
+                else if (origObj is Array array)
+                {
+                    Array newArr = Array.CreateInstance(t.GetElementType(), array.Length);
+                    for (int i = 0; i < newArr.Length; i++)
+                    {
+                        newArr.SetValue(Duplicate(array.GetValue(i)), i);
+                    }
+                    return newArr;
+                }
+                else if (origObj is IList list)
+                {
+                    IList result = t.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>()) as IList;
+                    foreach (object subObj in list)
+                    {
+                        result.Add(Duplicate(subObj));
+                    }
+                    return result;
+                }
+                else if (origObj is ICollection)
+                {
+                    List<FDSData> gennedList = GetListSaver(t).Invoke(null, new object[] { origObj }) as List<FDSData>;
+                    return GetListLoader(t).Invoke(null, new object[] { gennedList });
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Cannot duplicate object of type {t.FullName} - type not supported for AutoConfiguration");
+                }
+            }
+
+            /// <summary>Generates a getter for <see cref="SingleFieldData.GetValue"/>.</summary>
+            public static Func<AutoConfiguration, object> GenerateValueGetter(FieldInfo field)
+            {
+                DynamicMethod genMethod = new($"Config{field.Name}ValueGetter", typeof(object), AutoConfigArray, typeof(AutoConfiguration).Module, true);
+                ILGenerator targetILGen = genMethod.GetILGenerator();
+                targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=config)
+                targetILGen.Emit(OpCodes.Ldfld, field); // Load the field (stack=field)
+                targetILGen.Emit(OpCodes.Ret); // Return the value (stack clear)
+                return genMethod.CreateDelegate<Func<AutoConfiguration, object>>();
+            }
+
+            /// <summary>Generates a setter for <see cref="SingleFieldData.SetValue"/>.</summary>
+            public static Action<AutoConfiguration, object> GenerateValueSetter(FieldInfo field)
+            {
+                DynamicMethod genMethod = new($"Config{field.Name}ValueSetter", typeof(void), new Type[] { typeof(AutoConfiguration), typeof(object) }, typeof(AutoConfiguration).Module, true);
+                ILGenerator targetILGen = genMethod.GetILGenerator();
+                targetILGen.Emit(OpCodes.Ldarg_0); // Load the config input parameter (stack=config)
+                targetILGen.Emit(OpCodes.Ldarg_1); // Load the value input parameter (stack=config, value)
+                targetILGen.Emit(OpCodes.Stfld, field); // Store value to the field (stack clear)
+                targetILGen.Emit(OpCodes.Ret); // Return
+                return genMethod.CreateDelegate<Action<AutoConfiguration, object>>();
+            }
+
+            /// <summary>Special helper bool tracker to avoid duplicate generation calls.</summary>
+            public static bool AntiDuplicate;
+
             /// <summary>Generate the raw internal data for the specific config class type.</summary>
             /// <param name="type">The config class type.</param>
             /// <returns>The config data.</returns>
@@ -336,64 +468,114 @@ namespace FreneticUtilities.FreneticDataSyntax
                     {
                         return result;
                     }
+                    if (AntiDuplicate)
+                    {
+                        return null;
+                    }
+                    AutoConfiguration referenceDefaults;
+                    try
+                    {
+                        AntiDuplicate = true;
+                        referenceDefaults = type.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>()) as AutoConfiguration;
+                    }
+                    finally
+                    {
+                        AntiDuplicate = false;
+                    }
                     result = new AutoConfigData();
                     TypeMap[type] = result;
                     // FDSSection Save(AutoConfiguration config) {
-                    DynamicMethod saveMethod = new("Save", typeof(FDSSection), new Type[] { typeof(AutoConfiguration) }, typeof(AutoConfiguration).Module, true);
-                    ILGenerator saveILGen = saveMethod.GetILGenerator();
+                    DynamicMethod saveMethod = new("Save", typeof(FDSSection), SaveMethodInputTypeArray, typeof(AutoConfiguration).Module, true);
+                    ILGeneratorTracker saveILGen = new(saveMethod.GetILGenerator(), saveMethod, $"Save_{type.Name}");
                     LocalBuilder saveOutputLocal = saveILGen.DeclareLocal(typeof(FDSSection)); // FDSSection output;
                     saveILGen.Emit(OpCodes.Newobj, SectionConstructor); // output = new FDSSection();
                     saveILGen.Emit(OpCodes.Stloc, saveOutputLocal);
                     // void Load(AutoConfiguration config, FDSSection section) {
-                    DynamicMethod loadMethod = new("Load", typeof(void), new Type[] { typeof(AutoConfiguration), typeof(FDSSection) }, typeof(AutoConfiguration).Module, true);
-                    ILGenerator loadILGen = loadMethod.GetILGenerator();
+                    DynamicMethod loadMethod = new("Load", typeof(void), LoadMethodInputTypeArray, typeof(AutoConfiguration).Module, true);
+                    ILGeneratorTracker loadILGen = new(loadMethod.GetILGenerator(), loadMethod, $"Load_{type.Name}");
+                    LocalBuilder loadgen_SectionLocal = loadILGen.DeclareLocal(typeof(FDSSection));
+                    LocalBuilder loadgen_DataLocal = loadILGen.DeclareLocal(typeof(FDSData));
+                    int fieldIndex = 0;
+                    static void genLoadMarkModified(ILGeneratorTracker loadILGen, SingleFieldData fieldData)
+                    {
+                        loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
+                        loadILGen.Emit(OpCodes.Ldfld, AutoConfigurationInternalDataField); // load the internal data field (stack=internal-data)
+                        loadILGen.Emit(OpCodes.Ldfld, AutoConfigurationModifiedArrayField); // Load the modified array reference (stack=modified-array)
+                        loadILGen.Emit(OpCodes.Ldc_I4, fieldData.Index); // Loads the field index integer (stack=modified-array,index)
+                        loadILGen.Emit(OpCodes.Ldc_I4_1); // Loads a 'true' boolean (stack=modified-array,index,true)
+                        loadILGen.Emit(OpCodes.Stelem_I4); // Store the true into the array (stack now clear)
+                    }
                     foreach (FieldInfo field in type.GetRuntimeFields())
                     {
-                        if (field.IsStatic || field.FieldType == typeof(AutoConfigData))
+                        if (field.IsStatic || field.FieldType == typeof(LocalInternal))
                         {
                             continue;
                         }
+                        SingleFieldData fieldData = new()
+                        {
+                            Name = field.Name,
+                            Index = fieldIndex++,
+                            Field = field,
+                            Default = Duplicate(field.GetValue(referenceDefaults)),
+                            GetValue = GenerateValueGetter(field),
+                            SetValue = GenerateValueSetter(field),
+                            IsSection = typeof(AutoConfiguration).IsAssignableFrom(field.FieldType)
+                        };
+                        result.Fields.Add(field.Name.ToLowerFast(), fieldData);
+                        saveILGen.Comment($"Begin save field {field.Name}");
+                        loadILGen.Comment($"Begin load field {field.Name}");
+                        saveILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the input config) (stack=input)
+                        saveILGen.Emit(OpCodes.Ldfld, AutoConfigurationInternalDataField); // load the internal data field (stack=internal-data)
+                        saveILGen.Emit(OpCodes.Ldfld, AutoConfigurationModifiedArrayField); // Load the modified array reference (stack=modified-array)
+                        saveILGen.Emit(OpCodes.Ldc_I4, fieldData.Index); // Loads the field index integer (stack=modified-array,index)
+                        saveILGen.Emit(OpCodes.Ldelem_I4); // Loads the boolean at the index (stack=modified-bool)
+                        saveILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the boolean input 'save unmodified' input) (stack=modified-bool,save-unmodified-bool)
+                        saveILGen.Emit(OpCodes.Or); // ORs the two bools - true output indicates save, false indicates skip (stack=actual bool)
+                        Label skipLabel = saveILGen.DefineLabel();
+                        saveILGen.Emit(OpCodes.Brfalse, skipLabel); // If false, skip past current part (stack clear)
+                        // If true (do save), then:
                         saveILGen.Emit(OpCodes.Ldloc, saveOutputLocal); // load the output section (stack=output)
                         saveILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=output,name)
                         saveILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the input config) (stack=output,name,input)
                         saveILGen.Emit(OpCodes.Ldfld, field); // load the relevant field (stack=output,name,data)
                         if (typeof(AutoConfiguration).IsAssignableFrom(field.FieldType))
                         {
+                            saveILGen.Emit(OpCodes.Ldarg_1); // load the save-unmodified parameter (stack=output,name,data,save-unmodified-bool)
                             saveILGen.Emit(OpCodes.Call, ConfigSaveMethod); // Call config.Save() (stack=output,name,out-data)
                             // /\ save | load \/
+                            loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=section)
+                            loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=section,name)
+                            loadILGen.Emit(OpCodes.Call, SectionGetSectionMethod); // Call section.GetSection(name) (stack=sub-section)
+                            loadILGen.Emit(OpCodes.Stloc, loadgen_SectionLocal); // Store sub-section to 'section' local (stack clear)
+                            loadILGen.Emit(OpCodes.Ldloc, loadgen_SectionLocal); // Load the section local (stack=sub-section)
+                            Label afterIfLabel = loadILGen.DefineLabel(); // if (value is null) {
+                            loadILGen.Emit(OpCodes.Brfalse, afterIfLabel); // If the value is null, jump to after-the-if, otherwise continue ahead (stack clear)
                             loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
                             loadILGen.Emit(OpCodes.Ldfld, field); // load the relevant field (stack=sub-config)
-                            loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=sub-config,section)
-                            loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=sub-config,section,name)
-                            loadILGen.Emit(OpCodes.Call, SectionGetSectionMethod); // Call section.GetSection(name) (stack=sub-config,sub-section)
-                            loadILGen.Emit(OpCodes.Dup); // duplicate the value (stack=sub-config,sub-section,sub-section)
-                            Label afterIfLabel = loadILGen.DefineLabel(); // if (value is null) {
-                            loadILGen.Emit(OpCodes.Brtrue, afterIfLabel); // If the value is non-null, jump to after-the-if, otherwise continue ahead (stack=sub-config,sub-section)
-                            loadILGen.Emit(OpCodes.Pop); // Pop the redundant null off (stack=sub-config)
-                            loadILGen.Emit(OpCodes.Newobj, SectionConstructor); // new FDSSection(); (stack=sub-config,new-section)
-                            loadILGen.MarkLabel(afterIfLabel); // }
+                            loadILGen.Emit(OpCodes.Ldloc, loadgen_SectionLocal); // Load the section local (stack=sub-config,sub-section)
                             loadILGen.Emit(OpCodes.Call, ConfigLoadMethod); // Call sub_config.Load(section) (stack now clear)
+                            genLoadMarkModified(loadILGen, fieldData);
+                            loadILGen.MarkLabel(afterIfLabel); // }
                         }
                         else
                         {
-                            loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
-                            loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=config,section)
-                            loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=config,section,name)
-                            loadILGen.Emit(OpCodes.Call, SectionGetRootDataMethod); // call section.GetRootData(name) (stack=config,data)
-                            loadILGen.Emit(OpCodes.Dup); // duplicate the value (stack=config,data,data)
+                            loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=section)
+                            loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=section,name)
+                            loadILGen.Emit(OpCodes.Call, SectionGetRootDataMethod); // call section.GetRootData(name) (stack=data)
+                            loadILGen.Emit(OpCodes.Stloc, loadgen_DataLocal); // Store that data in the 'data' local (stack now clear)
+                            loadILGen.Emit(OpCodes.Ldloc, loadgen_DataLocal); // Load the 'data' local (stack=data)
                             Label afterIfLabel = loadILGen.DefineLabel(); // if (value is not null) {
-                            loadILGen.Emit(OpCodes.Brfalse, afterIfLabel); // If the value is null, jump to after-the-if, otherwise continue ahead (stack=config,data)
+                            loadILGen.Emit(OpCodes.Brfalse, afterIfLabel); // If the value is null, jump to after-the-if, otherwise continue ahead (stack clear)
+                            loadILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the config) (stack=config)
+                            loadILGen.Emit(OpCodes.Ldloc, loadgen_DataLocal); // Load the 'data' local (stack=config,data)
                             EmitTypeConverter(field.FieldType, loadILGen, true); // call the type converter needed (stack=config,out-data)
                             loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
-                            Label afterElseLabel = loadILGen.DefineLabel();
-                            loadILGen.Emit(OpCodes.Br, afterElseLabel); // }
-                            loadILGen.MarkLabel(afterIfLabel); // else {
-                            loadILGen.Emit(OpCodes.Pop); // remove the out-data copy from stack (stack=config)
-                            loadILGen.Emit(OpCodes.Pop); // remove the config from stack (stack now clear)
-                            loadILGen.MarkLabel(afterElseLabel); // }
+                            genLoadMarkModified(loadILGen, fieldData);
+                            loadILGen.MarkLabel(afterIfLabel); // }
                             // /\ load | save \/
                             EmitTypeConverter(field.FieldType, saveILGen, false); // call the type converter needed (stack=output,name,out-data-cleaned)
                         }
+                        saveILGen.ValidateStackSizeIs("Save before FDSData init", 3);
                         ConfigComment comment = field?.GetCustomAttribute<ConfigComment>();
                         if (comment != null)
                         {
@@ -405,42 +587,202 @@ namespace FreneticUtilities.FreneticDataSyntax
                             saveILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data) (stack=output,name,FDSData)
                         }
                         saveILGen.Emit(OpCodes.Call, SectionSetRootDataMethod); // Call output.SetRootData(name, data); (stack was output,name,FDSData - now clear)
+                        saveILGen.MarkLabel(skipLabel);
                     }
                     saveILGen.Emit(OpCodes.Ldloc, saveOutputLocal); // return output;
                     saveILGen.Emit(OpCodes.Ret);
                     loadILGen.Emit(OpCodes.Ret);
-                    result.SaveSection = (Func<AutoConfiguration, FDSSection>)saveMethod.CreateDelegate(typeof(Func<AutoConfiguration, FDSSection>));
-                    result.LoadSection = (Action<AutoConfiguration, FDSSection>)loadMethod.CreateDelegate(typeof(Action<AutoConfiguration, FDSSection>));
+                    result.SaveSection = saveMethod.CreateDelegate<Func<AutoConfiguration, bool, FDSSection>>();
+                    result.LoadSection = loadMethod.CreateDelegate<Action<AutoConfiguration, FDSSection>>();
                     return result;
                 }
             }
         }
 
+        /// <summary>Internal data local to this instance.</summary>
+        public struct LocalInternal
+        {
+            /// <summary>Shared static data for this config type.</summary>
+            public Internal.AutoConfigData SharedData;
+
+            /// <summary>Array of field indices to a boolean indicating whether that field has been modified.</summary>
+            public bool[] IsFieldModified;
+        }
+
         /// <summary>Internal-use only data.</summary>
-        public Internal.AutoConfigData InternalData;
+        public LocalInternal InternalData;
 
         /// <summary>Inits the <see cref="AutoConfiguration"/>.</summary>
         public AutoConfiguration()
         {
             Type type = GetType();
-            if (!Internal.TypeMap.TryGetValue(type, out InternalData))
+            if (!Internal.TypeMap.TryGetValue(type, out InternalData.SharedData))
             {
-                InternalData = Internal.GenerateData(type);
+                InternalData.SharedData = Internal.GenerateData(type);
             }
+            if (InternalData.SharedData is null)
+            {
+                return;
+            }
+            InternalData.IsFieldModified = new bool[InternalData.SharedData.Fields.Count];
         }
 
         /// <summary>Saves this <see cref="AutoConfiguration"/> to an <see cref="FDSSection"/>.</summary>
+        /// <param name="includeUnmodified">If true, unmodified fields are stored. If false, unmodified fields are not stored.</param>
         /// <returns>The section object with all save data.</returns>
-        public FDSSection Save()
+        public FDSSection Save(bool includeUnmodified)
         {
-            return InternalData.SaveSection(this);
+            return InternalData.SharedData.SaveSection(this, includeUnmodified);
         }
 
         /// <summary>Loads this <see cref="AutoConfiguration"/> from an <see cref="FDSSection"/>.</summary>
         /// <param name="section">The section to load from.</param>
         public void Load(FDSSection section)
         {
-            InternalData.LoadSection(this, section);
+            InternalData.SharedData.LoadSection(this, section);
+        }
+
+        /// <summary>Tries to set the given field by name to the given value.
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
+        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <returns>True if set, false if not.</returns>
+        public bool TrySetFieldValue(string field, object value)
+        {
+            field = field.ToLowerFast();
+            int dot = field.IndexOf('.');
+            if (dot > 0)
+            {
+                string thisField = field[..dot];
+                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
+                {
+                    return false;
+                }
+                string subPath = field[(dot + 1)..];
+                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
+                {
+                    return false;
+                }
+                InternalData.IsFieldModified[sectionData.Index] = true;
+                return subSection.TrySetFieldValue(subPath, value);
+            }
+            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            {
+                return false;
+            }
+            InternalData.IsFieldModified[data.Index] = true;
+            data.SetValue(this, value);
+            return true;
+        }
+
+        /// <summary>Gets the current value of the field by name, or the default if no value exists for the given path.
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
+        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        public T GetFieldValueOrDefault<T>(string field, T def = default)
+        {
+            field = field.ToLowerFast();
+            int dot = field.IndexOf('.');
+            if (dot > 0)
+            {
+                string thisField = field[..dot];
+                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
+                {
+                    return def;
+                }
+                string subPath = field[(dot + 1)..];
+                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
+                {
+                    return def;
+                }
+                return subSection.GetFieldValueOrDefault<T>(subPath);
+            }
+            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            {
+                return def;
+            }
+            object result = data.GetValue(this);
+            if (result is null)
+            {
+                return def;
+            }
+            if (!typeof(T).IsAssignableFrom(result.GetType()))
+            {
+                return def;
+            }
+            return (T)result;
+        }
+
+        /// <summary>Returns true if the named field is modified. Returns false if the field is unmodified, or paths are incorrect.
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
+        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        public bool IsFieldModified(string field)
+        {
+            field = field.ToLowerFast();
+            int dot = field.IndexOf('.');
+            if (dot > 0)
+            {
+                string thisField = field[..dot];
+                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
+                {
+                    return false;
+                }
+                string subPath = field[(dot + 1)..];
+                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
+                {
+                    return false;
+                }
+                return subSection.IsFieldModified(subPath);
+            }
+            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            {
+                return false;
+            }
+            return InternalData.IsFieldModified[data.Index];
+        }
+
+        /// <summary>Sets whether the named field is modified.
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
+        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <returns>True if applied, false if failed.</returns>
+        public bool TrySetFieldModified(string field, bool modified)
+        {
+            field = field.ToLowerFast();
+            int dot = field.IndexOf('.');
+            if (dot > 0)
+            {
+                string thisField = field[..dot];
+                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
+                {
+                    return false;
+                }
+                string subPath = field[(dot + 1)..];
+                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
+                {
+                    return false;
+                }
+                return subSection.TrySetFieldModified(subPath, modified);
+            }
+            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            {
+                return false;
+            }
+            // TODO: if modified is false, apply default value to the field?
+            InternalData.IsFieldModified[data.Index] = modified;
+            if (data.IsSection && !modified)
+            {
+                static void clearModified(AutoConfiguration config)
+                {
+                    foreach (Internal.SingleFieldData subData in config.InternalData.SharedData.Fields.Values)
+                    {
+                        config.InternalData.IsFieldModified[subData.Index] = false;
+                        if (subData.IsSection)
+                        {
+                            clearModified(subData.GetValue(config) as AutoConfiguration);
+                        }
+                    }
+                }
+                clearModified(data.GetValue(this) as AutoConfiguration);
+            }
+            return true;
         }
     }
 }

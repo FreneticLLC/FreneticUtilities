@@ -18,6 +18,7 @@ using System.Reflection.Emit;
 using System.Diagnostics;
 using FreneticUtilities.FreneticExtensions;
 
+#pragma warning disable CA1822 // Mark members as static
 namespace FreneticUtilities.FreneticToolkit
 {
     /// <summary>Tracks generated IL.</summary>
@@ -52,7 +53,7 @@ namespace FreneticUtilities.FreneticToolkit
         /// <summary>Optional text format codes.</summary>
         public string EmphasizeCode = "", BaseCode = "", MinorCode = "";
 
-#if DEBUG
+#if VALIDATE
         /// <summary>All codes generated. Only has a value when compiled in DEBUG mode.</summary>
         public List<KeyValuePair<string, object>> Codes = new();
 
@@ -69,10 +70,12 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void ValidateStackSizeIs(string situation, int expected)
         {
+#if VALIDATE
             if (StackTypes.Count != expected)
             {
                 DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be exactly {EmphasizeCode}{expected}");
             }
+#endif
         }
 
         /// <summary>Gives a warning if stack size is not at least the given size.</summary>
@@ -81,10 +84,12 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void ValidateStackSizeIsAtLeast(string situation, int expected)
         {
+#if VALIDATE
             if (StackTypes.Count < expected)
             {
                 DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be at least {EmphasizeCode}{expected}");
             }
+#endif
         }
 
         /// <summary>Gives a warning if stack size is not at most the given size.</summary>
@@ -93,17 +98,17 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void ValidateStackSizeIsAtMost(string situation, int expected)
         {
+#if VALIDATE
             if (StackTypes.Count > expected)
             {
                 DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be at most {EmphasizeCode}{expected}");
             }
+#endif
         }
 
         /// <summary>Creates a string of all the generated CIL code.</summary>
         /// <returns>Generated CIL code string.</returns>
-#pragma warning disable CA1822 // Mark members as static
         public string Stringify()
-#pragma warning restore CA1822 // Mark members as static
         {
 #if DEBUG
             StringBuilder fullResult = new();
@@ -147,6 +152,7 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void Validator(OpCode code, object val, int? altParams = null)
         {
+#if VALIDATE
             if (code == OpCodes.Nop)
             {
                 // Do nothing
@@ -446,6 +452,7 @@ namespace FreneticUtilities.FreneticToolkit
                 }
             }
             ValidateStackSizeIsAtLeast("post opcode " + code, 0);
+#endif
         }
 
         /// <summary>Defines a label.</summary>
@@ -481,12 +488,14 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void StackSizeChange(int amount)
         {
+#if VALIDATE
             while (amount < 0 && StackTypes.Any())
             {
                 StackTypes.Pop();
                 amount++;
             }
             AddCode(OpCodes.Nop, $"<stack size move: {amount}, now: {StackTypes.Count}>", "minor");
+#endif
         }
 
         /// <summary>Adds to the type stack.</summary>
@@ -494,8 +503,10 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void StackPush(Type type)
         {
+#if VALIDATE
             StackTypes.Push(type);
             AddCode(OpCodes.Nop, $"<stack size move: +1, added {type?.FullName}, now: {StackTypes.Count}>", "minor");
+#endif
         }
 
         /// <summary>Starts a catch block for a specific exception type.</summary>
@@ -647,3 +658,4 @@ namespace FreneticUtilities.FreneticToolkit
         }
     }
 }
+#pragma warning restore CA1822 // Mark members as static

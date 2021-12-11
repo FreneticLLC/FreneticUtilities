@@ -166,3 +166,4 @@ SubData:
         - Can have any collection type (`List<T>`, `LinkedList<T>`, etc.) so long as it supports a no-argument constructor and extends `ICollection<T>`.
         - Note that the variable type should match the real type (ie don't use an interface as the actual variable type, use a concrete type).
         - Can have any supported type as `T`.
+- Has a field-is-modified tracker that is optional to use - to exclude from output fields that are never directly modified.
