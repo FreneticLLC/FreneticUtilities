@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "WTF MICROSOFT???")]
