@@ -12,3 +12,4 @@ Frenetic Toolkit is a collection of general utilities for use a variety of cases
 - **ObjectConversionHelper**: helper for converting arbitrary object input to and from various common types.
 - **PrimitiveConversionHelper**: helper for converting raw byte array input to and from various primitive types.
 - **StringConversionHelper**: helper for converting string input to and from various common types.
+- **ILGeneratorTracker**: helper to replace .NET's `ILGenerator` with one that's capable of input tracking and error checking.

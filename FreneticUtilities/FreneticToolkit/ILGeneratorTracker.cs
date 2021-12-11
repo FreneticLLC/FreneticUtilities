@@ -23,9 +23,31 @@ namespace FreneticUtilities.FreneticToolkit
     /// <summary>Tracks generated IL.</summary>
     public class ILGeneratorTracker
     {
+        /// <summary>Creates the instance to wrap an MS base object.</summary>
+        public ILGeneratorTracker(ILGenerator _internal, MethodInfo _method, string _name = "Unnamed")
+        {
+            Internal = _internal;
+            Method = _method;
+            Name = _name;
+        }
+
+        /// <summary>Optional name for the generator.</summary>
+        public string Name;
 
         /// <summary>Internal generator.</summary>
         public ILGenerator Internal;
+
+        /// <summary>The method being worked on.</summary>
+        public MethodInfo Method;
+
+        /// <summary>Action to show error output.</summary>
+        public Action<string> Error = Console.Error.WriteLine;
+
+        /// <summary>Shows an error and automatically formats around it.</summary>
+        public void DoErrorDirect(string message)
+        {
+            Error($"{nameof(ILGeneratorTracker)} '{Name}' Error: {BaseCode}{message}\n{BaseCode}For code: {MinorCode}{Stringify()}\n{BaseCode}Stack: {MinorCode}{Environment.StackTrace}");
+        }
 
         /// <summary>Optional text format codes.</summary>
         public string EmphasizeCode = "", BaseCode = "", MinorCode = "";
@@ -33,10 +55,13 @@ namespace FreneticUtilities.FreneticToolkit
 #if DEBUG
         /// <summary>All codes generated. Only has a value when compiled in DEBUG mode.</summary>
         public List<KeyValuePair<string, object>> Codes = new();
-#endif
 
-        /// <summary>Stack size tracker, for validation.</summary>
-        public int StackSize = 0;
+        /// <summary>Stack tracker, for validation.</summary>
+        public Stack<Type> StackTypes = new();
+
+        /// <summary>Local variables.</summary>
+        public Dictionary<int, LocalBuilder> Locals = new();
+#endif
 
         /// <summary>Gives a warning if stack size is not the exact correct size.</summary>
         /// <param name="situation">The current place in the code that requires a validation.</param>
@@ -44,10 +69,9 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void ValidateStackSizeIs(string situation, int expected)
         {
-            if (StackSize != expected)
+            if (StackTypes.Count != expected)
             {
-                Error($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackSize}{BaseCode}"
-                    + $" but should be exactly {EmphasizeCode}{expected}{BaseCode} for code:\n{MinorCode}{Stringify()}");
+                DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be exactly {EmphasizeCode}{expected}");
             }
         }
 
@@ -57,10 +81,9 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void ValidateStackSizeIsAtLeast(string situation, int expected)
         {
-            if (StackSize < expected)
+            if (StackTypes.Count < expected)
             {
-                Error($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackSize}{BaseCode}"
-                    + $" but should be at least {EmphasizeCode}{expected}{BaseCode} for code:\n{MinorCode}{Stringify()}");
+                DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be at least {EmphasizeCode}{expected}");
             }
         }
 
@@ -70,10 +93,9 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void ValidateStackSizeIsAtMost(string situation, int expected)
         {
-            if (StackSize > expected)
+            if (StackTypes.Count > expected)
             {
-                Error($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackSize}{BaseCode}"
-                    + $" but should be at most {EmphasizeCode}{expected}{BaseCode} for code:\n{MinorCode}{Stringify()}");
+                DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be at most {EmphasizeCode}{expected}");
             }
         }
 
@@ -132,26 +154,51 @@ namespace FreneticUtilities.FreneticToolkit
             else if (code == OpCodes.Ret)
             {
                 ValidateStackSizeIsAtMost("return op", 1);
-                StackSize = 0;
+                StackTypes.Clear();
             }
             else if (code == OpCodes.Call || code == OpCodes.Callvirt)
             {
                 if (val is not MethodInfo method)
                 {
-                    Console.WriteLine("Invalid call (code " + code + ", to object " + val + ") - not a method reference");
+                    DoErrorDirect($"Invalid call (code {code}, to object {val}) - not a method reference");
                 }
                 else
                 {
                     int paramCount = altParams ?? method.GetParameters().Length;
+                    int fullParamCount = paramCount;
                     if (!method.IsStatic)
                     {
-                        paramCount++;
+                        fullParamCount++;
                     }
-                    ValidateStackSizeIsAtLeast("call opcode " + code, paramCount);
-                    StackSizeChange(-paramCount);
+                    ValidateStackSizeIsAtLeast($"call opcode {code}", fullParamCount);
+                    if (paramCount != method.GetParameters().Length)
+                    {
+                        StackSizeChange(-paramCount);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < paramCount && StackTypes.Any(); i++)
+                        {
+                            Type top = StackTypes.Pop();
+                            Type paramType = method.GetParameters()[paramCount - (i + 1)].ParameterType;
+                            if (!paramType.IsAssignableFrom(top))
+                            {
+                                DoErrorDirect($"Invalid call parameter {(paramCount - (i + 1))}: expected {paramType.FullName} but stack holds {top.FullName}");
+                            }
+                        }
+                    }
+                    if (!method.IsStatic && StackTypes.Any())
+                    {
+                        Type top = StackTypes.Pop();
+                        if (!method.DeclaringType.IsAssignableFrom(top))
+                        {
+                            DoErrorDirect($"Invalid call self-object parameter: expected {method.DeclaringType.FullName} but stack holds {top.FullName}");
+                        }
+                    }
+                    StackSizeChange(0);
                     if (method.ReturnType != typeof(void))
                     {
-                        StackSizeChange(1);
+                        StackPush(method.ReturnType);
                     }
                 }
             }
@@ -159,15 +206,162 @@ namespace FreneticUtilities.FreneticToolkit
             {
                 if (val is not ConstructorInfo method)
                 {
-                    Console.WriteLine("Invalid NEWOBJ (code " + code + ", to object " + val + ") - not a constructor reference");
+                    DoErrorDirect($"Invalid NEWOBJ (code {code}, to object {val}) - not a constructor reference");
                 }
                 else
                 {
                     int paramCount = altParams ?? method.GetParameters().Length;
                     ValidateStackSizeIsAtLeast("opcode newobj", paramCount);
-                    StackSizeChange(-paramCount);
-                    StackSizeChange(1);
+                    if (paramCount != method.GetParameters().Length)
+                    {
+                        StackSizeChange(-paramCount);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < paramCount && StackTypes.Any(); i++)
+                        {
+                            Type top = StackTypes.Pop();
+                            Type paramType = method.GetParameters()[paramCount - (i + 1)].ParameterType;
+                            if (!paramType.IsAssignableFrom(top))
+                            {
+                                DoErrorDirect($"Invalid call parameter {(paramCount - (i + 1))}: expected {paramType.FullName} but stack holds {top.FullName}");
+                            }
+                        }
+                    }
+                    StackPush(method.DeclaringType);
                 }
+            }
+            else if (code == OpCodes.Ldfld)
+            {
+                if (val is not FieldInfo fld)
+                {
+                    DoErrorDirect($"Invalid Ldfld (code {code}, to object {val}) - not a Field reference ({val}={val?.GetType()?.FullName})");
+                }
+                else if (fld.IsStatic)
+                {
+                    DoErrorDirect($"Invalid Ldfld (code {code}, to object {val}) - field {fld.Name} is static");
+                }
+                else
+                {
+                    ValidateStackSizeIsAtLeast($"opcode Ldfld", 1);
+                    Type top = StackTypes.Pop();
+                    StackSizeChange(0);
+                    if (!top.IsAssignableFrom(fld.DeclaringType))
+                    {
+                        DoErrorDirect($"Invalid Ldfld (code {code}, to object {val}) parameter - field belongs to type {fld.DeclaringType.FullName} but stack holds {top.FullName}");
+                    }
+                    StackPush(fld.FieldType);
+                }
+            }
+            else if (code == OpCodes.Stfld)
+            {
+                if (val is not FieldInfo fld)
+                {
+                    DoErrorDirect($"Invalid Stfld (code {code}, to object {val}) - not a Field reference ({val}={val?.GetType()?.FullName})");
+                }
+                else if (fld.IsStatic)
+                {
+                    DoErrorDirect($"Invalid Stfld (code {code}, to object {val}) - field {fld.Name} is static");
+                }
+                else
+                {
+                    ValidateStackSizeIsAtLeast($"opcode Stfld", 2);
+                    Type toPush = StackTypes.Pop();
+                    Type toPushOnto = StackTypes.Pop();
+                    StackSizeChange(0);
+                    if (!toPush.IsAssignableFrom(fld.FieldType))
+                    {
+                        DoErrorDirect($"Invalid Stfld (code {code}, to object {val}) parameter - field is type {fld.FieldType.FullName} but stack holds {toPush.FullName}");
+                    }
+                    if (!toPushOnto.IsAssignableFrom(fld.DeclaringType))
+                    {
+                        DoErrorDirect($"Invalid Stfld (code {code}, to object {val}) parameter - field belongs to type {fld.DeclaringType.FullName} but stack holds {toPushOnto.FullName}");
+                    }
+                }
+            }
+            else if (code == OpCodes.Ldarg_0 || code == OpCodes.Ldarg_1 || code == OpCodes.Ldarg_2 || code == OpCodes.Ldarg_3 || code == OpCodes.Ldarg_S)
+            {
+                int argIndex;
+                if (code == OpCodes.Ldarg_0) { argIndex = 0; }
+                else if (code == OpCodes.Ldarg_1) { argIndex = 1; }
+                else if (code == OpCodes.Ldarg_2) { argIndex = 2; }
+                else if (code == OpCodes.Ldarg_3) { argIndex = 3; }
+                else //if (code == OpCodes.Ldarg_S)
+                {
+                    if (val is not int newArgInd)
+                    {
+                        DoErrorDirect($"Invalid Ldarg_s val {val} - expected int, but got {val?.GetType()?.FullName}");
+                        argIndex = 0;
+                    }
+                    else
+                    {
+                        argIndex = newArgInd;
+                    }
+                }
+                if (Method.GetParameters().Length <= argIndex)
+                {
+                    DoErrorDirect($"Invalid Load Arg (code {code} val {val}) - tried to load parameter index {argIndex} but only have {Method.GetParameters().Length} params");
+                }
+                ParameterInfo param = Method.GetParameters()[argIndex];
+                StackPush(param.ParameterType);
+            }
+            else if (code == OpCodes.Ldelem || code == OpCodes.Ldelem_I || code == OpCodes.Ldelem_I1 || code == OpCodes.Ldelem_I2 || code == OpCodes.Ldelem_I4 || code == OpCodes.Ldelem_I8
+                 || code == OpCodes.Ldelem_R4 || code == OpCodes.Ldelem_R8 || code == OpCodes.Ldelem_Ref || code == OpCodes.Ldelem_U1 || code == OpCodes.Ldelem_U2 || code == OpCodes.Ldelem_U4)
+            {
+                ValidateStackSizeIsAtLeast($"{code}", 2);
+                Type index = StackTypes.Pop();
+                Type arr = StackTypes.Pop();
+                StackSizeChange(0);
+                if (index != typeof(int))
+                {
+                    DoErrorDirect($"Invalid {code} index type {index.FullName} - not an int32");
+                }
+                if (!arr.IsArray)
+                {
+                    DoErrorDirect($"Invalid {code} array type {arr.FullName} - not an array");
+                }
+                StackPush(arr.GetElementType());
+            }
+            else if (code == OpCodes.Add || code == OpCodes.Sub || code == OpCodes.And || code == OpCodes.Or || code == OpCodes.Xor || code == OpCodes.Mul || code == OpCodes.Div || code == OpCodes.Div_Un)
+            {
+                ValidateStackSizeIsAtLeast($"{code}", 2);
+                Type a1 = StackTypes.Pop();
+                Type a2 = StackTypes.Pop();
+                StackSizeChange(0);
+                if (a1 != a2)
+                {
+                    DoErrorDirect($"Invalid {code} types - got {a1?.FullName} and {a2?.FullName} - should be same");
+                }
+                StackPush(a1);
+            }
+            else if (code == OpCodes.Ldloc || code == OpCodes.Ldloc_0 || code == OpCodes.Ldloc_1 || code == OpCodes.Ldloc_2 || code == OpCodes.Ldloc_3 || code == OpCodes.Ldloc_S)
+            {
+                int locIndex;
+                if (code == OpCodes.Ldloc_0) { locIndex = 0; }
+                else if (code == OpCodes.Ldloc_1) { locIndex = 1; }
+                else if (code == OpCodes.Ldloc_2) { locIndex = 2; }
+                else if (code == OpCodes.Ldloc_3) { locIndex = 3; }
+                else
+                {
+                    if (val is int newLocInd)
+                    {
+                        locIndex = newLocInd;
+                    }
+                    else if (val is LocalBuilder locBuild)
+                    {
+                        locIndex = locBuild.LocalIndex;
+                    }
+                    else
+                    {
+                        DoErrorDirect($"Invalid {code} val {val} - expected int or LocalBuilder, but got {val?.GetType()?.FullName}");
+                        locIndex = 0;
+                    }
+                }
+                if (!Locals.TryGetValue(locIndex, out LocalBuilder local))
+                {
+                    DoErrorDirect($"Invalid {code} index {locIndex} - index not a declared local");
+                }
+                StackPush(local.LocalType);
             }
             else if (code == OpCodes.Leave || code == OpCodes.Leave_S)
             {
@@ -208,21 +402,46 @@ namespace FreneticUtilities.FreneticToolkit
                         StackSizeChange(-3);
                         break;
                 }
+                Type pushType = val switch
+                {
+                    null => null,
+                    MethodInfo method => method.ReturnType,
+                    FieldInfo field => field.FieldType,
+                    LocalBuilder local => local.LocalType,
+                    _ => val.GetType()
+                };
                 switch (code.StackBehaviourPush)
                 {
                     case StackBehaviour.Push0:
                         break;
                     case StackBehaviour.Push1:
-                    case StackBehaviour.Pushi:
-                    case StackBehaviour.Pushi8:
-                    case StackBehaviour.Pushr4:
-                    case StackBehaviour.Pushr8:
                     case StackBehaviour.Pushref:
                     case StackBehaviour.Varpush:
-                        StackSizeChange(1);
+                        if (pushType is null)
+                        {
+                            DoErrorDirect($"Invalid push type for x1 code '{code}' val {val} = {val?.GetType()?.FullName}");
+                        }
+                        StackPush(pushType);
+                        break;
+                    case StackBehaviour.Pushi:
+                        StackPush(typeof(int));
+                        break;
+                    case StackBehaviour.Pushi8:
+                        StackPush(typeof(long));
+                        break;
+                    case StackBehaviour.Pushr4:
+                        StackPush(typeof(float));
+                        break;
+                    case StackBehaviour.Pushr8:
+                        StackPush(typeof(double));
                         break;
                     case StackBehaviour.Push1_push1:
-                        StackSizeChange(2);
+                        if (pushType is null)
+                        {
+                            DoErrorDirect($"Invalid push type for x2 code '{code}' val {val} = {val?.GetType()?.FullName}");
+                        }
+                        StackPush(pushType);
+                        StackPush(pushType);
                         break;
                 }
             }
@@ -262,8 +481,21 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void StackSizeChange(int amount)
         {
-            StackSize += amount;
-            AddCode(OpCodes.Nop, "<stack size move: " + amount + ", now: " + StackSize + ">", "minor");
+            while (amount < 0 && StackTypes.Any())
+            {
+                StackTypes.Pop();
+                amount++;
+            }
+            AddCode(OpCodes.Nop, $"<stack size move: {amount}, now: {StackTypes.Count}>", "minor");
+        }
+
+        /// <summary>Adds to the type stack.</summary>
+        /// <param name="type">The new type.</param>
+        [Conditional("VALIDATE")]
+        public void StackPush(Type type)
+        {
+            StackTypes.Push(type);
+            AddCode(OpCodes.Nop, $"<stack size move: +1, added {type?.FullName}, now: {StackTypes.Count}>", "minor");
         }
 
         /// <summary>Starts a catch block for a specific exception type.</summary>
@@ -313,7 +545,8 @@ namespace FreneticUtilities.FreneticToolkit
         public void Emit(OpCode code, FieldInfo dat)
         {
             Internal.Emit(code, dat);
-            AddCode(code, dat.Name + " <" + dat.FieldType.Name + ">");
+            AddCode(OpCodes.Nop, $"{dat.Name} <{dat.FieldType.FullName}>", $"<{code}>");
+            Validator(code, dat);
         }
 
         /// <summary>Emits an operation.</summary>
@@ -383,17 +616,31 @@ namespace FreneticUtilities.FreneticToolkit
             AddCode(code, dat);
         }
 
+        /// <summary>Emits an operation.</summary>
+        /// <param name="code">The operation code.</param>
+        /// <param name="dat">The associated data.</param>
+        public void Emit(OpCode code, LocalBuilder dat)
+        {
+            Internal.Emit(code, dat);
+            AddCode(OpCodes.Nop, $"{dat.LocalIndex} <{dat.LocalType.FullName}>", $"<{code}>");
+            Validator(code, dat);
+        }
+
         /// <summary>Declares a local.</summary>
         /// <param name="t">The type.</param>
-        public int DeclareLocal(Type t)
+        public LocalBuilder DeclareLocal(Type t)
         {
-            int x = Internal.DeclareLocal(t).LocalIndex;
-            AddCode(OpCodes.Nop, t.FullName + " as " + x, "<declare local>");
+            LocalBuilder x = Internal.DeclareLocal(t);
+            AddCode(OpCodes.Nop, $"{t.FullName} as {x.LocalIndex}", "<declare local>");
+#if VALIDATE
+            Locals.Add(x.LocalIndex, x);
+#endif
             return x;
         }
 
         /// <summary>Adds a comment to the developer debug of the IL output.</summary>
         /// <param name="str">The comment text.</param>
+        [Conditional("VALIDATE")]
         public void Comment(string str)
         {
             AddCode(OpCodes.Nop, "-- " + str + " --", "// Comment");
