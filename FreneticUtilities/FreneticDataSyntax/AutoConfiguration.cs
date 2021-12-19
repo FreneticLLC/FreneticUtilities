@@ -81,6 +81,9 @@ namespace FreneticUtilities.FreneticDataSyntax
 
                 /// <summary>The default value of this field.</summary>
                 public object Default;
+
+                /// <summary>Action to fire when the field is changed by the standard 'Set' methods.</summary>
+                public Action OnChanged;
             }
 
             /// <summary>Helper class that represents the tools needed to convert <see cref="FDSData"/> to the final output type.</summary>
@@ -642,6 +645,38 @@ namespace FreneticUtilities.FreneticDataSyntax
             InternalData.SharedData.LoadSection(this, section);
         }
 
+        /// <summary>Tries to add a changed event handler to the given field by name.
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
+        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <returns>True if set, false if not.</returns>
+        public bool RegisterChangedEvent(string field, Action changedEventHandler)
+        {
+            field = field.ToLowerFast();
+            int dot = field.IndexOf('.');
+            if (dot > 0)
+            {
+                string thisField = field[..dot];
+                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
+                {
+                    return false;
+                }
+                string subPath = field[(dot + 1)..];
+                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
+                {
+                    return false;
+                }
+                InternalData.IsFieldModified[sectionData.Index] = true;
+                return subSection.RegisterChangedEvent(subPath, changedEventHandler);
+            }
+            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            {
+                return false;
+            }
+            InternalData.IsFieldModified[data.Index] = true;
+            data.OnChanged += changedEventHandler;
+            return true;
+        }
+
         /// <summary>Tries to set the given field by name to the given value.
         /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
         /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
@@ -663,7 +698,12 @@ namespace FreneticUtilities.FreneticDataSyntax
                     return false;
                 }
                 InternalData.IsFieldModified[sectionData.Index] = true;
-                return subSection.TrySetFieldValue(subPath, value);
+                if (subSection.TrySetFieldValue(subPath, value))
+                {
+                    sectionData.OnChanged?.Invoke();
+                    return true;
+                }
+                return false;
             }
             if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
             {
@@ -671,6 +711,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             InternalData.IsFieldModified[data.Index] = true;
             data.SetValue(this, value);
+            data.OnChanged?.Invoke();
             return true;
         }
 
