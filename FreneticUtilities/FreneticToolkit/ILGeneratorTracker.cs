@@ -369,7 +369,7 @@ namespace FreneticUtilities.FreneticToolkit
                 }
                 StackPush(a1);
             }
-            else if (code == OpCodes.Ldloc || code == OpCodes.Ldloc_0 || code == OpCodes.Ldloc_1 || code == OpCodes.Ldloc_2 || code == OpCodes.Ldloc_3 || code == OpCodes.Ldloc_S)
+            else if (code == OpCodes.Ldloc || code == OpCodes.Ldloca || code == OpCodes.Ldloc_0 || code == OpCodes.Ldloc_1 || code == OpCodes.Ldloc_2 || code == OpCodes.Ldloc_3 || code == OpCodes.Ldloc_S)
             {
                 int locIndex;
                 if (code == OpCodes.Ldloc_0) { locIndex = 0; }

@@ -278,20 +278,16 @@ namespace FreneticUtilities.FreneticDataSyntax
                     outListType = typeof(List<FDSData>);
                     inSubType = listSubType;
                     outSubType = typeof(FDSData);
-                    enumeratorMethod = inListType.GetMethod(nameof(ICollection<int>.GetEnumerator));
+                    enumeratorMethod = inListType.GetMethod(nameof(ICollection.GetEnumerator));
                     enumeratorType = enumeratorMethod.ReturnType;
-                    enumeratorMoveNextMethod = enumeratorType.GetMethod(nameof(IEnumerator<int>.MoveNext));
-                    enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator<int>.Current)).GetMethod;
+                    enumeratorMoveNextMethod = enumeratorType.GetMethod(nameof(IEnumerator.MoveNext));
+                    enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator.Current)).GetMethod;
                     listAddMethod = FDSDataListAddMethod;
                     outListConstructor = FDSDataListConstructor;
                 }
                 DynamicMethod genMethod = new("ListConvert", outListType, new Type[] { inListType }, typeof(AutoConfiguration).Module, true);
                 ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"ListConvert_{inListType.Name}");
                 targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=paramInList)
-                if (doLoad)
-                {
-                    targetILGen.Emit(OpCodes.Call, FDSDataAsDataListGetter); // data.AsDataList (stack=origInList)
-                }
                 // Store input list and new output list to local variable
                 inListVariable = targetILGen.DeclareLocal(inListType); // List<TIn> inList;
                 targetILGen.Emit(OpCodes.Stloc, inListVariable); // inList = dataList; (stack now clear)
@@ -312,7 +308,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 targetILGen.MarkLabel(blockStart);
                 targetILGen.Emit(OpCodes.Ldloc, outListVariable); // Load the outlist (stack=outList)
                 targetILGen.Emit(OpCodes.Ldloca, enumeratorVariable); // Load the enumerator (stack=outList,enumerator)
-                targetILGen.Emit(OpCodes.Call, enumeratorCurrentGetter); // Call TIn enumator.Current getter (stack=outList,datum)
+                targetILGen.Emit(OpCodes.Call, enumeratorCurrentGetter); // Call TIn enumerator.Current getter (stack=outList,datum)
                 EmitTypeConverter(listSubType, targetILGen, doLoad); // Convert the data as-needed
                 if (!doLoad)
                 {
@@ -365,6 +361,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 else if (typeof(ICollection).IsAssignableFrom(type))
                 {
+                    if (doLoad)
+                    {
+                        targetILGen.Emit(OpCodes.Call, FDSDataAsDataListGetter);
+                    }
                     targetILGen.Emit(OpCodes.Call, doLoad ? GetListLoader(type) : GetListSaver(type)); // Call the relevant list converter method
                 }
 
@@ -506,7 +506,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                         loadILGen.Emit(OpCodes.Ldfld, AutoConfigurationModifiedArrayField); // Load the modified array reference (stack=modified-array)
                         loadILGen.Emit(OpCodes.Ldc_I4, fieldData.Index); // Loads the field index integer (stack=modified-array,index)
                         loadILGen.Emit(OpCodes.Ldc_I4_1); // Loads a 'true' boolean (stack=modified-array,index,true)
-                        loadILGen.Emit(OpCodes.Stelem_I4); // Store the true into the array (stack now clear)
+                        loadILGen.Emit(OpCodes.Stelem_I1); // Store the true into the array (stack now clear)
                     }
                     foreach (FieldInfo field in type.GetRuntimeFields())
                     {
@@ -531,7 +531,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                         saveILGen.Emit(OpCodes.Ldfld, AutoConfigurationInternalDataField); // load the internal data field (stack=internal-data)
                         saveILGen.Emit(OpCodes.Ldfld, AutoConfigurationModifiedArrayField); // Load the modified array reference (stack=modified-array)
                         saveILGen.Emit(OpCodes.Ldc_I4, fieldData.Index); // Loads the field index integer (stack=modified-array,index)
-                        saveILGen.Emit(OpCodes.Ldelem_I4); // Loads the boolean at the index (stack=modified-bool)
+                        saveILGen.Emit(OpCodes.Ldelem_I1); // Loads the boolean at the index (stack=modified-bool)
                         saveILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the boolean input 'save unmodified' input) (stack=modified-bool,save-unmodified-bool)
                         saveILGen.Emit(OpCodes.Or); // ORs the two bools - true output indicates save, false indicates skip (stack=actual bool)
                         Label skipLabel = saveILGen.DefineLabel();
@@ -645,11 +645,22 @@ namespace FreneticUtilities.FreneticDataSyntax
             InternalData.SharedData.LoadSection(this, section);
         }
 
+        /// <summary>Adds a changed event handler to the given field by name.
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para></summary>
+        /// <exception cref="ArgumentException">If the field name is invalid.</exception>
+        public void RegisterChangedEventOrThrow(string field, Action changedEventHandler)
+        {
+            if (!TryRegisterChangedEvent(field, changedEventHandler))
+            {
+                throw new ArgumentException($"Invalid field path '{field}'");
+            }
+        }
+
         /// <summary>Tries to add a changed event handler to the given field by name.
         /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
-        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <para>Exceptions can be thrown if object types are incorrect or null.</para></summary>
         /// <returns>True if set, false if not.</returns>
-        public bool RegisterChangedEvent(string field, Action changedEventHandler)
+        public bool TryRegisterChangedEvent(string field, Action changedEventHandler)
         {
             field = field.ToLowerFast();
             int dot = field.IndexOf('.');
@@ -666,7 +677,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                     return false;
                 }
                 InternalData.IsFieldModified[sectionData.Index] = true;
-                return subSection.RegisterChangedEvent(subPath, changedEventHandler);
+                return subSection.TryRegisterChangedEvent(subPath, changedEventHandler);
             }
             if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
             {
@@ -679,7 +690,7 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>Tries to set the given field by name to the given value.
         /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
-        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <para>Exceptions can be thrown if object types are incorrect or null.</para></summary>
         /// <returns>True if set, false if not.</returns>
         public bool TrySetFieldValue(string field, object value)
         {
@@ -717,7 +728,7 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>Gets the current value of the field by name, or the default if no value exists for the given path.
         /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
-        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <para>Exceptions can be thrown if object types are incorrect or null.</para></summary>
         public T GetFieldValueOrDefault<T>(string field, T def = default)
         {
             field = field.ToLowerFast();
@@ -754,7 +765,7 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>Returns true if the named field is modified. Returns false if the field is unmodified, or paths are incorrect.
         /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
-        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <para>Exceptions can be thrown if object types are incorrect or null.</para></summary>
         public bool IsFieldModified(string field)
         {
             field = field.ToLowerFast();
@@ -782,7 +793,7 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>Sets whether the named field is modified.
         /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
-        /// <para>Exceptions can be throw if object types are incorrect or null.</para></summary>
+        /// <para>Exceptions can be thrown if object types are incorrect or null.</para></summary>
         /// <returns>True if applied, false if failed.</returns>
         public bool TrySetFieldModified(string field, bool modified)
         {
