@@ -645,6 +645,45 @@ namespace FreneticUtilities.FreneticDataSyntax
             InternalData.SharedData.LoadSection(this, section);
         }
 
+        /// <summary>Tries to get the internal data for the given field by name.
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para></summary>
+        /// <returns>The internal data, or null if invalid.</returns>
+        public Internal.SingleFieldData TryGetFieldInternalData(string field, out AutoConfiguration sectionAbove, bool markModified = false)
+        {
+            field = field.ToLowerFast();
+            int dot = field.IndexOf('.');
+            if (dot > 0)
+            {
+                string thisField = field[..dot];
+                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
+                {
+                    sectionAbove = null;
+                    return null;
+                }
+                string subPath = field[(dot + 1)..];
+                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
+                {
+                    sectionAbove = null;
+                    return null;
+                }
+                if (markModified)
+                {
+                    InternalData.IsFieldModified[sectionData.Index] = true;
+                }
+                return subSection.TryGetFieldInternalData(subPath, out sectionAbove);
+            }
+            sectionAbove = this;
+            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            {
+                return null;
+            }
+            if (markModified)
+            {
+                InternalData.IsFieldModified[data.Index] = true;
+            }
+            return data;
+        }
+
         /// <summary>Adds a changed event handler to the given field by name.
         /// <para>Case insensitive field names, allows dot-separated sub-paths.</para></summary>
         /// <exception cref="ArgumentException">If the field name is invalid.</exception>
@@ -662,28 +701,11 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>True if set, false if not.</returns>
         public bool TryRegisterChangedEvent(string field, Action changedEventHandler)
         {
-            field = field.ToLowerFast();
-            int dot = field.IndexOf('.');
-            if (dot > 0)
-            {
-                string thisField = field[..dot];
-                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
-                {
-                    return false;
-                }
-                string subPath = field[(dot + 1)..];
-                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
-                {
-                    return false;
-                }
-                InternalData.IsFieldModified[sectionData.Index] = true;
-                return subSection.TryRegisterChangedEvent(subPath, changedEventHandler);
-            }
-            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            Internal.SingleFieldData data = TryGetFieldInternalData(field, out _, true);
+            if (data is null)
             {
                 return false;
             }
-            InternalData.IsFieldModified[data.Index] = true;
             data.OnChanged += changedEventHandler;
             return true;
         }
@@ -694,34 +716,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>True if set, false if not.</returns>
         public bool TrySetFieldValue(string field, object value)
         {
-            field = field.ToLowerFast();
-            int dot = field.IndexOf('.');
-            if (dot > 0)
-            {
-                string thisField = field[..dot];
-                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
-                {
-                    return false;
-                }
-                string subPath = field[(dot + 1)..];
-                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
-                {
-                    return false;
-                }
-                InternalData.IsFieldModified[sectionData.Index] = true;
-                if (subSection.TrySetFieldValue(subPath, value))
-                {
-                    sectionData.OnChanged?.Invoke();
-                    return true;
-                }
-                return false;
-            }
-            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            Internal.SingleFieldData data = TryGetFieldInternalData(field, out AutoConfiguration section, true);
+            if (data is null)
             {
                 return false;
             }
-            InternalData.IsFieldModified[data.Index] = true;
-            data.SetValue(this, value);
+            data.SetValue(section, value);
             data.OnChanged?.Invoke();
             return true;
         }
@@ -731,27 +731,12 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <para>Exceptions can be thrown if object types are incorrect or null.</para></summary>
         public T GetFieldValueOrDefault<T>(string field, T def = default)
         {
-            field = field.ToLowerFast();
-            int dot = field.IndexOf('.');
-            if (dot > 0)
-            {
-                string thisField = field[..dot];
-                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
-                {
-                    return def;
-                }
-                string subPath = field[(dot + 1)..];
-                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
-                {
-                    return def;
-                }
-                return subSection.GetFieldValueOrDefault<T>(subPath);
-            }
-            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            Internal.SingleFieldData data = TryGetFieldInternalData(field, out AutoConfiguration section);
+            if (data is null)
             {
                 return def;
             }
-            object result = data.GetValue(this);
+            object result = data.GetValue(section);
             if (result is null)
             {
                 return def;
@@ -764,31 +749,15 @@ namespace FreneticUtilities.FreneticDataSyntax
         }
 
         /// <summary>Returns true if the named field is modified. Returns false if the field is unmodified, or paths are incorrect.
-        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para>
-        /// <para>Exceptions can be thrown if object types are incorrect or null.</para></summary>
+        /// <para>Case insensitive field names, allows dot-separated sub-paths.</para></summary>
         public bool IsFieldModified(string field)
         {
-            field = field.ToLowerFast();
-            int dot = field.IndexOf('.');
-            if (dot > 0)
-            {
-                string thisField = field[..dot];
-                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
-                {
-                    return false;
-                }
-                string subPath = field[(dot + 1)..];
-                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
-                {
-                    return false;
-                }
-                return subSection.IsFieldModified(subPath);
-            }
-            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            Internal.SingleFieldData data = TryGetFieldInternalData(field, out AutoConfiguration section);
+            if (data is null)
             {
                 return false;
             }
-            return InternalData.IsFieldModified[data.Index];
+            return section.InternalData.IsFieldModified[data.Index];
         }
 
         /// <summary>Sets whether the named field is modified.
@@ -797,28 +766,13 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>True if applied, false if failed.</returns>
         public bool TrySetFieldModified(string field, bool modified)
         {
-            field = field.ToLowerFast();
-            int dot = field.IndexOf('.');
-            if (dot > 0)
-            {
-                string thisField = field[..dot];
-                if (!InternalData.SharedData.Fields.TryGetValue(thisField, out Internal.SingleFieldData sectionData) || !sectionData.IsSection)
-                {
-                    return false;
-                }
-                string subPath = field[(dot + 1)..];
-                if (sectionData.GetValue(this) is not AutoConfiguration subSection)
-                {
-                    return false;
-                }
-                return subSection.TrySetFieldModified(subPath, modified);
-            }
-            if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
+            Internal.SingleFieldData data = TryGetFieldInternalData(field, out AutoConfiguration section);
+            if (data is null)
             {
                 return false;
             }
             // TODO: if modified is false, apply default value to the field?
-            InternalData.IsFieldModified[data.Index] = modified;
+            section.InternalData.IsFieldModified[data.Index] = modified;
             if (data.IsSection && !modified)
             {
                 static void clearModified(AutoConfiguration config)
@@ -832,7 +786,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                         }
                     }
                 }
-                clearModified(data.GetValue(this) as AutoConfiguration);
+                clearModified(data.GetValue(section) as AutoConfiguration);
             }
             return true;
         }
