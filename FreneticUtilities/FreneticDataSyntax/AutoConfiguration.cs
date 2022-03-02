@@ -441,6 +441,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 ILGenerator targetILGen = genMethod.GetILGenerator();
                 targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=config)
                 targetILGen.Emit(OpCodes.Ldfld, field); // Load the field (stack=field)
+                if (field.FieldType.IsValueType)
+                {
+                    targetILGen.Emit(OpCodes.Box, field.FieldType); // If necessary, box the value
+                }
                 targetILGen.Emit(OpCodes.Ret); // Return the value (stack clear)
                 return genMethod.CreateDelegate<Func<AutoConfiguration, object>>();
             }
@@ -452,6 +456,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 ILGenerator targetILGen = genMethod.GetILGenerator();
                 targetILGen.Emit(OpCodes.Ldarg_0); // Load the config input parameter (stack=config)
                 targetILGen.Emit(OpCodes.Ldarg_1); // Load the value input parameter (stack=config, value)
+                if (field.FieldType.IsValueType)
+                {
+                    targetILGen.Emit(OpCodes.Unbox_Any, field.FieldType);
+                }
                 targetILGen.Emit(OpCodes.Stfld, field); // Store value to the field (stack clear)
                 targetILGen.Emit(OpCodes.Ret); // Return
                 return genMethod.CreateDelegate<Action<AutoConfiguration, object>>();
