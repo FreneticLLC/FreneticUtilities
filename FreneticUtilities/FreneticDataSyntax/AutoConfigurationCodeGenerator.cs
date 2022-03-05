@@ -249,6 +249,7 @@ namespace FreneticUtilities.FreneticDataSyntax
         {
             Type listSubType = type.GetGenericArguments()[0];
             Type inListType, outListType, inSubType, outSubType, enumeratorType;
+            Type[] inputTypes;
             LocalBuilder outListVariable, inListVariable;
             MethodInfo enumeratorMethod, enumeratorMoveNextMethod, enumeratorCurrentGetter, listAddMethod;
             ConstructorInfo outListConstructor;
@@ -264,6 +265,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 enumeratorCurrentGetter = FDSDataListEnumeratorCurrentGetter;
                 listAddMethod = outListType.GetMethod(nameof(ICollection<int>.Add));
                 outListConstructor = type.GetConstructor(Array.Empty<Type>());
+                inputTypes = new Type[] { inListType };
             }
             else
             {
@@ -277,8 +279,9 @@ namespace FreneticUtilities.FreneticDataSyntax
                 enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator.Current)).GetMethod;
                 listAddMethod = FDSDataListAddMethod;
                 outListConstructor = FDSDataListConstructor;
+                inputTypes = new Type[] { inListType, typeof(bool) };
             }
-            DynamicMethod genMethod = new("ListConvert", outListType, new Type[] { inListType }, typeof(AutoConfiguration).Module, true);
+            DynamicMethod genMethod = new("ListConvert", outListType, inputTypes, typeof(AutoConfiguration).Module, true);
             ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"ListConvert_{inListType.Name}");
             targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=paramInList)
             // Store input list and new output list to local variable
@@ -336,6 +339,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             Type keyType = type.GetGenericArguments()[0];
             Type valueType = type.GetGenericArguments()[1];
             Type outType, inType, enumeratorType, outKeyType, actualValueType, inKeyType;
+            Type[] inputTypes;
             ConstructorInfo outConstructor;
             MethodInfo enumeratorMethod, getKeysMethod, addMethod, getValueMethod, enumeratorMoveNextMethod, enumeratorCurrentGetter;
             if (doLoad)
@@ -353,6 +357,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 getValueMethod = SectionGetRootDataMethod;
                 enumeratorMoveNextMethod = IEnumeratorMoveNextMethod;
                 enumeratorCurrentGetter = IEnumeratorCurrentGetter;
+                inputTypes = new Type[] { inType };
             }
             else
             {
@@ -369,9 +374,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator.Current)).GetMethod;
                 addMethod = SectionSetRootDataMethod;
                 getValueMethod = type.GetMethod("get_Item");
+                inputTypes = new Type[] { inType, typeof(bool) };
             }
-            DynamicMethod genMethod = new("DictionaryConvert", outType, new Type[] { inType }, typeof(AutoConfiguration).Module, true);
-            ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"DictionaryConvert_{inType.Name}");
+            DynamicMethod genMethod = new("DictionaryConvert", outType, inputTypes, typeof(AutoConfiguration).Module, true);
+            ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"DictionaryConvert_{type.Name}_{keyType.Name}_{valueType.Name}_{(doLoad ? "load" : "save")}");
             // Dictionary<TKey, TValue> result = new();
             LocalBuilder resultLocal = targetILGen.DeclareLocal(outType);
             targetILGen.Emit(OpCodes.Newobj, outConstructor);
@@ -391,12 +397,14 @@ namespace FreneticUtilities.FreneticDataSyntax
             // Loop body
             Label blockStart = targetILGen.DefineLabel();
             targetILGen.MarkLabel(blockStart);
+            targetILGen.Comment("Loop body start");
             // key = keysEnumerator.Current;
             targetILGen.Emit(enumeratorType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, keysEnumeratorLocal);
             targetILGen.Emit(enumeratorType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, enumeratorCurrentGetter);
             targetILGen.Emit(OpCodes.Stloc, keyLocal);
             // result.Add(ConvertKey(key), ConvertValue(section.GetRootData(key)));
             targetILGen.Emit(OpCodes.Ldloc, resultLocal);
+            targetILGen.Comment("Gather key");
             targetILGen.Emit(OpCodes.Ldloc, keyLocal);
             if (doLoad)
             {
@@ -411,6 +419,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 targetILGen.Emit(OpCodes.Callvirt, ObjectToStringMethod);
             }
+            targetILGen.Comment("Gather value");
             targetILGen.Emit(OpCodes.Ldarg_0);
             targetILGen.Emit(OpCodes.Ldloc, keyLocal);
             targetILGen.Emit(OpCodes.Call, getValueMethod);
@@ -429,6 +438,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             targetILGen.Emit(OpCodes.Brtrue, blockStart);
             // } else { goto finally; }
             // } finally {
+            targetILGen.Comment("Loop body end");
             targetILGen.Emit(OpCodes.Leave, tryBlock);
             targetILGen.BeginFinallyBlock();
             // keysEnumerator.Dispose();
@@ -477,6 +487,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                     targetILGen.Emit(OpCodes.Ldfld, FDSDataInternalField);
                     targetILGen.Emit(OpCodes.Castclass, typeof(FDSSection));
                 }
+                else
+                {
+                    targetILGen.Emit(OpCodes.Ldarg_1);
+                }
                 targetILGen.Emit(OpCodes.Call, doLoad ? GetDictionaryLoader(type) : GetDictionarySaver(type)); // Call the relevant Dictionary converter method
             }
             else if (typeof(ICollection).IsAssignableFrom(type))
@@ -485,7 +499,33 @@ namespace FreneticUtilities.FreneticDataSyntax
                 {
                     targetILGen.Emit(OpCodes.Call, FDSDataAsDataListGetter);
                 }
+                else
+                {
+                    targetILGen.Emit(OpCodes.Ldarg_1);
+                }
                 targetILGen.Emit(OpCodes.Call, doLoad ? GetListLoader(type) : GetListSaver(type)); // Call the relevant list converter method
+            }
+            else if (typeof(AutoConfiguration).IsAssignableFrom(type))
+            {
+                if (doLoad)
+                {
+                    targetILGen.Emit(OpCodes.Ldfld, FDSDataInternalField);
+                    targetILGen.Emit(OpCodes.Castclass, typeof(FDSSection));
+                    LocalBuilder sectionLocal = targetILGen.DeclareLocal(typeof(FDSSection));
+                    targetILGen.Emit(OpCodes.Stloc, sectionLocal);
+                    targetILGen.Emit(OpCodes.Newobj, type.GetConstructor(Array.Empty<Type>()));
+                    LocalBuilder configLocal = targetILGen.DeclareLocal(type);
+                    targetILGen.Emit(OpCodes.Stloc, configLocal);
+                    targetILGen.Emit(OpCodes.Ldloc, configLocal);
+                    targetILGen.Emit(OpCodes.Ldloc, sectionLocal);
+                    targetILGen.Emit(OpCodes.Call, ConfigLoadMethod);
+                    targetILGen.Emit(OpCodes.Ldloc, configLocal);
+                }
+                else
+                {
+                    targetILGen.Emit(OpCodes.Ldarg_1);
+                    targetILGen.Emit(OpCodes.Call, ConfigSaveMethod);
+                }
             }
             else
             {
@@ -554,7 +594,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             else if (origObj is ICollection)
             {
-                List<FDSData> gennedList = GetListSaver(t).Invoke(null, new object[] { origObj }) as List<FDSData>;
+                List<FDSData> gennedList = GetListSaver(t).Invoke(null, new object[] { origObj, true }) as List<FDSData>;
                 return GetListLoader(t).Invoke(null, new object[] { gennedList });
             }
             else

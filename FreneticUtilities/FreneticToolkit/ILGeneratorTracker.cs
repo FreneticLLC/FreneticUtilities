@@ -126,6 +126,7 @@ namespace FreneticUtilities.FreneticToolkit
 #if VALIDATE
             if (StackTypes.Count != expected)
             {
+                CommentStack();
                 DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be exactly {EmphasizeCode}{expected}");
             }
 #endif
@@ -140,6 +141,7 @@ namespace FreneticUtilities.FreneticToolkit
 #if VALIDATE
             if (StackTypes.Count < expected)
             {
+                CommentStack();
                 DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be at least {EmphasizeCode}{expected}");
             }
 #endif
@@ -154,6 +156,7 @@ namespace FreneticUtilities.FreneticToolkit
 #if VALIDATE
             if (StackTypes.Count > expected)
             {
+                CommentStack();
                 DoErrorDirect($"Stack not well sized at {EmphasizeCode}{situation}{BaseCode}... size = {EmphasizeCode}{StackTypes.Count}{BaseCode} but should be at most {EmphasizeCode}{expected}");
             }
 #endif
@@ -747,6 +750,15 @@ namespace FreneticUtilities.FreneticToolkit
         public void Comment(string str)
         {
             AddCode(OpCodes.Nop, $"-- {EmphasizeCode}{str}{BaseCode} --", "// Comment");
+        }
+
+        /// <summary>Adds a comment to the developer debug of the IL output showing the full current stack.</summary>
+        [Conditional("VALIDATE")]
+        public void CommentStack()
+        {
+#if VALIDATE
+            AddCode(OpCodes.Nop, string.Join(", ", StackTypes.Select(t => t.FullName)), "// Stack Report");
+#endif
         }
 
         /// <summary>Emits a <see cref="Console.WriteLine(string?)"/> directly (for debugging usage mainly).</summary>
