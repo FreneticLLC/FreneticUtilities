@@ -71,7 +71,31 @@ namespace FreneticUtilities.FreneticToolkit
         public Type[] Parameters;
 
         /// <summary>Action to show error output.</summary>
-        public Action<string> Error = Console.Error.WriteLine;
+        public Action<string> Error = (str) =>
+        {
+            string[] bits = str.SplitFast('\0');
+            Console.Error.Write(bits[0]);
+            for (int i = 1; i < bits.Length; i++)
+            {
+                switch (bits[i][0])
+                {
+                    case 'E':
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        break;
+                    case 'M':
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        break;
+                    default:
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                }
+                Console.Error.Write(bits[i][1..]);
+            }
+            Console.Error.WriteLine();
+        };
 
         /// <summary>Shows an error and automatically formats around it.</summary>
         public void DoErrorDirect(string message)
@@ -80,7 +104,7 @@ namespace FreneticUtilities.FreneticToolkit
         }
 
         /// <summary>Optional text format codes.</summary>
-        public string EmphasizeCode = "", BaseCode = "", MinorCode = "";
+        public string EmphasizeCode = "\0E", BaseCode = "\0B", MinorCode = "\0M";
 
 #if VALIDATE
         /// <summary>All codes generated. Only has a value when compiled in DEBUG mode.</summary>
@@ -543,6 +567,11 @@ namespace FreneticUtilities.FreneticToolkit
         public void StackSizeChange(int amount)
         {
 #if VALIDATE
+            if (amount == 0)
+            {
+                AddCode(OpCodes.Nop, $"<stack size moved out-of-track, now: {StackTypes.Count}>", "minor");
+                return;
+            }
             while (amount < 0 && StackTypes.Any())
             {
                 StackTypes.Pop();
@@ -717,7 +746,7 @@ namespace FreneticUtilities.FreneticToolkit
         [Conditional("VALIDATE")]
         public void Comment(string str)
         {
-            AddCode(OpCodes.Nop, "-- " + str + " --", "// Comment");
+            AddCode(OpCodes.Nop, $"-- {EmphasizeCode}{str}{BaseCode} --", "// Comment");
         }
 
         /// <summary>Emits a <see cref="Console.WriteLine(string?)"/> directly (for debugging usage mainly).</summary>
