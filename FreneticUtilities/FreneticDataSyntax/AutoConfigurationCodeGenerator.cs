@@ -118,8 +118,11 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <summary>A reference to the <see cref="IEnumerator.MoveNext"/> method.</summary>
         public static MethodInfo IEnumeratorMoveNextMethod = typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext));
 
-        /// <summary>A reference to the <see cref="IEnumerator{T}.Current"/> property getter with type <see cref="string"/>.</summary>
-        public static MethodInfo IEnumeratorStringCurrentGetter = typeof(IEnumerator<string>).GetProperty(nameof(IEnumerator.Current)).GetMethod;
+        /// <summary>A reference to the <see cref="IEnumerator.Current"/> property getter.</summary>
+        public static MethodInfo IEnumeratorCurrentGetter = typeof(IEnumerator).GetProperty(nameof(IEnumerator.Current)).GetMethod;
+
+        /// <summary>A reference to the <see cref="object.ToString"/> method.</summary>
+        public static MethodInfo ObjectToStringMethod = typeof(object).GetMethod(nameof(object.ToString));
 
         /// <summary>A mapping of core object types to the method that converts <see cref="FDSData"/> to them.</summary>
         public static Dictionary<Type, DataConverter> FDSDataFieldsByType = new(64);
@@ -332,29 +335,40 @@ namespace FreneticUtilities.FreneticDataSyntax
         {
             Type keyType = type.GetGenericArguments()[0];
             Type valueType = type.GetGenericArguments()[1];
-            Type outType, inType, enumeratorType, outKeyType, outValueType, inKeyType;
+            Type outType, inType, enumeratorType, outKeyType, actualValueType, inKeyType;
             ConstructorInfo outConstructor;
-            MethodInfo enumeratorMethod, enumeratorMoveNextMethod, enumeratorCurrentGetter, getKeysMethod, addMethod;
+            MethodInfo enumeratorMethod, getKeysMethod, addMethod, getValueMethod, enumeratorMoveNextMethod, enumeratorCurrentGetter;
             if (doLoad)
             {
                 inType = typeof(FDSSection);
                 outType = type;
                 outKeyType = keyType;
                 inKeyType = typeof(string);
-                outValueType = valueType;
+                actualValueType = valueType;
                 outConstructor = type.GetConstructor(Array.Empty<Type>());
+                getKeysMethod = SectionGetRootKeysMethod;
                 enumeratorMethod = IEnumerableStringGetEnumeratorMethod;
                 enumeratorType = typeof(IEnumerator<string>);
-                enumeratorMoveNextMethod = IEnumeratorMoveNextMethod;
-                enumeratorCurrentGetter = IEnumeratorStringCurrentGetter;
-                getKeysMethod = SectionGetRootKeysMethod;
                 addMethod = type.GetMethod(nameof(IDictionary.Add), type.GetGenericArguments());
+                getValueMethod = SectionGetRootDataMethod;
+                enumeratorMoveNextMethod = IEnumeratorMoveNextMethod;
+                enumeratorCurrentGetter = IEnumeratorCurrentGetter;
             }
             else
             {
                 inType = type;
                 outType = typeof(FDSSection);
-                return new DynamicMethod("placeholder", typeof(string), new Type[] { inType }, typeof(AutoConfiguration).Module, true);
+                outKeyType = typeof(string);
+                inKeyType = keyType;
+                actualValueType = valueType;
+                outConstructor = SectionConstructor;
+                getKeysMethod = type.GetProperty(nameof(IDictionary.Keys)).GetMethod;
+                enumeratorMethod = getKeysMethod.ReturnType.GetMethod(nameof(ICollection.GetEnumerator));
+                enumeratorType = enumeratorMethod.ReturnType;
+                enumeratorMoveNextMethod = enumeratorType.GetMethod(nameof(IEnumerator.MoveNext));
+                enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator.Current)).GetMethod;
+                addMethod = SectionSetRootDataMethod;
+                getValueMethod = type.GetMethod("get_Item");
             }
             DynamicMethod genMethod = new("DictionaryConvert", outType, new Type[] { inType }, typeof(AutoConfiguration).Module, true);
             ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"DictionaryConvert_{inType.Name}");
@@ -362,9 +376,6 @@ namespace FreneticUtilities.FreneticDataSyntax
             LocalBuilder resultLocal = targetILGen.DeclareLocal(outType);
             targetILGen.Emit(OpCodes.Newobj, outConstructor);
             targetILGen.Emit(OpCodes.Stloc, resultLocal);
-            
-
-
             // IEnumerator<string> keysEnumerator = section.GetRootKeys().GetEnumerator();
             LocalBuilder keysEnumeratorLocal = targetILGen.DeclareLocal(enumeratorType);
             targetILGen.Emit(OpCodes.Ldarg_0);
@@ -380,36 +391,40 @@ namespace FreneticUtilities.FreneticDataSyntax
             // Loop body
             Label blockStart = targetILGen.DefineLabel();
             targetILGen.MarkLabel(blockStart);
-
-
             // key = keysEnumerator.Current;
-            targetILGen.Emit(OpCodes.Ldloc, keysEnumeratorLocal);
-            targetILGen.Emit(OpCodes.Callvirt, enumeratorCurrentGetter);
+            targetILGen.Emit(enumeratorType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, keysEnumeratorLocal);
+            targetILGen.Emit(enumeratorType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, enumeratorCurrentGetter);
             targetILGen.Emit(OpCodes.Stloc, keyLocal);
             // result.Add(ConvertKey(key), ConvertValue(section.GetRootData(key)));
             targetILGen.Emit(OpCodes.Ldloc, resultLocal);
             targetILGen.Emit(OpCodes.Ldloc, keyLocal);
-            targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // use FDSData to convert the key type
-            EmitTypeConverter(outKeyType, targetILGen, doLoad);
+            if (doLoad)
+            {
+                targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // use FDSData to convert the key type
+                EmitTypeConverter(outKeyType, targetILGen, doLoad);
+            }
+            else
+            {
+                if (keyLocal.LocalType.IsValueType)
+                {
+                    targetILGen.Emit(OpCodes.Box, keyLocal.LocalType);
+                }
+                targetILGen.Emit(OpCodes.Callvirt, ObjectToStringMethod);
+            }
             targetILGen.Emit(OpCodes.Ldarg_0);
             targetILGen.Emit(OpCodes.Ldloc, keyLocal);
-            targetILGen.Emit(OpCodes.Call, SectionGetRootDataMethod);
-            EmitTypeConverter(outValueType, targetILGen, doLoad);
+            targetILGen.Emit(OpCodes.Call, getValueMethod);
+            EmitTypeConverter(actualValueType, targetILGen, doLoad);
             if (!doLoad)
             {
                 targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data)
             }
             targetILGen.Emit(OpCodes.Call, addMethod);
-
-
             // Loop check (MoveNext)
             targetILGen.MarkLabel(loopCheck);
             // if (keysEnumerator.MoveNext()) {
-            targetILGen.Emit(OpCodes.Ldloc, keysEnumeratorLocal);
-            targetILGen.Emit(OpCodes.Callvirt, enumeratorMoveNextMethod);
-
-            
-
+            targetILGen.Emit(enumeratorType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, keysEnumeratorLocal);
+            targetILGen.Emit(enumeratorType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, enumeratorMoveNextMethod);
             // goto loopStart;
             targetILGen.Emit(OpCodes.Brtrue, blockStart);
             // } else { goto finally; }
@@ -417,13 +432,13 @@ namespace FreneticUtilities.FreneticDataSyntax
             targetILGen.Emit(OpCodes.Leave, tryBlock);
             targetILGen.BeginFinallyBlock();
             // keysEnumerator.Dispose();
-            targetILGen.Emit(OpCodes.Ldloc, keysEnumeratorLocal);
-            targetILGen.Emit(OpCodes.Callvirt, IDisposableDisposeMethod);
+            if (doLoad)
+            {
+                targetILGen.Emit(OpCodes.Ldloc, keysEnumeratorLocal);
+                targetILGen.Emit(OpCodes.Callvirt, IDisposableDisposeMethod);
+            }
             // }
             targetILGen.EndExceptionBlock();
-            
-
-
             // return result;
             targetILGen.Emit(OpCodes.Ldloc, resultLocal);
             targetILGen.Emit(OpCodes.Ret);

@@ -419,6 +419,14 @@ namespace FreneticUtilities.FreneticToolkit
             {
                 ValidateStackSizeIs("Leaving exception block", 0);
             }
+            else if (code == OpCodes.Box || code == OpCodes.Unbox_Any)
+            {
+                if (val is not Type)
+                {
+                    DoErrorDirect($"Invalid Box op (code {code}, to object {val}) - not a Type ({val}={val?.GetType()?.FullName})");
+                }
+                ValidateStackSizeIsAtLeast($"{code}", 1);
+            }
             else
             {
                 switch (code.StackBehaviourPop)
@@ -710,6 +718,18 @@ namespace FreneticUtilities.FreneticToolkit
         public void Comment(string str)
         {
             AddCode(OpCodes.Nop, "-- " + str + " --", "// Comment");
+        }
+
+        /// <summary>Emits a <see cref="Console.WriteLine(string?)"/> directly (for debugging usage mainly).</summary>
+        public void EmitWriteLine(string val)
+        {
+            Internal.EmitWriteLine(val);
+        }
+
+        /// <summary>Emits a <see cref="Console.WriteLine(object)"/> directly with a local variable (for debugging usage mainly).</summary>
+        public void EmitWriteLine(LocalBuilder loc)
+        {
+            Internal.EmitWriteLine(loc);
         }
     }
 }
