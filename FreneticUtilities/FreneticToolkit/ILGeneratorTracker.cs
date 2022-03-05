@@ -199,6 +199,10 @@ namespace FreneticUtilities.FreneticToolkit
                 }
                 else
                 {
+                    if (method.IsAbstract && code == OpCodes.Call)
+                    {
+                        DoErrorDirect($"Invalid call (code {code}, to object {val}) - method is abstract, cannot direct call, use callvirt");
+                    }
                     int paramCount = altParams ?? method.GetParameters().Length;
                     int fullParamCount = paramCount;
                     if (!method.IsStatic)

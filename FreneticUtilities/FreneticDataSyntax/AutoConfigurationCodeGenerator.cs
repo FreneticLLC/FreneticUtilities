@@ -25,7 +25,7 @@ using FreneticUtilities.FreneticToolkit;
 namespace FreneticUtilities.FreneticDataSyntax
 {
     /// <summary>Internal utility for <see cref="AutoConfiguration"/> to do dynamic code generation.</summary>
-    public class AutoConfigurationCodeGenerator
+    public static class AutoConfigurationCodeGenerator
     {
         /// <summary>Helper class that represents the tools needed to convert <see cref="FDSData"/> to the final output type.</summary>
         public class DataConverter
@@ -67,8 +67,11 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <summary>A reference to the <see cref="FDSSection.GetRootData(string)"/> method.</summary>
         public static MethodInfo SectionGetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetRootData), new Type[] { typeof(string) });
 
+        /// <summary>A reference to the <see cref="FDSSection.GetRootKeys"/> method.</summary>
+        public static MethodInfo SectionGetRootKeysMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetRootKeys));
+
         /// <summary>A reference to the <see cref="FixNull{T}(T?)"/> method.</summary>
-        public static MethodInfo FixNullMethod = typeof(AutoConfiguration.Internal).GetMethod(nameof(FixNull));
+        public static MethodInfo FixNullMethod = typeof(AutoConfigurationCodeGenerator).GetMethod(nameof(FixNull));
 
         /// <summary>A reference to the <see cref="List{FDSData}.Add"/> method for lists of <see cref="FDSData"/>.</summary>
         public static MethodInfo FDSDataListAddMethod = typeof(List<FDSData>).GetMethod(nameof(List<FDSData>.Add));
@@ -88,6 +91,9 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <summary>A reference to the <see cref="FDSData.AsDataList"/> property getter method.</summary>
         public static MethodInfo FDSDataAsDataListGetter = typeof(FDSData).GetProperty(nameof(FDSData.AsDataList)).GetMethod;
 
+        /// <summary>A reference to the <see cref="FDSData.Internal"/> field.</summary>
+        public static FieldInfo FDSDataInternalField = typeof(FDSData).GetField(nameof(FDSData.Internal));
+
         /// <summary>A reference to the <see cref="FDSSection"/> no-arguments constructor.</summary>
         public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor(Array.Empty<Type>());
 
@@ -105,6 +111,15 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>A reference to <see cref="AutoConfiguration.LocalInternal.IsFieldModified"/>.</summary>
         public static FieldInfo AutoConfigurationModifiedArrayField = typeof(AutoConfiguration.LocalInternal).GetField(nameof(AutoConfiguration.LocalInternal.IsFieldModified));
+
+        /// <summary>A reference to the <see cref="IEnumerable{T}.GetEnumerator"/> method with type <see cref="string"/>.</summary>
+        public static MethodInfo IEnumerableStringGetEnumeratorMethod = typeof(IEnumerable<string>).GetMethod(nameof(IEnumerable<string>.GetEnumerator));
+
+        /// <summary>A reference to the <see cref="IEnumerator.MoveNext"/> method.</summary>
+        public static MethodInfo IEnumeratorMoveNextMethod = typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext));
+
+        /// <summary>A reference to the <see cref="IEnumerator{T}.Current"/> property getter with type <see cref="string"/>.</summary>
+        public static MethodInfo IEnumeratorStringCurrentGetter = typeof(IEnumerator<string>).GetProperty(nameof(IEnumerator.Current)).GetMethod;
 
         /// <summary>A mapping of core object types to the method that converts <see cref="FDSData"/> to them.</summary>
         public static Dictionary<Type, DataConverter> FDSDataFieldsByType = new(64);
@@ -154,6 +169,40 @@ namespace FreneticUtilities.FreneticDataSyntax
 
         /// <summary>A mapping of types to methods that save a list of that type to a <see cref="List{T}"/> of <see cref="FDSData"/>.</summary>
         public static Dictionary<Type, DynamicMethod> ListSavers = new(32);
+
+        /// <summary>
+        /// Gets or creates a method that loads a list of the specified type from a <see cref="IDictionary{TKey, TValue}"/> of <see cref="FDSData"/>.
+        /// Uses <see cref="ListLoaders"/> as a backing map.
+        /// </summary>
+        /// <param name="type">The Dictionary type to load to, like typeof 'Dictionary&lt;int, string&gt;'.</param>
+        /// <returns>The method that loads to it.</returns>
+        public static DynamicMethod GetDictionaryLoader(Type type)
+        {
+            if (ListLoaders.TryGetValue(type, out DynamicMethod method))
+            {
+                return method;
+            }
+            DynamicMethod generated = CreateDictionaryConverter(type, true);
+            ListLoaders[type] = generated;
+            return generated;
+        }
+
+        /// <summary>
+        /// Gets or creates a method that saves a list of the specified type to a <see cref="IDictionary{TKey, TValue}"/> of <see cref="FDSData"/>.
+        /// Uses <see cref="ListSavers"/> as a backing map.
+        /// </summary>
+        /// <param name="type">The Dictionary type to save from, like typeof 'Dictionary&lt;int, string&gt;'.</param>
+        /// <returns>The method that saves from it.</returns>
+        public static DynamicMethod GetDictionarySaver(Type type)
+        {
+            if (ListSavers.TryGetValue(type, out DynamicMethod method))
+            {
+                return method;
+            }
+            DynamicMethod generated = CreateDictionaryConverter(type, false);
+            ListSavers[type] = generated;
+            return generated;
+        }
 
         /// <summary>
         /// Gets or creates a method that loads a list of the specified type from a <see cref="List{T}"/> of <see cref="FDSData"/>.
@@ -229,14 +278,14 @@ namespace FreneticUtilities.FreneticDataSyntax
             DynamicMethod genMethod = new("ListConvert", outListType, new Type[] { inListType }, typeof(AutoConfiguration).Module, true);
             ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"ListConvert_{inListType.Name}");
             targetILGen.Emit(OpCodes.Ldarg_0); // Load the input parameter (stack=paramInList)
-                                               // Store input list and new output list to local variable
+            // Store input list and new output list to local variable
             inListVariable = targetILGen.DeclareLocal(inListType); // List<TIn> inList;
             targetILGen.Emit(OpCodes.Stloc, inListVariable); // inList = dataList; (stack now clear)
             targetILGen.Emit(OpCodes.Newobj, outListConstructor); // new List<TOut>(); (stack=newOutList)
             outListVariable = targetILGen.DeclareLocal(outListType); // List<TOut> outList;
             targetILGen.Emit(OpCodes.Stloc, outListVariable); // outList = newOutList; (stack now clear)
-                                                              // foreach (TIn datum in inList)
-                                                              // Gather enumerator data
+            // foreach (TIn datum in inList)
+            // Gather enumerator data
             targetILGen.Emit(OpCodes.Ldloc, inListVariable); // Load the inList (stack=inList)
             targetILGen.Emit(OpCodes.Call, enumeratorMethod); // call inList.GetEnumerator() (stack=gottenEnum)
             LocalBuilder enumeratorVariable = targetILGen.DeclareLocal(enumeratorType);
@@ -244,7 +293,7 @@ namespace FreneticUtilities.FreneticDataSyntax
             Label tryBlock = targetILGen.BeginExceptionBlock(); // try { // for the 'finally' block farther down
             Label loopCheck = targetILGen.DefineLabel();
             targetILGen.Emit(OpCodes.Br, loopCheck); // Jump to the loop check first
-                                                     // Loop body
+            // Loop body
             Label blockStart = targetILGen.DefineLabel();
             targetILGen.MarkLabel(blockStart);
             targetILGen.Emit(OpCodes.Ldloc, outListVariable); // Load the outlist (stack=outList)
@@ -256,22 +305,128 @@ namespace FreneticUtilities.FreneticDataSyntax
                 targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data)
             }
             targetILGen.Emit(OpCodes.Call, listAddMethod); // call outList.add(datum); (stack now clear)
-                                                           // Loop check (MoveNext)
+            // Loop check (MoveNext)
             targetILGen.MarkLabel(loopCheck);
             targetILGen.Emit(OpCodes.Ldloca, enumeratorVariable); // Load the enumerator (stack=enumerator)
             targetILGen.Emit(OpCodes.Call, enumeratorMoveNextMethod); // Call bool enumator.MoveNext() (stack=hasNext)
             targetILGen.Emit(OpCodes.Brtrue, blockStart); // If true, jump to block start
-                                                          // else, continue to finally logic
-                                                          // Finally block
+            // else, continue to finally logic
+            // Finally block
             targetILGen.Emit(OpCodes.Leave, tryBlock); // end the 'try' block
             targetILGen.BeginFinallyBlock(); // finally {
             targetILGen.Emit(OpCodes.Ldloca, enumeratorVariable); // load enumerator variable (stack=enumerator)
             targetILGen.Emit(OpCodes.Constrained, enumeratorType); // constrain the type for the disposable call
             targetILGen.Emit(OpCodes.Callvirt, IDisposableDisposeMethod); // enumerator.Dispose(); (stack now clear)
             targetILGen.EndExceptionBlock(); // end the finally { block
-                                             // End of method (return)
+            // End of method (return)
             targetILGen.Emit(OpCodes.Ldloc, outListVariable); // load the outList onto stack (stack=outList)
             targetILGen.Emit(OpCodes.Ret); // return outList;
+            return genMethod;
+        }
+
+        /// <summary>Generates a method that loads a Dictionary of the specified type from a <see cref="IDictionary{TKey, TValue}"/>.</summary>
+        /// <param name="type">The type to convert to/from.</param>
+        /// <param name="doLoad">True indicates load, false indicates save.</param>
+        /// <returns>The generated method.</returns>
+        public static DynamicMethod CreateDictionaryConverter(Type type, bool doLoad)
+        {
+            Type keyType = type.GetGenericArguments()[0];
+            Type valueType = type.GetGenericArguments()[1];
+            Type outType, inType, enumeratorType, outKeyType, outValueType, inKeyType;
+            ConstructorInfo outConstructor;
+            MethodInfo enumeratorMethod, enumeratorMoveNextMethod, enumeratorCurrentGetter, getKeysMethod, addMethod;
+            if (doLoad)
+            {
+                inType = typeof(FDSSection);
+                outType = type;
+                outKeyType = keyType;
+                inKeyType = typeof(string);
+                outValueType = valueType;
+                outConstructor = type.GetConstructor(Array.Empty<Type>());
+                enumeratorMethod = IEnumerableStringGetEnumeratorMethod;
+                enumeratorType = typeof(IEnumerator<string>);
+                enumeratorMoveNextMethod = IEnumeratorMoveNextMethod;
+                enumeratorCurrentGetter = IEnumeratorStringCurrentGetter;
+                getKeysMethod = SectionGetRootKeysMethod;
+                addMethod = type.GetMethod(nameof(IDictionary.Add), type.GetGenericArguments());
+            }
+            else
+            {
+                inType = type;
+                outType = typeof(FDSSection);
+                return new DynamicMethod("placeholder", typeof(string), new Type[] { inType }, typeof(AutoConfiguration).Module, true);
+            }
+            DynamicMethod genMethod = new("DictionaryConvert", outType, new Type[] { inType }, typeof(AutoConfiguration).Module, true);
+            ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"DictionaryConvert_{inType.Name}");
+            // Dictionary<TKey, TValue> result = new();
+            LocalBuilder resultLocal = targetILGen.DeclareLocal(outType);
+            targetILGen.Emit(OpCodes.Newobj, outConstructor);
+            targetILGen.Emit(OpCodes.Stloc, resultLocal);
+            
+
+
+            // IEnumerator<string> keysEnumerator = section.GetRootKeys().GetEnumerator();
+            LocalBuilder keysEnumeratorLocal = targetILGen.DeclareLocal(enumeratorType);
+            targetILGen.Emit(OpCodes.Ldarg_0);
+            targetILGen.Emit(OpCodes.Call, getKeysMethod);
+            targetILGen.Emit(OpCodes.Callvirt, enumeratorMethod);
+            targetILGen.Emit(OpCodes.Stloc, keysEnumeratorLocal);
+            LocalBuilder keyLocal = targetILGen.DeclareLocal(inKeyType); // TKey key;
+            // try {
+            Label tryBlock = targetILGen.BeginExceptionBlock();
+            // 
+            Label loopCheck = targetILGen.DefineLabel();
+            targetILGen.Emit(OpCodes.Br, loopCheck); // Jump to the loop check first
+            // Loop body
+            Label blockStart = targetILGen.DefineLabel();
+            targetILGen.MarkLabel(blockStart);
+
+
+            // key = keysEnumerator.Current;
+            targetILGen.Emit(OpCodes.Ldloc, keysEnumeratorLocal);
+            targetILGen.Emit(OpCodes.Callvirt, enumeratorCurrentGetter);
+            targetILGen.Emit(OpCodes.Stloc, keyLocal);
+            // result.Add(ConvertKey(key), ConvertValue(section.GetRootData(key)));
+            targetILGen.Emit(OpCodes.Ldloc, resultLocal);
+            targetILGen.Emit(OpCodes.Ldloc, keyLocal);
+            targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // use FDSData to convert the key type
+            EmitTypeConverter(outKeyType, targetILGen, doLoad);
+            targetILGen.Emit(OpCodes.Ldarg_0);
+            targetILGen.Emit(OpCodes.Ldloc, keyLocal);
+            targetILGen.Emit(OpCodes.Call, SectionGetRootDataMethod);
+            EmitTypeConverter(outValueType, targetILGen, doLoad);
+            if (!doLoad)
+            {
+                targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data)
+            }
+            targetILGen.Emit(OpCodes.Call, addMethod);
+
+
+            // Loop check (MoveNext)
+            targetILGen.MarkLabel(loopCheck);
+            // if (keysEnumerator.MoveNext()) {
+            targetILGen.Emit(OpCodes.Ldloc, keysEnumeratorLocal);
+            targetILGen.Emit(OpCodes.Callvirt, enumeratorMoveNextMethod);
+
+            
+
+            // goto loopStart;
+            targetILGen.Emit(OpCodes.Brtrue, blockStart);
+            // } else { goto finally; }
+            // } finally {
+            targetILGen.Emit(OpCodes.Leave, tryBlock);
+            targetILGen.BeginFinallyBlock();
+            // keysEnumerator.Dispose();
+            targetILGen.Emit(OpCodes.Ldloc, keysEnumeratorLocal);
+            targetILGen.Emit(OpCodes.Callvirt, IDisposableDisposeMethod);
+            // }
+            targetILGen.EndExceptionBlock();
+            
+
+
+            // return result;
+            targetILGen.Emit(OpCodes.Ldloc, resultLocal);
+            targetILGen.Emit(OpCodes.Ret);
             return genMethod;
         }
 
@@ -300,6 +455,15 @@ namespace FreneticUtilities.FreneticDataSyntax
                     targetILGen.Emit(OpCodes.Box, type); // Box value types before sending along.
                 }
             }
+            else if (typeof(IDictionary).IsAssignableFrom(type))
+            {
+                if (doLoad)
+                {
+                    targetILGen.Emit(OpCodes.Ldfld, FDSDataInternalField);
+                    targetILGen.Emit(OpCodes.Castclass, typeof(FDSSection));
+                }
+                targetILGen.Emit(OpCodes.Call, doLoad ? GetDictionaryLoader(type) : GetDictionarySaver(type)); // Call the relevant Dictionary converter method
+            }
             else if (typeof(ICollection).IsAssignableFrom(type))
             {
                 if (doLoad)
@@ -308,9 +472,6 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 targetILGen.Emit(OpCodes.Call, doLoad ? GetListLoader(type) : GetListSaver(type)); // Call the relevant list converter method
             }
-
-            // TODO: Dictionary/...? type support
-
             else
             {
                 throw new InvalidOperationException($"Type '{type.FullName}' is not supported by {nameof(AutoConfiguration)}.");
@@ -497,7 +658,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                     saveILGen.Emit(OpCodes.Or); // ORs the two bools - true output indicates save, false indicates skip (stack=actual bool)
                     Label skipLabel = saveILGen.DefineLabel();
                     saveILGen.Emit(OpCodes.Brfalse, skipLabel); // If false, skip past current part (stack clear)
-                                                                // If true (do save), then:
+                    // If true (do save), then:
                     saveILGen.Emit(OpCodes.Ldloc, saveOutputLocal); // load the output section (stack=output)
                     saveILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=output,name)
                     saveILGen.Emit(OpCodes.Ldarg_0); // load arg 0 (the input config) (stack=output,name,input)
@@ -506,7 +667,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                     {
                         saveILGen.Emit(OpCodes.Ldarg_1); // load the save-unmodified parameter (stack=output,name,data,save-unmodified-bool)
                         saveILGen.Emit(OpCodes.Call, ConfigSaveMethod); // Call config.Save() (stack=output,name,out-data)
-                                                                        // /\ save | load \/
+                        // /\ save | load \/
                         loadILGen.Emit(OpCodes.Ldarg_1); // load arg 1 (the FDS Section) (stack=section)
                         loadILGen.Emit(OpCodes.Ldstr, field.Name); // load the field name as a string (stack=section,name)
                         loadILGen.Emit(OpCodes.Call, SectionGetSectionMethod); // Call section.GetSection(name) (stack=sub-section)
@@ -536,7 +697,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                         loadILGen.Emit(OpCodes.Stfld, field); // Store to the relevant field on the config instance (stack was config,out-data - now clear)
                         genLoadMarkModified(loadILGen, fieldData);
                         loadILGen.MarkLabel(afterIfLabel); // }
-                                                           // /\ load | save \/
+                        // /\ load | save \/
                         EmitTypeConverter(field.FieldType, saveILGen, false); // call the type converter needed (stack=output,name,out-data-cleaned)
                     }
                     saveILGen.ValidateStackSizeIs("Save before FDSData init", 3);
