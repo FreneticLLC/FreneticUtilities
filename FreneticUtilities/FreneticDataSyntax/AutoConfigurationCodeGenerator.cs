@@ -311,6 +311,10 @@ namespace FreneticUtilities.FreneticDataSyntax
                 targetILGen.Emit(OpCodes.Newobj, FDSDataObjectConstructor); // new FDSData(out-data)
             }
             targetILGen.Emit(OpCodes.Call, listAddMethod); // call outList.add(datum); (stack now clear)
+            if (listAddMethod.ReturnType != typeof(void)) // eg HashSet.Add returns a bool
+            {
+                targetILGen.Emit(OpCodes.Pop);
+            }
             // Loop check (MoveNext)
             targetILGen.MarkLabel(loopCheck);
             targetILGen.Emit(OpCodes.Ldloca, enumeratorVariable); // Load the enumerator (stack=enumerator)
@@ -493,7 +497,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 targetILGen.Emit(OpCodes.Call, doLoad ? GetDictionaryLoader(type) : GetDictionarySaver(type)); // Call the relevant Dictionary converter method
             }
-            else if (typeof(ICollection).IsAssignableFrom(type))
+            else if (typeof(IEnumerable).IsAssignableFrom(type))
             {
                 if (doLoad)
                 {
@@ -592,7 +596,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 }
                 return result;
             }
-            else if (origObj is ICollection)
+            else if (origObj is IEnumerable)
             {
                 List<FDSData> gennedList = GetListSaver(t).Invoke(null, new object[] { origObj, true }) as List<FDSData>;
                 return GetListLoader(t).Invoke(null, new object[] { gennedList });
