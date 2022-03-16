@@ -28,9 +28,11 @@ namespace FreneticUtilities.FreneticExtensions
             char[] finalString = input.ToCharArray();
             for (int i = 0; i < finalString.Length; i++)
             {
-                if (finalString[i] >= 'A' && finalString[i] <= 'Z')
+                char c = finalString[i];
+                // NOTE: these bit patterns are defined as part of ASCII - uppercase letters start 010(..), the difference between upper and lower is at 001(..)
+                if ((c & 0b11100000) == 0b01000000 && c >= 'A' && c <= 'Z')
                 {
-                    finalString[i] = (char)(finalString[i] - ('A' - 'a'));
+                    finalString[i] = (char)(c ^ 0b00100000);
                 }
             }
             return new string(finalString);
@@ -58,13 +60,13 @@ namespace FreneticUtilities.FreneticExtensions
             {
                 char a = first[i];
                 char b = second[i];
-                if (a >= 'A' && a <= 'Z')
+                if ((a & 0b11100000) == 0b01000000 && a >= 'A' && a <= 'Z')
                 {
-                    a = (char)(a - ('A' - 'a'));
+                    a = (char)(a ^ 0b00100000);
                 }
-                if (b >= 'A' && b <= 'Z')
+                if ((b & 0b11100000) == 0b01000000 && b >= 'A' && b <= 'Z')
                 {
-                    b = (char)(b - ('A' - 'a'));
+                    b = (char)(b ^ 0b00100000);
                 }
                 if (a != b)
                 {
@@ -437,7 +439,8 @@ namespace FreneticUtilities.FreneticExtensions
         {
             for (int i = 0; i < input.Length; i++)
             {
-                if (input[i] >= 'A' && input[i] <= 'Z')
+                char c = input[i];
+                if ((c & 0b11100000) == 0b01000000 && c >= 'A' && c <= 'Z')
                 {
                     return false;
                 }
@@ -458,9 +461,10 @@ namespace FreneticUtilities.FreneticExtensions
             char[] finalString = input.ToCharArray();
             for (int i = 0; i < finalString.Length; i++)
             {
-                if (finalString[i] >= 'a' && finalString[i] <= 'z')
+                char c = finalString[i];
+                if ((c & 0b11100000) == 0b01100000 && c >= 'a' && c <= 'z')
                 {
-                    finalString[i] = (char)(finalString[i] + ('A' - 'a'));
+                    finalString[i] = (char)(c ^ 0b00100000);
                 }
             }
             return new string(finalString);
