@@ -101,5 +101,13 @@ namespace FreneticUtilities.FreneticExtensions
             }
             return result;
         }
+
+        /// <summary>Forces a <see cref="ValueTask"/> to be waitable the normal way.</summary>
+        /// <param name="task">The <see cref="ValueTask"/> that can't be waited for properly.</param>
+        /// <returns>A properly waitable task.</returns>
+        public static async Task<T> Normalize<T>(this ValueTask<T> task)
+        {
+            return await task;
+        }
     }
 }
