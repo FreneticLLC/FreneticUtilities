@@ -13,6 +13,16 @@
     <Version>1.0.1</Version>
     <ProjectGuid>{1DB47D6A-4225-4F25-8559-2C6292496953}</ProjectGuid>
     <TargetFramework>net6.0</TargetFramework>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Frenetic LLC</Authors>
+    <PackageId>FreneticLLC.FreneticUtilities</PackageId>
+    <PackageProjectUrl>https://github.com/FreneticLLC/FreneticUtilities</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FreneticLLC/FreneticUtilities</RepositoryUrl>
+    <PackageTags>Frenetic Utilities C# Library</PackageTags>
+    <Description>
+      Frenetic Utilities is a collection of general C# utilities made by Frenetic LLC for a variety of purposes.
+    </Description>
+    <PackageReleaseNotes>First NuGet publication of FreneticUtilities.</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

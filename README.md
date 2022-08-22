@@ -3,6 +3,8 @@ FreneticUtilities
 
 Frenetic Utilities is a collection of general C# utilities and documents made by Frenetic LLC for a variety of purposes.
 
+You can get FreneticUtilities from NuGet: https://www.nuget.org/packages/FreneticLLC.FreneticUtilities/
+
 ## Included
 
 - [Frenetic Data Syntax](FreneticDataSyntax.md): a data syntax designed as a replacement for data syntaxes or object notations such as JSON or YAML.
