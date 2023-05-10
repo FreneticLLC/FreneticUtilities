@@ -5,6 +5,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -229,9 +230,18 @@ namespace FreneticUtilities.FreneticDataSyntax
         /// <returns>The cleaned proper FDS object.</returns>
         public static object ProcessObject(object input)
         {
-            if (input is List<string> stringList)
+            if (input is string || input is FDSData || input is IDictionary || input is FDSSection)
             {
-                return stringList.Select(s => new FDSData() { Internal = s }).ToList();
+                return input;
+            }
+            if (input is IEnumerable list)
+            {
+                List<FDSData> output = new();
+                foreach (object o in list)
+                {
+                    output.Add(new FDSData(ProcessObject(o)));
+                }
+                return output;
             }
             return input;
         }

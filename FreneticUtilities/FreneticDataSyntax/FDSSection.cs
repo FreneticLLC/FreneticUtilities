@@ -653,5 +653,16 @@ namespace FreneticUtilities.FreneticDataSyntax
             }
             return toRet;
         }
+
+        /// <summary>Converts a simple C# object (as output by <see cref="ToSimple"/> to an <see cref="FDSSection"/>.</summary>
+        public static FDSSection FromSimple(Dictionary<string, object> simple)
+        {
+            FDSSection toRet = new();
+            foreach ((string key, object value) in simple)
+            {
+                toRet.SetRoot(key, value);
+            }
+            return toRet;
+        }
     }
 }
