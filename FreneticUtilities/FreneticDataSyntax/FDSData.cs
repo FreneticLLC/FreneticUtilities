@@ -382,5 +382,16 @@ namespace FreneticUtilities.FreneticDataSyntax
         {
             return Internal.Equals(other.Internal);
         }
+
+        /// <summary>Returns a simple C# object representing this datapiece. Lists become "List&lt;object&gt;".</summary>
+        public object ToSimple()
+        {
+            return Internal switch
+            {
+                List<FDSData> asList => asList.Select(d => d.ToSimple()).ToList(),
+                FDSSection section => section.ToSimple(),
+                _ => Internal
+            };
+        }
     }
 }

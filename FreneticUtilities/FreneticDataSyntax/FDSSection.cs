@@ -637,10 +637,21 @@ namespace FreneticUtilities.FreneticDataSyntax
             return outputBuilder.ToString();
         }
 
-        /// <summary>Implements <see cref="Object.ToString()"/> as a redirect to <see cref="SaveToString()"/>.</summary>
+        /// <summary>Implements <see cref="object.ToString()"/> as a redirect to <see cref="SaveToString()"/>.</summary>
         public override string ToString()
         {
             return SaveToString();
+        }
+
+        /// <summary>Returns a simple C# object representing this datapiece. Lists become "List&lt;object&gt;".</summary>
+        public Dictionary<string, object> ToSimple()
+        {
+            Dictionary<string, object> toRet = new(Data.Count * 2);
+            foreach ((string key, FDSData data) in Data)
+            {
+                toRet[key] = data.ToSimple();
+            }
+            return toRet;
         }
     }
 }
