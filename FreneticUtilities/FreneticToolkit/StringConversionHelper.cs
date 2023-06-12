@@ -351,5 +351,51 @@ namespace FreneticUtilities.FreneticToolkit
             }
             return -1;
         }
+
+        /// <summary>
+        /// Quick and simple method to fill the tags in a tagged string. For example:
+        /// <code>
+        /// QuickSimpleTagFiller("Hello [name], today is [day]!", "[", "]", (tag) => tag switch { "name" => "Bob", "day" => "Wednesday", _ => null })
+        /// </code>
+        /// Would return "Hello Bob, today is Wednesday!"
+        /// <para>
+        /// Specifically designed for very quick and simple usages, to be a much better alternative to "str.Replace("[tag]", value)" spam or similar quickhacks.
+        /// Also enables dynamic processing based on tag data.
+        /// </para>
+        /// </summary>
+        /// <param name="taggedText">The original raw text.</param>
+        /// <param name="prefix">A symbol that indicates the start of a tag.</param>
+        /// <param name="suffix">A symbol that indicates the end of a tag.</param>
+        /// <param name="tagReader">A function that takes the text of a tag and returns the appropriate value for it, or null if unfillable.</param>
+        public static string QuickSimpleTagFiller(string taggedText, string prefix, string suffix, Func<string, string> tagReader)
+        {
+            int start = taggedText.IndexOf(prefix);
+            int end = taggedText.IndexOf(suffix, start + prefix.Length);
+            if (start == -1 || end == -1)
+            {
+                return taggedText;
+            }
+            StringBuilder output = new(taggedText.Length);
+            int lastEnd = 0;
+            while (start != -1 && end != -1)
+            {
+                output.Append(taggedText[lastEnd..start]);
+                string part = taggedText[(start + prefix.Length)..end];
+                string read = tagReader(part);
+                if (read is not null)
+                {
+                    output.Append(read);
+                    lastEnd = end + suffix.Length;
+                }
+                else
+                {
+                    lastEnd = start;
+                }
+                start = taggedText.IndexOf(prefix, end + suffix.Length);
+                end = taggedText.IndexOf(suffix, start + prefix.Length);
+            }
+            output.Append(taggedText[lastEnd..]);
+            return output.ToString();
+        }
     }
 }
