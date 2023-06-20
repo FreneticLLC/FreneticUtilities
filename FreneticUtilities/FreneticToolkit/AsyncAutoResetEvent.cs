@@ -52,7 +52,7 @@ public class AsyncAutoResetEvent
     /// <param name="timeout">The max timeout before giving up.</param>
     /// <param name="cancel">Cancellation token to allow stopping early from an arbitrary signal.</param>
     /// <returns>True if signalled, false if timed out or cancelled.</returns>
-    public async Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancel = default)
+    public async Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancel)
     {
         LinkedListNode<TaskCompletionSource<bool>> node;
         lock (Internal.Lock)
@@ -69,14 +69,15 @@ public class AsyncAutoResetEvent
         {
             return true;
         }
-        else
+        lock (Internal.Lock)
         {
-            lock (Internal.Lock)
+            if (node.List is null)
             {
-                Internal.Waiting.Remove(node);
+                return true;
             }
-            return false;
+            Internal.Waiting.Remove(node);
         }
+        return false;
     }
 
     /// <summary>Sets the signal, allowing exactly one thread through.</summary>
@@ -86,9 +87,9 @@ public class AsyncAutoResetEvent
         {
             if (Internal.Waiting.Count > 0)
             {
-                // Note: async goes weird here. Send off-thread to avoid issues.
-                Task.Run(() => Internal.Waiting.First.Value.SetResult(true));
+                TaskCompletionSource<bool> task = Internal.Waiting.First.Value;
                 Internal.Waiting.RemoveFirst();
+                task.SetResult(true);
             }
             else
             {
