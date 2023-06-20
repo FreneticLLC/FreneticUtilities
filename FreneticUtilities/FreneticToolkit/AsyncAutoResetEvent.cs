@@ -86,7 +86,8 @@ public class AsyncAutoResetEvent
         {
             if (Internal.Waiting.Count > 0)
             {
-                Internal.Waiting.First.Value.SetResult(true);
+                // Note: async goes weird here. Send off-thread to avoid issues.
+                Task.Run(() => Internal.Waiting.First.Value.SetResult(true));
                 Internal.Waiting.RemoveFirst();
             }
             else
