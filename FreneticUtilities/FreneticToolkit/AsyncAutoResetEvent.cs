@@ -42,6 +42,14 @@ public class AsyncAutoResetEvent
 
     /// <summary>Returns a task that waits for the next signal.</summary>
     /// <param name="timeout">The max timeout before giving up.</param>
+    /// <returns>True if signalled, false if timed out.</returns>
+    public Task<bool> WaitAsync(TimeSpan timeout)
+    {
+        return WaitAsync(timeout, CancellationToken.None);
+    }
+
+    /// <summary>Returns a task that waits for the next signal.</summary>
+    /// <param name="timeout">The max timeout before giving up.</param>
     /// <param name="cancel">Cancellation token to allow stopping early from an arbitrary signal.</param>
     /// <returns>True if signalled, false if timed out or cancelled.</returns>
     public async Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancel = default)
