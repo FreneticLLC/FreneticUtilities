@@ -4,6 +4,7 @@
 // See README.md or LICENSE.txt in the FreneticUtilities source root for the contents of the license.
 //
 
+using FreneticUtilities.FreneticToolkit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -553,6 +554,14 @@ namespace FreneticUtilities.FreneticExtensions
             }
             resultArray[currentResultIndex] = input[startIndex..];
             return resultArray;
+        }
+
+        /// <summary>A quick-n-easy tool to encode any string to UTF-8 Bytes.</summary>
+        /// <param name="input">The original string.</param>
+        /// <returns>The UTF-8 encoded byte array.</returns>
+        public static byte[] EncodeUTF8(this string input)
+        {
+            return StringConversionHelper.UTF8Encoding.GetBytes(input);
         }
     }
 }

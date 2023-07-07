@@ -239,5 +239,15 @@ namespace FreneticUtilities.FreneticExtensions
         {
             return !inp.Any();
         }
+
+        /// <summary>A quick-n-easy tool to join an enumerable input to a string, with a given separator string. Equivalent to "string.Join(separator, input)"</summary>
+        /// <typeparam name="T">The list type.</typeparam>
+        /// <param name="inp">The list to be joined.</param>
+        /// <param name="separator">The separator to go between parts.</param>
+        /// <returns>The joined string.</returns>
+        public static string JoinString<T>(this IEnumerable<T> inp, string separator)
+        {
+            return string.Join(separator, inp);
+        }
     }
 }
