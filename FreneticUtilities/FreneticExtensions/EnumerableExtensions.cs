@@ -249,5 +249,42 @@ namespace FreneticUtilities.FreneticExtensions
         {
             return string.Join(separator, inp);
         }
+
+        /// <summary>Returns the 0-based index of the first item that matches the given function, or -1 if no match is found.</summary>
+        /// <typeparam name="T">The list type.</typeparam>
+        /// <param name="inp">The list to search.</param>
+        /// <param name="matcher">A function that returns true if the item matches and the search stop stop and return an index, or false if the item does not match.</param>
+        /// <returns>The match index, or -1 if none.</returns>
+        public static int FindFirstIndexOf<T>(this IEnumerable<T> inp, Func<T, bool> matcher)
+        {
+            int i = 0;
+            foreach (T item in inp)
+            {
+                if (matcher(item))
+                {
+                    return i;
+                }
+                i++;
+            }
+            return -1;
+        }
+
+        /// <summary>Returns the 0-based index of all items that matches the given function, or empty if none.</summary>
+        /// <typeparam name="T">The list type.</typeparam>
+        /// <param name="inp">The list to search.</param>
+        /// <param name="matcher">A function that returns true if the item matches and an index should be given, or false if the item does not match.</param>
+        /// <returns>The match indices, or empty if none.</returns>
+        public static IEnumerable<int> FindAllIndicesOf<T>(this IEnumerable<T> inp, Func<T, bool> matcher)
+        {
+            int i = 0;
+            foreach (T item in inp)
+            {
+                if (matcher(item))
+                {
+                    yield return i;
+                }
+                i++;
+            }
+        }
     }
 }
