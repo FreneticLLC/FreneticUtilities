@@ -146,7 +146,7 @@ namespace FreneticUtilities.FreneticDataSyntax
                 {
                     InternalData.IsFieldModified[sectionData.Index] = true;
                 }
-                return subSection.TryGetFieldInternalData(subPath, out sectionAbove);
+                return subSection.TryGetFieldInternalData(subPath, out sectionAbove, markModified);
             }
             sectionAbove = this;
             if (!InternalData.SharedData.Fields.TryGetValue(field, out Internal.SingleFieldData data))
