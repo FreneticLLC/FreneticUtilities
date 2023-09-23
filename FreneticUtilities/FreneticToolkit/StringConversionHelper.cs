@@ -367,9 +367,9 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="prefix">A symbol that indicates the start of a tag.</param>
         /// <param name="suffix">A symbol that indicates the end of a tag.</param>
         /// <param name="tagReader">A function that takes the text of a tag and returns the appropriate value for it, or null if unfillable.</param>
-        /// <param name="maxDepth">Maximum depth, recursion safety check.</param>
         /// <param name="depth">Internal depth tracker.</param>
-        public static string QuickSimpleTagFiller(string taggedText, string prefix, string suffix, Func<string, string> tagReader, int maxDepth = 500, int depth = 0)
+        /// <param name="maxDepth">Maximum depth, recursion safety check.</param>
+        public static string QuickSimpleTagFiller(string taggedText, string prefix, string suffix, Func<string, string> tagReader, int depth = 0, int maxDepth = 500)
         {
             if (depth > maxDepth)
             {
@@ -392,7 +392,11 @@ namespace FreneticUtilities.FreneticToolkit
                 return taggedText;
             }
             string tag = taggedText[(lastStartPrior + prefix.Length)..firstEnd];
-            string filled = tagReader(tag) ?? tag;
+            string filled = tagReader(tag);
+            if (filled is null || filled == $"{prefix}{tag}{suffix}")
+            {
+                return taggedText;
+            }
             string content = taggedText[..lastStartPrior] + filled + taggedText[(firstEnd + suffix.Length)..];
             return QuickSimpleTagFiller(content, prefix, suffix, tagReader, depth + 1);
         }
