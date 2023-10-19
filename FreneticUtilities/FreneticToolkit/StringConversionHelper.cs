@@ -367,38 +367,71 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="prefix">A symbol that indicates the start of a tag.</param>
         /// <param name="suffix">A symbol that indicates the end of a tag.</param>
         /// <param name="tagReader">A function that takes the text of a tag and returns the appropriate value for it, or null if unfillable.</param>
-        /// <param name="depth">Internal depth tracker.</param>
-        /// <param name="maxDepth">Maximum depth, recursion safety check.</param>
-        public static string QuickSimpleTagFiller(string taggedText, string prefix, string suffix, Func<string, string> tagReader, int depth = 0, int maxDepth = 500)
+        /// <param name="doSubtags">If true, subtags (tags within other tags) will be parsed. If false, they won't be.</param>
+        /// <param name="maxRecurse">If non-zero, tags that returned tags will be reparsed a max of this many times. If 0, returned tags will be treated as plaintext.</param>
+        public static string QuickSimpleTagFiller(string taggedText, string prefix, string suffix, Func<string, string> tagReader, bool doSubtags = true, int maxRecurse = 0)
         {
-            if (depth > maxDepth)
-            {
-                return taggedText;
-            }
             int start = taggedText.IndexOf(prefix);
+            if (start == -1)
+            {
+                return taggedText;
+            }
             int end = taggedText.LastIndexOf(suffix);
-            if (start == -1 || end == -1 || end <= start)
+            if (end < start)
             {
                 return taggedText;
             }
-            if (start > 0 || end + suffix.Length < taggedText.Length)
+            if (start == 0 && end == taggedText.Length - 1)
             {
-                return taggedText[0..start] + QuickSimpleTagFiller(taggedText[start..(end + suffix.Length)], prefix, suffix, tagReader, depth + 1) + taggedText[(end + suffix.Length)..];
+                string content = taggedText[prefix.Length..^suffix.Length];
+                if (doSubtags)
+                {
+                    content = QuickSimpleTagFiller(content, prefix, suffix, tagReader, doSubtags, maxRecurse);
+                }
+                string read = tagReader(content);
+                if (read is null)
+                {
+                    return taggedText;
+                }
+                if (maxRecurse > 0)
+                {
+                    read = QuickSimpleTagFiller(read, prefix, suffix, tagReader, doSubtags, maxRecurse - 1);
+                }
+                return read;
             }
-            int firstEnd = taggedText.IndexOf(suffix, prefix.Length);
-            int lastStartPrior = taggedText.LastIndexOf(prefix, firstEnd);
-            if (firstEnd == -1 || lastStartPrior == -1)
+            char prefix0 = prefix[0], suffix0 = suffix[0];
+            StringBuilder result = new(taggedText.Length);
+            result.Append(taggedText, 0, start);
+            int subTagCount = 0;
+            for (int i = start + prefix.Length; i < taggedText.Length; i++)
             {
-                return taggedText;
+                char c = taggedText[i];
+                // TODO: More optimal check than the 'taggedText[i..].StartsWith(prefix)' hack for multicharacter prefixes?
+                if (c == prefix0 && (prefix.Length == 1 || taggedText[i..].StartsWith(prefix)))
+                {
+                    subTagCount++;
+                }
+                if (c == suffix0 && (suffix.Length == 1 || taggedText[i..].StartsWith(suffix)))
+                {
+                    if (subTagCount == 0)
+                    {
+                        i += suffix.Length;
+                        result.Append(QuickSimpleTagFiller(taggedText[start..i], prefix, suffix, tagReader, doSubtags, maxRecurse));
+                        start = taggedText.IndexOf(prefix, i);
+                        if (start == -1)
+                        {
+                            result.Append(taggedText[i..]);
+                            return result.ToString();
+                        }
+                        result.Append(taggedText[i..start]);
+                        i = start + prefix.Length;
+                        continue;
+                    }
+                    subTagCount--;
+                }
             }
-            string tag = taggedText[(lastStartPrior + prefix.Length)..firstEnd];
-            string filled = tagReader(tag);
-            if (filled is null || filled == $"{prefix}{tag}{suffix}")
-            {
-                return taggedText;
-            }
-            string content = taggedText[..lastStartPrior] + filled + taggedText[(firstEnd + suffix.Length)..];
-            return QuickSimpleTagFiller(content, prefix, suffix, tagReader, depth + 1);
+            result.Append(taggedText[start..]);
+            return result.ToString();
         }
     }
 }
