@@ -50,6 +50,24 @@ namespace FreneticUtilities.FreneticExtensions
         }
 
         /// <summary>
+        /// Creates a dictionary mapping the first item in each pair to the second item in the pair.
+        /// <para>This will throw an <see cref="ArgumentException"/> if there are duplicate keys.</para>
+        /// </summary>
+        /// <typeparam name="TKey">Key type.</typeparam>
+        /// <typeparam name="TValue">Value type.</typeparam>
+        /// <param name="pairSet">List of (key, value) pairs.</param>
+        /// <returns>The new dictionary.</returns>
+        public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> pairSet)
+        {
+            Dictionary<TKey, TValue> resultDictionary = new();
+            foreach (KeyValuePair<TKey, TValue> pair in pairSet)
+            {
+                resultDictionary.Add(pair.Key, pair.Value);
+            }
+            return resultDictionary;
+        }
+
+        /// <summary>
         /// Creates a dictionary mapping the keys array to the values array, such that keys[i] maps to values[i], for all integer "i" in range.
         /// <para>This will throw an <see cref="ArgumentException"/> if there are duplicate keys, or the two lists do not have the same size.</para>
         /// </summary>
