@@ -304,5 +304,20 @@ namespace FreneticUtilities.FreneticExtensions
                 i++;
             }
         }
+
+        /// <summary>Casts all objects in the enumerable to given type <typeparamref name="T"/> and returns them, skipping any null or uncastable values.</summary>
+        /// <typeparam name="T">The type to cast to.</typeparam>
+        /// <param name="inp">The input set.</param>
+        /// <returns>A subset of the input, cast to the given type.</returns>
+        public static IEnumerable<T> FilterCast<T>(this System.Collections.IEnumerable inp) where T: class
+        {
+            foreach (object x in inp)
+            {
+                if (x is T xT)
+                {
+                    yield return xT;
+                }
+            }
+        }
     }
 }
