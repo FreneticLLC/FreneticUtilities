@@ -371,17 +371,17 @@ namespace FreneticUtilities.FreneticToolkit
         /// <param name="maxRecurse">If non-zero, tags that returned tags will be reparsed a max of this many times. If 0, returned tags will be treated as plaintext.</param>
         public static string QuickSimpleTagFiller(string taggedText, string prefix, string suffix, Func<string, string> tagReader, bool doSubtags = true, int maxRecurse = 0)
         {
-            int start = taggedText.IndexOf(prefix);
+            int start = taggedText.IndexOf(prefix, StringComparison.Ordinal);
             if (start == -1)
             {
                 return taggedText;
             }
-            int end = taggedText.LastIndexOf(suffix);
+            int end = taggedText.LastIndexOf(suffix, StringComparison.Ordinal);
             if (end < start)
             {
                 return taggedText;
             }
-            if (start == 0 && end == taggedText.Length - 1)
+            if (start == 0 && end == taggedText.Length - suffix.Length)
             {
                 string content = taggedText[prefix.Length..^suffix.Length];
                 if (doSubtags)
@@ -406,18 +406,17 @@ namespace FreneticUtilities.FreneticToolkit
             for (int i = start + prefix.Length; i < taggedText.Length; i++)
             {
                 char c = taggedText[i];
-                // TODO: More optimal check than the 'taggedText[i..].StartsWith(prefix)' hack for multicharacter prefixes?
-                if (c == prefix0 && (prefix.Length == 1 || taggedText[i..].StartsWith(prefix)))
+                if (c == prefix0 && (prefix.Length == 1 || taggedText[i..].StartsWithFast(prefix)))
                 {
                     subTagCount++;
                 }
-                if (c == suffix0 && (suffix.Length == 1 || taggedText[i..].StartsWith(suffix)))
+                if (c == suffix0 && (suffix.Length == 1 || taggedText[i..].StartsWithFast(suffix)))
                 {
                     if (subTagCount == 0)
                     {
                         i += suffix.Length;
-                        result.Append(QuickSimpleTagFiller(taggedText[start..i], prefix, suffix, tagReader, doSubtags, maxRecurse));
-                        start = taggedText.IndexOf(prefix, i);
+                        result.Append(QuickSimpleTagFiller(taggedText[start..i], prefix, suffix, tagReader, doSubtags, maxRecurse - 1));
+                        start = taggedText.IndexOf(prefix, i, StringComparison.Ordinal);
                         if (start == -1)
                         {
                             result.Append(taggedText[i..]);

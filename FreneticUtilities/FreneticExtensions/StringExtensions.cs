@@ -77,6 +77,7 @@ namespace FreneticUtilities.FreneticExtensions
             return true;
         }
 
+#pragma warning disable IDE0180 // Use tuple to swap values
         /// <summary>
         /// Produces a reversed copy of the string, using relatively efficient logic.
         /// <para>This purely reverses the underlying array of 16-bit characters, and therefore does not account for unicode character groups or other special cases.</para>
@@ -97,6 +98,7 @@ namespace FreneticUtilities.FreneticExtensions
             }
             return new string(output);
         }
+#pragma warning restore IDE0180
 
         /// <summary>
         /// Gets the part of a string before a specified portion.
