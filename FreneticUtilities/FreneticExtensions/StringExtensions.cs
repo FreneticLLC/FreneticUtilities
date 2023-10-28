@@ -412,6 +412,26 @@ namespace FreneticUtilities.FreneticExtensions
             return input.Length > 0 && input[0] == firstChar;
         }
 
+        /// <summary>Returns whether the string starts with the specified text, as a direct byte comparison, no null-weirdness.</summary>
+        /// <param name="input">The input string.</param>
+        /// <param name="text">The string to search for.</param>
+        /// <returns>True if the input starts with the given text, otherwise false.</returns>
+        public static bool StartsWithFast(this string input, string text)
+        {
+            if (input.Length < text.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] != input[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /// <summary>Returns whether the string ends with a null character.</summary>
         /// <param name="input">The input string.</param>
         /// <returns>True if the last character of the string is a null, otherwise false.</returns>
@@ -427,6 +447,27 @@ namespace FreneticUtilities.FreneticExtensions
         public static bool EndsWithFast(this string input, char firstChar)
         {
             return input.Length > 0 && input[^1] == firstChar;
+        }
+
+        /// <summary>Returns whether the string ends with the specified text, as a direct byte comparison, no null-weirdness.</summary>
+        /// <param name="input">The input string.</param>
+        /// <param name="text">The string to search for.</param>
+        /// <returns>True if the input ends with the given text, otherwise false.</returns>
+        public static bool EndsWithFast(this string input, string text)
+        {
+            if (input.Length < text.Length)
+            {
+                return false;
+            }
+            int inputZero = input.Length - text.Length;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] != input[inputZero + i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
