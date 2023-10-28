@@ -33,36 +33,56 @@ namespace FreneticUtilities.FreneticExtensions
 
         /// <summary>
         /// Creates a dictionary mapping the first item in each pair to the second item in the pair.
-        /// <para>This will throw an <see cref="ArgumentException"/> if there are duplicate keys.</para>
         /// </summary>
         /// <typeparam name="TKey">Key type.</typeparam>
         /// <typeparam name="TValue">Value type.</typeparam>
         /// <param name="pairSet">List of (key, value) pairs.</param>
+        /// <param name="throwOnDup">If true, will throw an <see cref="ArgumentException"/> if there are duplicate keys.</param>
         /// <returns>The new dictionary.</returns>
-        public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairSet)
+        public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairSet, bool throwOnDup = true)
         {
             Dictionary<TKey, TValue> resultDictionary = new();
-            foreach ((TKey, TValue) pair in pairSet)
+            if (throwOnDup)
             {
-                resultDictionary.Add(pair.Item1, pair.Item2);
+                foreach ((TKey, TValue) pair in pairSet)
+                {
+                    resultDictionary.Add(pair.Item1, pair.Item2);
+                }
+            }
+            else
+            {
+                foreach ((TKey, TValue) pair in pairSet)
+                {
+                    resultDictionary[pair.Item1] = pair.Item2;
+                }
             }
             return resultDictionary;
         }
 
         /// <summary>
         /// Creates a dictionary mapping the first item in each pair to the second item in the pair.
-        /// <para>This will throw an <see cref="ArgumentException"/> if there are duplicate keys.</para>
         /// </summary>
         /// <typeparam name="TKey">Key type.</typeparam>
         /// <typeparam name="TValue">Value type.</typeparam>
         /// <param name="pairSet">List of (key, value) pairs.</param>
+        /// <param name="throwOnDup">If true, will throw an <see cref="ArgumentException"/> if there are duplicate keys.</param>
         /// <returns>The new dictionary.</returns>
-        public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> pairSet)
+        public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> pairSet, bool throwOnDup = true)
         {
             Dictionary<TKey, TValue> resultDictionary = new();
-            foreach (KeyValuePair<TKey, TValue> pair in pairSet)
+            if (throwOnDup)
             {
-                resultDictionary.Add(pair.Key, pair.Value);
+                foreach (KeyValuePair<TKey, TValue> pair in pairSet)
+                {
+                    resultDictionary.Add(pair.Key, pair.Value);
+                }
+            }
+            else
+            {
+                foreach (KeyValuePair<TKey, TValue> pair in pairSet)
+                {
+                    resultDictionary[pair.Key] = pair.Value;
+                }
             }
             return resultDictionary;
         }
