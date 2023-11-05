@@ -186,7 +186,7 @@ public static class FFPBuilder
         public long ActualLength;
     }
 
-    private readonly static byte[] HEADER = new byte[] { (byte)'F', (byte)'F', (byte)'P', (byte)'0', (byte)'0', (byte)'1' };
+    private readonly static byte[] HEADER = "FFP001"u8.ToArray();
 
     private readonly static byte[] PLACEHOLDER_FILEDATA = new byte[8 + 8 + 1 + 8];
 
