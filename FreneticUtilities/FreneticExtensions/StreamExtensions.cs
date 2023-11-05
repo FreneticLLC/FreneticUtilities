@@ -11,26 +11,25 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace FreneticUtilities.FreneticExtensions
+namespace FreneticUtilities.FreneticExtensions;
+
+/// <summary>Helper extensions for <see cref="Stream"/>.</summary>
+public static class StreamExtensions
 {
-    /// <summary>Helper extensions for <see cref="Stream"/>.</summary>
-    public static class StreamExtensions
+    /// <summary>Returns all the lines of text within a readable stream.</summary>
+    /// <param name="input">The input stream.</param>
+    /// <returns>All lines of text, separated.</returns>
+    public static IEnumerable<string> AllLinesOfText(this Stream input)
     {
-        /// <summary>Returns all the lines of text within a readable stream.</summary>
-        /// <param name="input">The input stream.</param>
-        /// <returns>All lines of text, separated.</returns>
-        public static IEnumerable<string> AllLinesOfText(this Stream input)
+        using StreamReader reader = new(input);
+        while (true)
         {
-            using StreamReader reader = new(input);
-            while (true)
+            string line = reader.ReadLine();
+            if (line == null)
             {
-                string line = reader.ReadLine();
-                if (line == null)
-                {
-                    break;
-                }
-                yield return line;
+                break;
             }
+            yield return line;
         }
     }
 }

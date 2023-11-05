@@ -10,388 +10,387 @@ using System.Linq;
 using System.Text;
 using FreneticUtilities.FreneticExtensions;
 
-namespace FreneticUtilities.FreneticDataSyntax
+namespace FreneticUtilities.FreneticDataSyntax;
+
+/// <summary>Represents a piece of data within an FDS Section.</summary>
+public class FDSData : IEquatable<FDSData>
 {
-    /// <summary>Represents a piece of data within an FDS Section.</summary>
-    public class FDSData : IEquatable<FDSData>
+    /// <summary>Constructs an empty <see cref="FDSData"/> instance.</summary>
+    public FDSData()
     {
-        /// <summary>Constructs an empty <see cref="FDSData"/> instance.</summary>
-        public FDSData()
+    }
+
+    /// <summary>Constructs an <see cref="FDSData"/> instance of the specified object.</summary>
+    /// <param name="_internal">The object.</param>
+    public FDSData(object _internal)
+    {
+        Internal = _internal;
+    }
+
+    /// <summary>Constructs an <see cref="FDSData"/> instance of the specified object and the specified comments.</summary>
+    /// <param name="_internal">The object.</param>
+    /// <param name="comment">The comments to apply (newline separated).</param>
+    public FDSData(object _internal, string comment)
+    {
+        Internal = _internal;
+        AddComment(comment);
+    }
+
+    /// <summary>The list of comments preceding this data piece.</summary>
+    public List<string> PrecedingComments = new();
+
+    /// <summary>Adds a preceding comment to this data piece.</summary>
+    /// <param name="comment">The comment to add.</param>
+    public void AddComment(string comment)
+    {
+        comment = comment.Replace("\r", "");
+        PrecedingComments.AddRange(comment.Split('\n').Select(str => str.TrimEnd()));
+    }
+
+    /// <summary>The internal represented data.</summary>
+    public object Internal;
+
+    /// <summary>Gets the internal represented data as a string. Can stringify non-string values.</summary>
+    public string AsString
+    {
+        get
         {
-        }
-
-        /// <summary>Constructs an <see cref="FDSData"/> instance of the specified object.</summary>
-        /// <param name="_internal">The object.</param>
-        public FDSData(object _internal)
-        {
-            Internal = _internal;
-        }
-
-        /// <summary>Constructs an <see cref="FDSData"/> instance of the specified object and the specified comments.</summary>
-        /// <param name="_internal">The object.</param>
-        /// <param name="comment">The comments to apply (newline separated).</param>
-        public FDSData(object _internal, string comment)
-        {
-            Internal = _internal;
-            AddComment(comment);
-        }
-
-        /// <summary>The list of comments preceding this data piece.</summary>
-        public List<string> PrecedingComments = new();
-
-        /// <summary>Adds a preceding comment to this data piece.</summary>
-        /// <param name="comment">The comment to add.</param>
-        public void AddComment(string comment)
-        {
-            comment = comment.Replace("\r", "");
-            PrecedingComments.AddRange(comment.Split('\n').Select(str => str.TrimEnd()));
-        }
-
-        /// <summary>The internal represented data.</summary>
-        public object Internal;
-
-        /// <summary>Gets the internal represented data as a string. Can stringify non-string values.</summary>
-        public string AsString
-        {
-            get
+            if (Internal is string str)
             {
-                if (Internal is string str)
-                {
-                    return str;
-                }
-                else
-                {
-                    return Internal.ToString();
-                }
+                return str;
+            }
+            else
+            {
+                return Internal.ToString();
             }
         }
+    }
 
-        /// <summary>Gets the internal represented data as a boolean.</summary>
-        public bool AsBool
+    /// <summary>Gets the internal represented data as a boolean.</summary>
+    public bool AsBool
+    {
+        get
         {
-            get
+            if (Internal is bool asBool)
             {
-                if (Internal is bool asBool)
-                {
-                    return asBool;
-                }
-                else
-                {
-                    return Internal.ToString().ToLowerFast() == "true";
-                }
+                return asBool;
+            }
+            else
+            {
+                return Internal.ToString().ToLowerFast() == "true";
             }
         }
+    }
 
-        /// <summary>Gets the internal represented data as a list of data.</summary>
-        public List<FDSData> AsDataList
+    /// <summary>Gets the internal represented data as a list of data.</summary>
+    public List<FDSData> AsDataList
+    {
+        get
         {
-            get
+            if (Internal is List<FDSData> asList)
             {
-                if (Internal is List<FDSData> asList)
-                {
-                    return asList;
-                }
-                else if (Internal is FDSSection section && section.IsEmpty())
-                {
-                    return new List<FDSData>();
-                }
-                else
-                {
-                    return new List<FDSData>() { this };
-                }
+                return asList;
+            }
+            else if (Internal is FDSSection section && section.IsEmpty())
+            {
+                return new List<FDSData>();
+            }
+            else
+            {
+                return new List<FDSData>() { this };
             }
         }
+    }
 
-        /// <summary>Gets the internal represented data as a list of strings.</summary>
-        public List<string> AsStringList
+    /// <summary>Gets the internal represented data as a list of strings.</summary>
+    public List<string> AsStringList
+    {
+        get
         {
-            get
+            List<FDSData> dat = AsDataList;
+            List<string> newlist = new(dat.Count);
+            for (int i = 0; i < dat.Count; i++)
             {
-                List<FDSData> dat = AsDataList;
-                List<string> newlist = new(dat.Count);
-                for (int i = 0; i < dat.Count; i++)
-                {
-                    newlist.Add(dat[i].Internal.ToString());
-                }
-                return newlist;
+                newlist.Add(dat[i].Internal.ToString());
             }
+            return newlist;
         }
+    }
 
-        /// <summary>Gets the internal represented data as a C# decimal value. Returns null if not a valid decimal.</summary>
-        public decimal? AsDecimal
+    /// <summary>Gets the internal represented data as a C# decimal value. Returns null if not a valid decimal.</summary>
+    public decimal? AsDecimal
+    {
+        get
         {
-            get
+            if (Internal is decimal asDecimal)
             {
-                if (Internal is decimal asDecimal)
-                {
-                    return asDecimal;
-                }
-                else if (Internal is double asDouble)
-                {
-                    return (decimal)asDouble;
-                }
-                else if (Internal is float asFloat)
-                {
-                    return (decimal)asFloat;
-                }
-                if (Internal is long asLong)
-                {
-                    return (decimal)asLong;
-                }
-                else if (Internal is int asInt)
-                {
-                    return (decimal)asInt;
-                }
-                else if (decimal.TryParse(Internal.ToString(), out decimal d))
-                {
-                    return d;
-                }
+                return asDecimal;
+            }
+            else if (Internal is double asDouble)
+            {
+                return (decimal)asDouble;
+            }
+            else if (Internal is float asFloat)
+            {
+                return (decimal)asFloat;
+            }
+            if (Internal is long asLong)
+            {
+                return (decimal)asLong;
+            }
+            else if (Internal is int asInt)
+            {
+                return (decimal)asInt;
+            }
+            else if (decimal.TryParse(Internal.ToString(), out decimal d))
+            {
+                return d;
+            }
+            return null;
+        }
+    }
+
+    /// <summary>Gets the internal represented data as a double-precision (64-bit) floating point value. Returns null if not a valid double.</summary>
+    public double? AsDouble
+    {
+        get
+        {
+            if (Internal is double asDouble)
+            {
+                return asDouble;
+            }
+            else if (Internal is float asFloat)
+            {
+                return asFloat;
+            }
+            if (Internal is long asLong)
+            {
+                return (double)asLong;
+            }
+            else if (Internal is int asInt)
+            {
+                return (double)asInt;
+            }
+            else if (double.TryParse(Internal.ToString(), out double d))
+            {
+                return d;
+            }
+            return null;
+        }
+    }
+
+    /// <summary>Gets the internal represented data as a single-precision (32-bit) floating point value. Returns null if not a valid float.</summary>
+    public float? AsFloat
+    {
+        get
+        {
+            double? dValue = AsDouble;
+            if (!dValue.HasValue)
+            {
                 return null;
             }
+            return (float)dValue.Value;
         }
+    }
 
-        /// <summary>Gets the internal represented data as a double-precision (64-bit) floating point value. Returns null if not a valid double.</summary>
-        public double? AsDouble
+    /// <summary>Gets the internal represented data as a 64-bit signed integer. Returns null if not a valid integer.</summary>
+    public long? AsLong
+    {
+        get
         {
-            get
+            if (Internal is long asLong)
             {
-                if (Internal is double asDouble)
-                {
-                    return asDouble;
-                }
-                else if (Internal is float asFloat)
-                {
-                    return asFloat;
-                }
-                if (Internal is long asLong)
-                {
-                    return (double)asLong;
-                }
-                else if (Internal is int asInt)
-                {
-                    return (double)asInt;
-                }
-                else if (double.TryParse(Internal.ToString(), out double d))
-                {
-                    return d;
-                }
+                return asLong;
+            }
+            else if (Internal is int asInt)
+            {
+                return asInt;
+            }
+            else if (long.TryParse(Internal.ToString(), out long l))
+            {
+                return l;
+            }
+            return null;
+        }
+    }
+
+    /// <summary>Gets the internal represented data as a 32-bit signed integer. Returns null if not a valid integer.</summary>
+    public int? AsInt
+    {
+        get
+        {
+            long? lValue = AsLong;
+            if (!lValue.HasValue)
+            {
                 return null;
             }
+            return (int)lValue.Value;
         }
+    }
 
-        /// <summary>Gets the internal represented data as a single-precision (32-bit) floating point value. Returns null if not a valid float.</summary>
-        public float? AsFloat
+    /// <summary>Gets the internal represented data as a 16-bit signed integer. Returns null if not a valid integer.</summary>
+    public short? AsShort
+    {
+        get
         {
-            get
+            long? lValue = AsLong;
+            if (!lValue.HasValue)
             {
-                double? dValue = AsDouble;
-                if (!dValue.HasValue)
-                {
-                    return null;
-                }
-                return (float)dValue.Value;
+                return null;
             }
+            return (short)lValue.Value;
         }
+    }
 
-        /// <summary>Gets the internal represented data as a 64-bit signed integer. Returns null if not a valid integer.</summary>
-        public long? AsLong
+    /// <summary>Gets the internal represented data as an 8-bit signed integer (sbyte). Returns null if not a valid integer.</summary>
+    public sbyte? AsSByte
+    {
+        get
         {
-            get
+            long? lValue = AsLong;
+            if (!lValue.HasValue)
             {
-                if (Internal is long asLong)
-                {
-                    return asLong;
-                }
-                else if (Internal is int asInt)
-                {
-                    return asInt;
-                }
-                else if (long.TryParse(Internal.ToString(), out long l))
+                return null;
+            }
+            return (sbyte)lValue.Value;
+        }
+    }
+
+    /// <summary>Gets the internal represented data as a 64-bit unsigned integer. Returns null if not a valid integer.</summary>
+    public ulong? AsULong
+    {
+        get
+        {
+            if (Internal is ulong asLong)
+            {
+                return asLong;
+            }
+            else if (Internal is uint asInt)
+            {
+                return asInt;
+            }
+            else
+            {
+                if (ulong.TryParse(Internal.ToString(), out ulong l))
                 {
                     return l;
                 }
                 return null;
             }
         }
+    }
 
-        /// <summary>Gets the internal represented data as a 32-bit signed integer. Returns null if not a valid integer.</summary>
-        public int? AsInt
+    /// <summary>Gets the internal represented data as a 32-bit unsigned integer. Returns null if not a valid integer.</summary>
+    public uint? AsUInt
+    {
+        get
         {
-            get
+            ulong? lValue = AsULong;
+            if (!lValue.HasValue)
             {
-                long? lValue = AsLong;
-                if (!lValue.HasValue)
-                {
-                    return null;
-                }
-                return (int)lValue.Value;
+                return null;
             }
+            return (uint)lValue.Value;
         }
+    }
 
-        /// <summary>Gets the internal represented data as a 16-bit signed integer. Returns null if not a valid integer.</summary>
-        public short? AsShort
+    /// <summary>Gets the internal represented data as a 16-bit unsigned integer. Returns null if not a valid integer.</summary>
+    public ushort? AsUShort
+    {
+        get
         {
-            get
+            ulong? lValue = AsULong;
+            if (!lValue.HasValue)
             {
-                long? lValue = AsLong;
-                if (!lValue.HasValue)
-                {
-                    return null;
-                }
-                return (short)lValue.Value;
+                return null;
             }
+            return (ushort)lValue.Value;
         }
+    }
 
-        /// <summary>Gets the internal represented data as an 8-bit signed integer (sbyte). Returns null if not a valid integer.</summary>
-        public sbyte? AsSByte
+    /// <summary>Gets the internal represented data as an 8-bit unsigned integer (byte). Returns null if not a valid integer.</summary>
+    public byte? AsByte
+    {
+        get
         {
-            get
+            ulong? lValue = AsULong;
+            if (!lValue.HasValue)
             {
-                long? lValue = AsLong;
-                if (!lValue.HasValue)
-                {
-                    return null;
-                }
-                return (sbyte)lValue.Value;
+                return null;
             }
+            return (byte)lValue.Value;
         }
+    }
 
-        /// <summary>Gets the internal represented data as a 64-bit unsigned integer. Returns null if not a valid integer.</summary>
-        public ulong? AsULong
+    /// <summary>Gets the internal represented data as an array of bytes. Returns null if not a valid array of bytes.</summary>
+    public byte[] AsByteArray
+    {
+        get
         {
-            get
+            return Internal as byte[];
+        }
+    }
+
+    /// <summary>Returns the output-able string representation of this data.</summary>
+    /// <returns>The resultant data.</returns>
+    public string Outputable()
+    {
+        if (Internal is List<FDSData> list)
+        {
+            StringBuilder outputBuilder = new();
+            foreach (FDSData dat in list)
             {
-                if (Internal is ulong asLong)
-                {
-                    return asLong;
-                }
-                else if (Internal is uint asInt)
-                {
-                    return asInt;
-                }
-                else
-                {
-                    if (ulong.TryParse(Internal.ToString(), out ulong l))
-                    {
-                        return l;
-                    }
-                    return null;
-                }
+                outputBuilder.Append(dat.Outputable()).Append('|');
             }
+            return outputBuilder.ToString();
         }
-
-        /// <summary>Gets the internal represented data as a 32-bit unsigned integer. Returns null if not a valid integer.</summary>
-        public uint? AsUInt
+        else if (Internal is byte[] output)
         {
-            get
-            {
-                ulong? lValue = AsULong;
-                if (!lValue.HasValue)
-                {
-                    return null;
-                }
-                return (uint)lValue.Value;
-            }
+            return Convert.ToBase64String(output, Base64FormattingOptions.None);
         }
-
-        /// <summary>Gets the internal represented data as a 16-bit unsigned integer. Returns null if not a valid integer.</summary>
-        public ushort? AsUShort
+        else if (Internal is bool bValue)
         {
-            get
-            {
-                ulong? lValue = AsULong;
-                if (!lValue.HasValue)
-                {
-                    return null;
-                }
-                return (ushort)lValue.Value;
-            }
+            return bValue ? "true" : "false";
         }
+        return FDSUtility.Escape(Internal.ToString());
+    }
 
-        /// <summary>Gets the internal represented data as an 8-bit unsigned integer (byte). Returns null if not a valid integer.</summary>
-        public byte? AsByte
-        {
-            get
-            {
-                ulong? lValue = AsULong;
-                if (!lValue.HasValue)
-                {
-                    return null;
-                }
-                return (byte)lValue.Value;
-            }
-        }
+    /// <summary>Implements <see cref="Object.ToString"/> by redirecting to <see cref="Outputable"/></summary>
+    public override string ToString()
+    {
+        return Outputable();
+    }
 
-        /// <summary>Gets the internal represented data as an array of bytes. Returns null if not a valid array of bytes.</summary>
-        public byte[] AsByteArray
-        {
-            get
-            {
-                return Internal as byte[];
-            }
-        }
+    /// <summary>Implements <see cref="Object.GetHashCode"/> by redirecting to <see cref="Internal"/></summary>
+    public override int GetHashCode()
+    {
+        return Internal.GetHashCode();
+    }
 
-        /// <summary>Returns the output-able string representation of this data.</summary>
-        /// <returns>The resultant data.</returns>
-        public string Outputable()
+    /// <summary>Implements <see cref="Object.Equals(object)"/> by redirecting to <see cref="Internal"/></summary>
+    public override bool Equals(object obj)
+    {
+        if (obj is not FDSData data)
         {
-            if (Internal is List<FDSData> list)
-            {
-                StringBuilder outputBuilder = new();
-                foreach (FDSData dat in list)
-                {
-                    outputBuilder.Append(dat.Outputable()).Append('|');
-                }
-                return outputBuilder.ToString();
-            }
-            else if (Internal is byte[] output)
-            {
-                return Convert.ToBase64String(output, Base64FormattingOptions.None);
-            }
-            else if (Internal is bool bValue)
-            {
-                return bValue ? "true" : "false";
-            }
-            return FDSUtility.Escape(Internal.ToString());
+            return false;
         }
+        return Equals(data);
+    }
 
-        /// <summary>Implements <see cref="Object.ToString"/> by redirecting to <see cref="Outputable"/></summary>
-        public override string ToString()
-        {
-            return Outputable();
-        }
+    /// <summary>Implements <see cref="IEquatable{FDSData}.Equals(FDSData)"/> by redirecting to <see cref="Internal"/></summary>
+    public bool Equals(FDSData other)
+    {
+        return Internal.Equals(other.Internal);
+    }
 
-        /// <summary>Implements <see cref="Object.GetHashCode"/> by redirecting to <see cref="Internal"/></summary>
-        public override int GetHashCode()
+    /// <summary>Returns a simple C# object representing this datapiece. Lists become "List&lt;object&gt;".</summary>
+    public object ToSimple()
+    {
+        return Internal switch
         {
-            return Internal.GetHashCode();
-        }
-
-        /// <summary>Implements <see cref="Object.Equals(object)"/> by redirecting to <see cref="Internal"/></summary>
-        public override bool Equals(object obj)
-        {
-            if (obj is not FDSData data)
-            {
-                return false;
-            }
-            return Equals(data);
-        }
-
-        /// <summary>Implements <see cref="IEquatable{FDSData}.Equals(FDSData)"/> by redirecting to <see cref="Internal"/></summary>
-        public bool Equals(FDSData other)
-        {
-            return Internal.Equals(other.Internal);
-        }
-
-        /// <summary>Returns a simple C# object representing this datapiece. Lists become "List&lt;object&gt;".</summary>
-        public object ToSimple()
-        {
-            return Internal switch
-            {
-                List<FDSData> asList => asList.Select(d => d.ToSimple()).ToList(),
-                FDSSection section => section.ToSimple(),
-                _ => Internal
-            };
-        }
+            List<FDSData> asList => asList.Select(d => d.ToSimple()).ToList(),
+            FDSSection section => section.ToSimple(),
+            _ => Internal
+        };
     }
 }

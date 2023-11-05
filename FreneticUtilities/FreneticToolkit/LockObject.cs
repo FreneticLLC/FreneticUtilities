@@ -10,13 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FreneticUtilities.FreneticToolkit
+namespace FreneticUtilities.FreneticToolkit;
+
+/// <summary>
+/// Used for C# locking (which requires an arbitrary object reference to map the monitor lock to).
+/// Serves as a better placeholder empty object to use instead of just raw 'object'.
+/// </summary>
+public sealed class LockObject
 {
-    /// <summary>
-    /// Used for C# locking (which requires an arbitrary object reference to map the monitor lock to).
-    /// Serves as a better placeholder empty object to use instead of just raw 'object'.
-    /// </summary>
-    public sealed class LockObject
-    {
-    }
 }
