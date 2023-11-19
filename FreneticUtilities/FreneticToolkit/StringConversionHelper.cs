@@ -381,24 +381,6 @@ public static class StringConversionHelper
         {
             return taggedText;
         }
-        if (start == 0 && end == taggedText.Length - suffix.Length)
-        {
-            string content = taggedText[prefix.Length..^suffix.Length];
-            if (doSubtags)
-            {
-                content = QuickSimpleTagFiller(content, prefix, suffix, tagReader, doSubtags, maxRecurse);
-            }
-            string read = tagReader(content);
-            if (read is null)
-            {
-                return taggedText;
-            }
-            if (maxRecurse > 0)
-            {
-                read = QuickSimpleTagFiller(read, prefix, suffix, tagReader, doSubtags, maxRecurse - 1);
-            }
-            return read;
-        }
         char prefix0 = prefix[0], suffix0 = suffix[0];
         StringBuilder result = new(taggedText.Length);
         result.Append(taggedText, 0, start);
@@ -415,7 +397,27 @@ public static class StringConversionHelper
                 if (subTagCount == 0)
                 {
                     i += suffix.Length;
-                    result.Append(QuickSimpleTagFiller(taggedText[start..i], prefix, suffix, tagReader, doSubtags, maxRecurse - 1));
+                    string innards = taggedText[start..i];
+                    string content = innards[prefix.Length..^suffix.Length];
+                    if (doSubtags)
+                    {
+                        content = QuickSimpleTagFiller(content, prefix, suffix, tagReader, doSubtags, maxRecurse);
+                    }
+                    string read = tagReader(content);
+                    string parsedInside;
+                    if (read is null)
+                    {
+                        parsedInside = innards;
+                    }
+                    else
+                    {
+                        if (maxRecurse > 0)
+                        {
+                            read = QuickSimpleTagFiller(read, prefix, suffix, tagReader, doSubtags, maxRecurse - 1);
+                        }
+                        parsedInside = read;
+                    }
+                    result.Append(parsedInside);
                     start = taggedText.IndexOf(prefix, i, StringComparison.Ordinal);
                     if (start == -1)
                     {
