@@ -339,4 +339,24 @@ public static class EnumerableExtensions
             }
         }
     }
+
+    /// <summary>Returns a copy of the array with the contents shifted to the right. For example, for [1, 2, 3, 4, 5].Shift(2) you will get [4, 5, 1, 2, 3].</summary>
+    /// <typeparam name="T">The type of the array.</typeparam>
+    /// <param name="inp">The input array.</param>
+    /// <param name="shiftAmount">The amount to shift rightward. Can use a negative number to shift left.</param>
+    /// <returns></returns>
+    public static T[] Shift<T>(this T[] inp, int shiftAmount)
+    {
+        T[] result = new T[inp.Length];
+        for (int i = 0; i < inp.Length; i++)
+        {
+            int newIndex = (i + shiftAmount) % inp.Length;
+            if (newIndex < 0)
+            {
+                newIndex += inp.Length;
+            }
+            result[newIndex] = inp[i];
+        }
+        return result;
+    }
 }
