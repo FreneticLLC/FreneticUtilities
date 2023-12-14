@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -184,7 +185,8 @@ public static class EnumerableExtensions
         }
     }
 
-    /// <summary>Gets a value from a Dictionary, or creates a new value (and adds it to the dictionary).</summary>
+    /// <summary>Gets a value from a Dictionary, or creates a new value (and adds it to the dictionary).
+    /// If the dictionary is a <see cref="ConcurrentDictionary{TKey, TValue}"/>, will lock the dictionary and guarantee against double-calling.</summary>
     /// <typeparam name="TKey">The key type.</typeparam>
     /// <typeparam name="TValue">The value type.</typeparam>
     /// <param name="dictionary">The dictionary.</param>
@@ -196,6 +198,14 @@ public static class EnumerableExtensions
         if (dictionary.TryGetValue(key, out TValue toReturn))
         {
             return toReturn;
+        }
+        if (dictionary is ConcurrentDictionary<TKey, TValue> concurrentDict)
+        {
+            // Yes this lock is needed, C# does not actually guarantee against multicall in ConcurrentDictionary.GetOrAdd for some awful reason.
+            lock (concurrentDict)
+            {
+                return concurrentDict.GetOrAdd(key, _ => createFunction());
+            }
         }
         TValue created = createFunction();
         dictionary.Add(key, created);
