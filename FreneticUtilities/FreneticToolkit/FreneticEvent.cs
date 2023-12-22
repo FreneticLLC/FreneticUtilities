@@ -13,13 +13,14 @@ using System.Threading;
 namespace FreneticUtilities.FreneticToolkit;
 
 /// <summary>Specialized event handler utility, similar to the C# base "event" system, but with special added tooling such as source tracking and sync waiting, notably for use with the FreneticGameEngine.</summary>
-public class FreneticEvent<T> where T : FreneticEventArgs
+/// <param name="_helper">The relevant helper object, usually provided at an engine level.</param>
+public class FreneticEvent<T>(FreneticEventHelper _helper) where T : FreneticEventArgs
 {
     /// <summary>All event handlers for this event.</summary>
-    public List<HandlerSet> Handlers = new();
+    public List<HandlerSet> Handlers = [];
 
     /// <summary>A map of sources to what they handle.</summary>
-    public Dictionary<object, List<HandlerIndex>> HandlersBySource = new();
+    public Dictionary<object, List<HandlerIndex>> HandlersBySource = [];
 
     /// <summary>Represents the index of a handler in the event handler list.</summary>
     public class HandlerIndex
@@ -41,18 +42,11 @@ public class FreneticEvent<T> where T : FreneticEventArgs
         public int Index;
 
         /// <summary>The event handlers contained in the set.</summary>
-        public List<KeyValuePair<HandlerIndex, FreneticEventFirer<T>>> Handlers = new();
+        public List<KeyValuePair<HandlerIndex, FreneticEventFirer<T>>> Handlers = [];
     }
 
     /// <summary>Helper for various usages, primarily scheduling.</summary>
-    public FreneticEventHelper Helper;
-
-    /// <summary>Constructs the <see cref="FreneticEvent{T}"/>.</summary>
-    /// <param name="_helper">The relevant helper object, usually provided at an engine level.</param>
-    public FreneticEvent(FreneticEventHelper _helper)
-    {
-        Helper = _helper;
-    }
+    public FreneticEventHelper Helper = _helper;
 
     /// <summary>Returns whether the <see cref="FreneticEvent{T}"/> has any handlers. If this returns false, firing the event will do nothing.</summary>
     /// <returns>Whether the event is handled.</returns>
@@ -113,7 +107,7 @@ public class FreneticEvent<T> where T : FreneticEventArgs
     /// <param name="complete">Action to fire when completed.</param>
     public void Fire(T eventArgs, Action complete)
     {
-        List<FreneticEventWaiter> fews = new();
+        List<FreneticEventWaiter> fews = [];
         Fire(eventArgs, fews);
         if (fews.Count == 0)
         {
@@ -219,7 +213,7 @@ public class FreneticEvent<T> where T : FreneticEventArgs
         HandlerIndex indexObject = new() { SetObject = set, SetIndex = set.Handlers.Count };
         if (!HandlersBySource.TryGetValue(sourceTracker, out List<HandlerIndex> trackerIndices))
         {
-            trackerIndices = new List<HandlerIndex>();
+            trackerIndices = [];
             HandlersBySource.Add(sourceTracker, trackerIndices);
         }
         trackerIndices.Add(indexObject);

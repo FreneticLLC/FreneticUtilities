@@ -42,7 +42,7 @@ public static class EnumerableExtensions
     /// <returns>The new dictionary.</returns>
     public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairSet, bool throwOnDup = true)
     {
-        Dictionary<TKey, TValue> resultDictionary = new();
+        Dictionary<TKey, TValue> resultDictionary = [];
         if (throwOnDup)
         {
             foreach ((TKey, TValue) pair in pairSet)
@@ -70,7 +70,7 @@ public static class EnumerableExtensions
     /// <returns>The new dictionary.</returns>
     public static Dictionary<TKey, TValue> PairsToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> pairSet, bool throwOnDup = true)
     {
-        Dictionary<TKey, TValue> resultDictionary = new();
+        Dictionary<TKey, TValue> resultDictionary = [];
         if (throwOnDup)
         {
             foreach (KeyValuePair<TKey, TValue> pair in pairSet)

@@ -11,3 +11,5 @@ using System.Diagnostics.CodeAnalysis;
         Justification = "Endless false marking of methods whose parameters are defined by delegate/Func/Action usage")]
 [assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression",
         Justification = "WTF MICROSOFT???")]
+[assembly: SuppressMessage("Performance", "CA1860:Avoid using 'Enumerable.Any()' extension method",
+    Justification = "They replaced a tip telling you to always use Any() with one saying to never use it. Wtf?")]

@@ -61,11 +61,11 @@ public static class PrimitiveConversionHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static byte[] GetOutputBytes16(in ByteUnionBase16 unionBytes)
     {
-        return new byte[]
-        {
+        return
+        [
             unionBytes.Byte0Value,
             unionBytes.Byte1Value
-        };
+        ];
     }
 
     /// <summary>Helper for filling a 32-bit byte union helper struct section from byte array input.</summary>
@@ -116,13 +116,13 @@ public static class PrimitiveConversionHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static byte[] GetOutputBytes32(in ByteUnionBase32 unionBytes)
     {
-        return new byte[]
-        {
+        return
+        [
             unionBytes.Byte0Value,
             unionBytes.Byte1Value,
             unionBytes.Byte2Value,
             unionBytes.Byte3Value
-        };
+        ];
     }
 
     /// <summary>Helper for filling a 64-bit byte union helper struct section from byte array input.</summary>
@@ -185,8 +185,8 @@ public static class PrimitiveConversionHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static byte[] GetOutputBytes64(in ByteUnionBase64 unionBytes)
     {
-        return new byte[]
-        {
+        return
+        [
             unionBytes.Byte0Value,
             unionBytes.Byte1Value,
             unionBytes.Byte2Value,
@@ -195,7 +195,7 @@ public static class PrimitiveConversionHelper
             unionBytes.Byte5Value,
             unionBytes.Byte6Value,
             unionBytes.Byte7Value
-        };
+        ];
     }
     #endregion
 

@@ -37,7 +37,7 @@ public class FDSData : IEquatable<FDSData>
     }
 
     /// <summary>The list of comments preceding this data piece.</summary>
-    public List<string> PrecedingComments = new();
+    public List<string> PrecedingComments = [];
 
     /// <summary>Adds a preceding comment to this data piece.</summary>
     /// <param name="comment">The comment to add.</param>
@@ -93,11 +93,11 @@ public class FDSData : IEquatable<FDSData>
             }
             else if (Internal is FDSSection section && section.IsEmpty())
             {
-                return new List<FDSData>();
+                return [];
             }
             else
             {
-                return new List<FDSData>() { this };
+                return [this];
             }
         }
     }

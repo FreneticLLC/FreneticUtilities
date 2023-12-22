@@ -19,18 +19,12 @@ namespace FreneticUtilities.FreneticDataSyntax;
 public abstract class AutoConfiguration
 {
     /// <summary>Adds comment lines to a configuration value.</summary>
+    /// <param name="_comment">The comment to add.</param>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ConfigComment : Attribute
+    public class ConfigComment(string _comment) : Attribute
     {
         /// <summary>The comments to add (separated via newline).</summary>
-        public string Comments;
-
-        /// <summary>Construct the config comment.</summary>
-        /// <param name="_comment">The comment to add.</param>
-        public ConfigComment(string _comment)
-        {
-            Comments = _comment;
-        }
+        public string Comments = _comment;
     }
 
     /// <summary>Internal tooling for <see cref="AutoConfiguration"/>.</summary>
@@ -46,7 +40,7 @@ public abstract class AutoConfiguration
             public Action<AutoConfiguration, FDSSection> LoadSection;
 
             /// <summary>All fields for this instance, mapped from Name.ToLowerFast() to full field data.</summary>
-            public Dictionary<string, SingleFieldData> Fields = new();
+            public Dictionary<string, SingleFieldData> Fields = [];
         }
 
         /// <summary>Container for important data about a single field in an <see cref="AutoConfiguration"/> class.</summary>

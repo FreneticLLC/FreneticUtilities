@@ -12,14 +12,8 @@ using System.Text;
 namespace FreneticUtilities.FreneticDataSyntax;
 
 /// <summary>Represents an exception thrown while inputting data to an FDS section.</summary>
+/// <param name="message">The message explaining the error.</param>
 [Serializable]
-public class FDSInputException : Exception
+public class FDSInputException(string message) : Exception(message)
 {
-    /// <summary>Construct the FDS exception.</summary>
-    /// <param name="message">The message explaining the error.</param>
-    public FDSInputException(string message)
-        : base(message)
-    {
-        // No init needed.
-    }
 }

@@ -60,7 +60,7 @@ public static class FFPBuilder
     private static FFPBuilderFile[] GetFilesIn(string folder)
     {
         folder = Path.GetFullPath(folder);
-        List<FFPBuilderFile> filesOutput = new();
+        List<FFPBuilderFile> filesOutput = [];
         foreach (string file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories))
         {
             filesOutput.Add(new FFPBuilderFile()
@@ -69,7 +69,7 @@ public static class FFPBuilder
                 FileObject = file
             });
         }
-        return filesOutput.ToArray();
+        return [.. filesOutput];
     }
 
     /// <summary>Creates a <see cref="FFPackage"/> from a file system folder and saves it to a new file.</summary>
@@ -99,7 +99,7 @@ public static class FFPBuilder
     /// <exception cref="InvalidOperationException">If there are duplicate files, or the file cannot be created.</exception>
     public static void CreateFromFiles(FFPBuilderFile[] files, Stream output, Options options)
     {
-        HashSet<string> fileSet = new();
+        HashSet<string> fileSet = [];
         for (int i = 0; i < files.Length; i++)
         {
             files[i].Name = FFPUtilities.CleanFileName(files[i].Name);

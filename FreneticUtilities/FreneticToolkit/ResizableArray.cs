@@ -50,7 +50,7 @@ public class ResizableArray<T> : IEnumerable<T>
     /// <summary>Constructs an empty list.</summary>
     public ResizableArray()
     {
-        Internal = Array.Empty<T>();
+        Internal = [];
     }
 
     /// <summary>Constructs an empty list with a pre-chosen capacity.</summary>
@@ -140,29 +140,22 @@ public class ResizableArray<T> : IEnumerable<T>
     }
 
     /// <summary>Helper class for enumerating the <see cref="ResizableArray{T}"/>.</summary>
-    public struct ResArrEnumerator : IEnumerator<T>
+    public struct ResArrEnumerator(ResizableArray<T> arr) : IEnumerator<T>
     {
         /// <summary>The current index in the list.</summary>
-        public int Index;
+        public int Index = -1;
 
         /// <summary>The relevant original list.</summary>
-        public ResizableArray<T> Array;
-
-        /// <summary>Constructs the enumerator.</summary>
-        public ResArrEnumerator(ResizableArray<T> arr)
-        {
-            Array = arr;
-            Index = -1;
-        }
+        public ResizableArray<T> Array = arr;
 
         /// <summary>Gets the current value.</summary>
-        public T Current => Index < Array.Length ? Array[Index] : default;
+        public readonly T Current => Index < Array.Length ? Array[Index] : default;
 
         /// <summary>Gets the current value.</summary>
-        object IEnumerator.Current => Index < Array.Length ? Array[Index] : default;
+        readonly object IEnumerator.Current => Index < Array.Length ? Array[Index] : default;
 
         /// <summary>Disposes the enumerator (does nothing).</summary>
-        public void Dispose()
+        public readonly void Dispose()
         {
         }
 

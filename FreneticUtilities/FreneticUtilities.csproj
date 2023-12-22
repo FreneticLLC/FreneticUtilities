@@ -12,7 +12,7 @@
     <Copyright>Copyright (C) Frenetic LLC 2016-2023</Copyright>
     <Version>1.0.24</Version>
     <ProjectGuid>{1DB47D6A-4225-4F25-8559-2C6292496953}</ProjectGuid>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Frenetic LLC</Authors>
     <PackageId>FreneticLLC.FreneticUtilities</PackageId>

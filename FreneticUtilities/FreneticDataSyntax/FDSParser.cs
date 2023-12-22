@@ -29,7 +29,7 @@ public static class FDSParser
     /// <summary>Helper for <see cref="ParseSection(string[], int, int, int, out int, FDSSection)"/> to parse a list.</summary>
     public static void ParseList(string[] allLines, int startLine, int skip, int spacing, out int endLine, List<FDSData> outList)
     {
-        List<string> currentComments = new();
+        List<string> currentComments = [];
         endLine = startLine;
         for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
         {
@@ -87,10 +87,7 @@ public static class FDSParser
             if (ListPrefixMatcher.IsMatch(subSymbol))
             {
                 string lineText = valueText[1..].TrimStart(' ');
-                List<FDSData> outList = new()
-                {
-                    ParseSubListValue(subSymbol, lineText, allLines, startLine, spacing, out endLine)
-                };
+                List<FDSData> outList = [ParseSubListValue(subSymbol, lineText, allLines, startLine, spacing, out endLine)];
                 ParseList(allLines, endLine, 1, spacing, out endLine, outList);
                 return new FDSData(outList);
             }
@@ -176,7 +173,7 @@ public static class FDSParser
             }
             if (ListPrefixMatcher.IsMatch(firstSymbol))
             {
-                List<FDSData> subList = new();
+                List<FDSData> subList = [];
                 ParseList(allLines, startLine + skip, 0, spacing, out endLine, subList);
                 return new FDSData(subList);
             }
@@ -194,7 +191,7 @@ public static class FDSParser
     /// <param name="section">The section to store into.</param>
     public static void ParseSection(string[] allLines, int startLine, int skip, int spacing, out int endLine, FDSSection section)
     {
-        List<string> currentComments = new();
+        List<string> currentComments = [];
         endLine = startLine;
         for (int lineNum = startLine + skip; lineNum < allLines.Length; lineNum++)
         {

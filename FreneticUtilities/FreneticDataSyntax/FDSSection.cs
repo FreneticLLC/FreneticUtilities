@@ -30,16 +30,16 @@ public class FDSSection
     }
 
     /// <summary>All data contained by this section.</summary>
-    public Dictionary<string, FDSData> Data = new();
+    public Dictionary<string, FDSData> Data = [];
 
     /// <summary>
     /// Lowercase-stored data for this section.
     /// For lookup assistance only.
     /// </summary>
-    public Dictionary<string, FDSData> DataLowered = new();
+    public Dictionary<string, FDSData> DataLowered = [];
 
     /// <summary>Comments at the end of the section (usually only on the file root section).</summary>
-    public List<string> PostComments = new();
+    public List<string> PostComments = [];
 
     /// <summary>
     /// The section path splitter for this section.
@@ -254,7 +254,7 @@ public class FDSSection
     /// <param name="input">The key to set data to.</param>
     public void SetRoot(string key, object input)
     {
-        SetRootData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = new List<string>() });
+        SetRootData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = [] });
     }
 
     /// <summary>
@@ -265,7 +265,7 @@ public class FDSSection
     /// <param name="input">The key to set data to.</param>
     public void Set(string key, object input)
     {
-        SetData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = new List<string>() });
+        SetData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = [] });
     }
 
     /// <summary>
@@ -296,7 +296,7 @@ public class FDSSection
     /// <param name="input">The key to set data to.</param>
     public void Default(string key, object input)
     {
-        DefaultData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = new List<string>() });
+        DefaultData(key, new FDSData() { Internal = FDSUtility.ProcessObject(input), PrecedingComments = [] });
     }
 
     /// <summary>Defaults data to the section (IE, sets it if not present).</summary>
@@ -462,7 +462,7 @@ public class FDSSection
                     throw new FDSInputException("Key contains non-section contents!");
                 }
                 FDSSection temp = new();
-                current.SetRootData(dat[i], new FDSData() { Internal = temp, PrecedingComments = new List<string>() });
+                current.SetRootData(dat[i], new FDSData() { Internal = temp, PrecedingComments = [] });
                 current = temp;
             }
         }
@@ -540,7 +540,7 @@ public class FDSSection
     }
 
     /// <summary>Helper for <see cref="SaveToString(int, string, bool)"/></summary>
-    private void AppendListToString(StringBuilder output, List<FDSData> list, int tabulation, string newline, bool skipFirstTabs)
+    private static void AppendListToString(StringBuilder output, List<FDSData> list, int tabulation, string newline, bool skipFirstTabs)
     {
         string tabs = new('\t', tabulation);
         foreach (FDSData cdat in list)

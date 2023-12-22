@@ -117,7 +117,7 @@ public static class FDSUtility
     public static class Internal
     {
         /// <summary>A premade, reusable, empty byte array, for <see cref="FromBase64(string)"/> to return when the input is empty.</summary>
-        public static readonly byte[] EMPTY_BYTES = Array.Empty<byte>();
+        public static readonly byte[] EMPTY_BYTES = [];
 
         /// <summary>Quick-matcher for text codes that need to be escaped by <see cref="Escape(string)"/>.</summary>
         public static AsciiMatcher NeedsEscapingMatcher = new("\\\t\n\r");
@@ -236,7 +236,7 @@ public static class FDSUtility
         }
         if (input is IEnumerable list)
         {
-            List<FDSData> output = new();
+            List<FDSData> output = [];
             foreach (object o in list)
             {
                 output.Add(new FDSData(ProcessObject(o)));

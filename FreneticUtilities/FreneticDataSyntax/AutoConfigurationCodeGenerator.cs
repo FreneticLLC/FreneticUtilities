@@ -44,13 +44,13 @@ public static class AutoConfigurationCodeGenerator
     public static LockObject GenerationLock = new();
 
     /// <summary>A 1-value type array, with the value being <see cref="AutoConfiguration"/>.</summary>
-    public static Type[] AutoConfigArray = new Type[] { typeof(AutoConfiguration) };
+    public static Type[] AutoConfigArray = [typeof(AutoConfiguration)];
 
     /// <summary>Array of types for input to <see cref="AutoConfiguration.Internal.AutoConfigData.SaveSection"/>.</summary>
-    public static Type[] SaveMethodInputTypeArray = new Type[] { typeof(AutoConfiguration), typeof(bool) };
+    public static Type[] SaveMethodInputTypeArray = [typeof(AutoConfiguration), typeof(bool)];
 
     /// <summary>Array of types for input to <see cref="AutoConfiguration.Internal.AutoConfigData.LoadSection"/>.</summary>
-    public static Type[] LoadMethodInputTypeArray = new Type[] { typeof(AutoConfiguration), typeof(FDSSection) };
+    public static Type[] LoadMethodInputTypeArray = [typeof(AutoConfiguration), typeof(FDSSection)];
 
     /// <summary>A reference to the <see cref="AutoConfiguration.Save"/> method.</summary>
     public static MethodInfo ConfigSaveMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Save));
@@ -95,7 +95,7 @@ public static class AutoConfigurationCodeGenerator
     public static FieldInfo FDSDataInternalField = typeof(FDSData).GetField(nameof(FDSData.Internal));
 
     /// <summary>A reference to the <see cref="FDSSection"/> no-arguments constructor.</summary>
-    public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor(Array.Empty<Type>());
+    public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor([]);
 
     /// <summary>A reference to the <see cref="FDSData"/> one-argument constructor.</summary>
     public static ConstructorInfo FDSDataObjectConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object) });
@@ -104,7 +104,7 @@ public static class AutoConfigurationCodeGenerator
     public static ConstructorInfo FDSDataObjectCommentConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object), typeof(string) });
 
     /// <summary>A reference to the <see cref="List{FDSData}"/> of <see cref="FDSData"/> no-arguments constructor.</summary>
-    public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor(Array.Empty<Type>());
+    public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor([]);
 
     /// <summary>A reference to <see cref="AutoConfiguration.InternalData"/>.</summary>
     public static FieldInfo AutoConfigurationInternalDataField = typeof(AutoConfiguration).GetField(nameof(AutoConfiguration.InternalData));
@@ -264,8 +264,8 @@ public static class AutoConfigurationCodeGenerator
             enumeratorMoveNextMethod = FDSDataListEnumeratorMoveNextMethod;
             enumeratorCurrentGetter = FDSDataListEnumeratorCurrentGetter;
             listAddMethod = outListType.GetMethod(nameof(ICollection<int>.Add));
-            outListConstructor = type.GetConstructor(Array.Empty<Type>());
-            inputTypes = new Type[] { inListType };
+            outListConstructor = type.GetConstructor([]);
+            inputTypes = [inListType];
         }
         else
         {
@@ -279,7 +279,7 @@ public static class AutoConfigurationCodeGenerator
             enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator.Current)).GetMethod;
             listAddMethod = FDSDataListAddMethod;
             outListConstructor = FDSDataListConstructor;
-            inputTypes = new Type[] { inListType, typeof(bool) };
+            inputTypes = [inListType, typeof(bool)];
         }
         DynamicMethod genMethod = new("ListConvert", outListType, inputTypes, typeof(AutoConfiguration).Module, true);
         ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"ListConvert_{inListType.Name}");
@@ -353,7 +353,7 @@ public static class AutoConfigurationCodeGenerator
             outKeyType = keyType;
             inKeyType = typeof(string);
             actualValueType = valueType;
-            outConstructor = type.GetConstructor(Array.Empty<Type>());
+            outConstructor = type.GetConstructor([]);
             getKeysMethod = SectionGetRootKeysMethod;
             enumeratorMethod = IEnumerableStringGetEnumeratorMethod;
             enumeratorType = typeof(IEnumerator<string>);
@@ -361,7 +361,7 @@ public static class AutoConfigurationCodeGenerator
             getValueMethod = SectionGetRootDataMethod;
             enumeratorMoveNextMethod = IEnumeratorMoveNextMethod;
             enumeratorCurrentGetter = IEnumeratorCurrentGetter;
-            inputTypes = new Type[] { inType };
+            inputTypes = [inType];
         }
         else
         {
@@ -378,7 +378,7 @@ public static class AutoConfigurationCodeGenerator
             enumeratorCurrentGetter = enumeratorType.GetProperty(nameof(IEnumerator.Current)).GetMethod;
             addMethod = SectionSetRootDataMethod;
             getValueMethod = type.GetMethod("get_Item");
-            inputTypes = new Type[] { inType, typeof(bool) };
+            inputTypes = [inType, typeof(bool)];
         }
         DynamicMethod genMethod = new("DictionaryConvert", outType, inputTypes, typeof(AutoConfiguration).Module, true);
         ILGeneratorTracker targetILGen = new(genMethod.GetILGenerator(), genMethod, $"DictionaryConvert_{type.Name}_{keyType.Name}_{valueType.Name}_{(doLoad ? "load" : "save")}");
@@ -517,7 +517,7 @@ public static class AutoConfigurationCodeGenerator
                 targetILGen.Emit(OpCodes.Castclass, typeof(FDSSection));
                 LocalBuilder sectionLocal = targetILGen.DeclareLocal(typeof(FDSSection));
                 targetILGen.Emit(OpCodes.Stloc, sectionLocal);
-                targetILGen.Emit(OpCodes.Newobj, type.GetConstructor(Array.Empty<Type>()));
+                targetILGen.Emit(OpCodes.Newobj, type.GetConstructor([]));
                 LocalBuilder configLocal = targetILGen.DeclareLocal(type);
                 targetILGen.Emit(OpCodes.Stloc, configLocal);
                 targetILGen.Emit(OpCodes.Ldloc, configLocal);
@@ -538,8 +538,8 @@ public static class AutoConfigurationCodeGenerator
     }
 
     /// <summary>Types that can be duplicated by just returning the same instance.</summary>
-    public static HashSet<Type> StandardTypes = new()
-    {
+    public static HashSet<Type> StandardTypes =
+    [
         typeof(int),
         typeof(uint),
         typeof(long),
@@ -554,7 +554,7 @@ public static class AutoConfigurationCodeGenerator
         typeof(decimal),
         typeof(bool),
         typeof(string)
-    };
+    ];
 
     /// <summary>Duplicates common object types properly automatically.</summary>
     public static object Duplicate(object origObj)
@@ -571,7 +571,7 @@ public static class AutoConfigurationCodeGenerator
         }
         if (origObj is IDictionary dict)
         {
-            IDictionary result = t.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>()) as IDictionary;
+            IDictionary result = t.GetConstructor([]).Invoke([]) as IDictionary;
             foreach (DictionaryEntry subPair in dict)
             {
                 result.Add(Duplicate(subPair.Key), Duplicate(subPair.Value));
@@ -589,7 +589,7 @@ public static class AutoConfigurationCodeGenerator
         }
         else if (origObj is IList list)
         {
-            IList result = t.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>()) as IList;
+            IList result = t.GetConstructor([]).Invoke([]) as IList;
             foreach (object subObj in list)
             {
                 result.Add(Duplicate(subObj));
@@ -660,7 +660,7 @@ public static class AutoConfigurationCodeGenerator
             try
             {
                 AntiDuplicate = true;
-                referenceDefaults = type.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>()) as AutoConfiguration;
+                referenceDefaults = type.GetConstructor([]).Invoke([]) as AutoConfiguration;
             }
             finally
             {

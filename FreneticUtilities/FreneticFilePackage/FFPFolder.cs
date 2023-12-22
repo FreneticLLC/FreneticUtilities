@@ -24,7 +24,7 @@ public class FFPFolder
     }
 
     /// <summary>The contents of the package.</summary>
-    public Dictionary<string, object> Contents = new();
+    public Dictionary<string, object> Contents = [];
 
     /// <summary>Adds a file to the folder.</summary>
     /// <param name="path">The full file path, separated by the '/' character.</param>
