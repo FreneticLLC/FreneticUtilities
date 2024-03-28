@@ -108,13 +108,13 @@ public class ILGeneratorTracker
 
 #if VALIDATE
     /// <summary>All codes generated. Only has a value when compiled in DEBUG mode.</summary>
-    public List<KeyValuePair<string, object>> Codes = new();
+    public List<KeyValuePair<string, object>> Codes = [];
 
     /// <summary>Stack tracker, for validation.</summary>
     public Stack<Type> StackTypes = new();
 
     /// <summary>Local variables.</summary>
-    public Dictionary<int, LocalBuilder> Locals = new();
+    public Dictionary<int, LocalBuilder> Locals = [];
 #endif
 
     /// <summary>Gives a warning if stack size is not the exact correct size.</summary>
