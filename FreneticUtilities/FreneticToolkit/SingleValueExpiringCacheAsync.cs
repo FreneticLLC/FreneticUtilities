@@ -49,6 +49,12 @@ public class SingleValueExpiringCacheAsync<TValue>(Func<TValue> calculateValueFu
     /// <summary>Write semaphore to limit writes from overlapping.</summary>
     public SemaphoreSlim WriteSemaphore = new(1, 1);
 
+    /// <summary>Forces the value to immediately be considered expired.</summary>
+    public void ForceExpire()
+    {
+        Interlocked.Exchange(ref TimeValueUpdated, 0);
+    }
+
     /// <summary>Get the current value, either from cache or a fresh calculation.</summary>
     public TValue GetValue()
     {
