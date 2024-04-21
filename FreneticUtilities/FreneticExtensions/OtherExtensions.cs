@@ -31,7 +31,7 @@ public static class OtherExtensions
         return val == 1 ? "" : "s";
     }
 
-    /// <summary>Utility for <see cref="SimpleFormat(TimeSpan, bool)"/> for building a result.</summary>
+    /// <summary>Utility for <see cref="SimpleFormat(TimeSpan, bool, bool)"/> for building a result.</summary>
     private static string AutoFormatResult(int largeValue, string largeValueName, int smallValue, string smallValueName)
     {
         if (smallValue == 0 && largeValue == 0)
@@ -61,8 +61,9 @@ public static class OtherExtensions
     /// </summary>
     /// <param name="duration">The duration of time.</param>
     /// <param name="addAgo">For positive timespans, ends the result with "from now". For negative timespans, ends the result with "ago".</param>
+    /// <param name="includeMs">If true, include milliseconds value. If false, exclude it.</param>
     /// <returns>The text formatting of the timespan.</returns>
-    public static string SimpleFormat(this TimeSpan duration, bool addAgo)
+    public static string SimpleFormat(this TimeSpan duration, bool addAgo, bool includeMs = true)
     {
         bool wasNegative = duration.TotalMilliseconds < 0;
         if (wasNegative)
@@ -76,7 +77,7 @@ public static class OtherExtensions
         }
         else if (duration.TotalMinutes < 1)
         {
-            result = AutoFormatResult(duration.Seconds, "second", duration.Milliseconds, "millisecond");
+            result = AutoFormatResult(duration.Seconds, "second", includeMs ? duration.Milliseconds : 0, "millisecond");
         }
         else if (duration.TotalHours < 1)
         {
