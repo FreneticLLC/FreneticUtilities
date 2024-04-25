@@ -58,8 +58,9 @@ public class SingleCacheAsync<TKey, TValue>(Func<TKey, TValue> calculateValueFun
             {
                 return Value;
             }
+            ReadSemaphore.Release();
             WriteSemaphore.Wait();
-            for (int i = 0; i < MaxReaders - 1; i++) // We need to write, so block all reads (excluding self)
+            for (int i = 0; i < MaxReaders; i++) // We need to write, so block all reads (excluding self)
             {
                 ReadSemaphore.Wait();
             }

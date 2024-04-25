@@ -27,15 +27,18 @@ namespace FreneticUtilities.FreneticToolkit;
 /// ValueTypes are supportable in theory, but in practice require unique codepaths dependent on bitwidth, and therefore are currently excluded from this implementation.</para>
 /// </summary>
 /// <param name="calculateValueFunc">Function that defines the current value.</param>
-/// <param name="ExpireTime">After how much time delay should the value be considered expired.</param>
+/// <param name="expireTime">After how much time delay should the value be considered expired.</param>
 /// <param name="maxReaders">Maximum parallel reads (that may never overlap with a write).</param>
-public class SingleValueExpiringCacheAsync<TValue>(Func<TValue> calculateValueFunc, TimeSpan ExpireTime, int maxReaders = 10) where TValue : class
+public class SingleValueExpiringCacheAsync<TValue>(Func<TValue> calculateValueFunc, TimeSpan expireTime, int maxReaders = 10) where TValue : class
 {
     /// <summary>The time the value was last updated (<see cref="Environment.TickCount64"/>).</summary>
     public long TimeValueUpdated = 0;
 
     /// <summary>The current cache value (if any).</summary>
     public volatile TValue Value;
+
+    /// <summary>After how much time delay should the value be considered expired.</summary>
+    public TimeSpan ExpireTime = expireTime;
 
     /// <summary>Function that calculates the new value.</summary>
     public Func<TValue> CalculateValueFunc = calculateValueFunc;
@@ -66,8 +69,9 @@ public class SingleValueExpiringCacheAsync<TValue>(Func<TValue> calculateValueFu
             {
                 return Value;
             }
+            ReadSemaphore.Release();
             WriteSemaphore.Wait();
-            for (int i = 0; i < MaxReaders - 1; i++) // We need to write, so block all reads (excluding self)
+            for (int i = 0; i < MaxReaders; i++) // We need to write, so block all reads (excluding self)
             {
                 ReadSemaphore.Wait();
             }
