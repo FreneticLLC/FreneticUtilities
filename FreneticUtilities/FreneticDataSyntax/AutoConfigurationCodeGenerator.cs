@@ -59,13 +59,13 @@ public static class AutoConfigurationCodeGenerator
     public static MethodInfo ConfigLoadMethod = typeof(AutoConfiguration).GetMethod(nameof(AutoConfiguration.Load));
 
     /// <summary>A reference to the <see cref="FDSSection.SetRootData(string, FDSData)"/> method.</summary>
-    public static MethodInfo SectionSetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.SetRootData), new Type[] { typeof(string), typeof(FDSData) });
+    public static MethodInfo SectionSetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.SetRootData), [typeof(string), typeof(FDSData)]);
 
     /// <summary>A reference to the <see cref="FDSSection.GetSection(string)"/> method.</summary>
-    public static MethodInfo SectionGetSectionMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetSection), new Type[] { typeof(string) });
+    public static MethodInfo SectionGetSectionMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetSection), [typeof(string)]);
 
     /// <summary>A reference to the <see cref="FDSSection.GetRootData(string)"/> method.</summary>
-    public static MethodInfo SectionGetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetRootData), new Type[] { typeof(string) });
+    public static MethodInfo SectionGetRootDataMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetRootData), [typeof(string)]);
 
     /// <summary>A reference to the <see cref="FDSSection.GetRootKeys"/> method.</summary>
     public static MethodInfo SectionGetRootKeysMethod = typeof(FDSSection).GetMethod(nameof(FDSSection.GetRootKeys));
@@ -98,10 +98,10 @@ public static class AutoConfigurationCodeGenerator
     public static ConstructorInfo SectionConstructor = typeof(FDSSection).GetConstructor([]);
 
     /// <summary>A reference to the <see cref="FDSData"/> one-argument constructor.</summary>
-    public static ConstructorInfo FDSDataObjectConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object) });
+    public static ConstructorInfo FDSDataObjectConstructor = typeof(FDSData).GetConstructor([typeof(object)]);
 
     /// <summary>A reference to the <see cref="FDSData"/> two-arguments constructor.</summary>
-    public static ConstructorInfo FDSDataObjectCommentConstructor = typeof(FDSData).GetConstructor(new Type[] { typeof(object), typeof(string) });
+    public static ConstructorInfo FDSDataObjectCommentConstructor = typeof(FDSData).GetConstructor([typeof(object), typeof(string)]);
 
     /// <summary>A reference to the <see cref="List{FDSData}"/> of <see cref="FDSData"/> no-arguments constructor.</summary>
     public static ConstructorInfo FDSDataListConstructor = typeof(List<FDSData>).GetConstructor([]);
@@ -598,8 +598,8 @@ public static class AutoConfigurationCodeGenerator
         }
         else if (origObj is IEnumerable)
         {
-            List<FDSData> gennedList = GetListSaver(t).Invoke(null, new object[] { origObj, true }) as List<FDSData>;
-            return GetListLoader(t).Invoke(null, new object[] { gennedList });
+            List<FDSData> gennedList = GetListSaver(t).Invoke(null, [origObj, true]) as List<FDSData>;
+            return GetListLoader(t).Invoke(null, [gennedList]);
         }
         else
         {
@@ -625,7 +625,7 @@ public static class AutoConfigurationCodeGenerator
     /// <summary>Generates a setter for <see cref="AutoConfiguration.Internal.SingleFieldData.SetValue"/>.</summary>
     public static Action<AutoConfiguration, object> GenerateValueSetter(FieldInfo field)
     {
-        DynamicMethod genMethod = new($"Config{field.Name}ValueSetter", typeof(void), new Type[] { typeof(AutoConfiguration), typeof(object) }, typeof(AutoConfiguration).Module, true);
+        DynamicMethod genMethod = new($"Config{field.Name}ValueSetter", typeof(void), [typeof(AutoConfiguration), typeof(object)], typeof(AutoConfiguration).Module, true);
         ILGenerator targetILGen = genMethod.GetILGenerator();
         targetILGen.Emit(OpCodes.Ldarg_0); // Load the config input parameter (stack=config)
         targetILGen.Emit(OpCodes.Ldarg_1); // Load the value input parameter (stack=config, value)

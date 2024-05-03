@@ -60,6 +60,7 @@ public class SingleCacheAsync<TKey, TValue>(Func<TKey, TValue> calculateValueFun
             }
             ReadSemaphore.Release();
             WriteSemaphore.Wait();
+            // TODO: Do a key check before grabbing read semaphores to avoid pile-ups
             for (int i = 0; i < MaxReaders; i++) // We need to write, so block all reads (excluding self)
             {
                 ReadSemaphore.Wait();

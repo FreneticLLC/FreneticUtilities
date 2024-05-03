@@ -108,7 +108,7 @@ public static class EnumHelper<T> where T : Enum
     static Func<T, long> CreateLongConverter()
     {
         // long EnumToLong(T val) { return (long)val; }
-        DynamicMethod method = new("EnumToLong", typeof(long), new Type[] { typeof(T) }, typeof(EnumHelper<T>).Module, true);
+        DynamicMethod method = new("EnumToLong", typeof(long), [typeof(T)], typeof(EnumHelper<T>).Module, true);
         ILGenerator ilgen = method.GetILGenerator();
         ilgen.Emit(OpCodes.Ldarg_0); // Load arg 0 (flag)
         ilgen.Emit(OpCodes.Conv_I8); // Convert it to an int64 (long)
@@ -121,7 +121,7 @@ public static class EnumHelper<T> where T : Enum
     static Func<T, T, bool> CreateFlagTester()
     {
         // bool FlagTester(T one, T two) { return (one & two) == two; }
-        DynamicMethod method = new("FlagTester", typeof(bool), new Type[] { typeof(T), typeof(T) }, typeof(EnumHelper<T>).Module, true);
+        DynamicMethod method = new("FlagTester", typeof(bool), [typeof(T), typeof(T)], typeof(EnumHelper<T>).Module, true);
         ILGenerator ilgen = method.GetILGenerator();
         ilgen.Emit(OpCodes.Ldarg_0); // Load arg 0 (flag to be tested)
         ilgen.Emit(OpCodes.Ldarg_1); // Load arg 1 (flag to test for)

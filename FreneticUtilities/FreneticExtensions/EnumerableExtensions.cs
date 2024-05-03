@@ -273,9 +273,7 @@ public static class EnumerableExtensions
     /// <returns>The joined result.</returns>
     public static List<T> JoinWith<T>(this IEnumerable<T> originalList, IEnumerable<T> addtionalObjects)
     {
-        List<T> result = new(originalList.Count() + addtionalObjects.Count());
-        result.AddRange(originalList);
-        result.AddRange(addtionalObjects);
+        List<T> result = [.. originalList, .. addtionalObjects];
         return result;
     }
 
