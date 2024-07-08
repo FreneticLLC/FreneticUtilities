@@ -14,7 +14,7 @@ namespace FreneticUtilities.FreneticToolkit;
 /// <para>Handles nulls as equivalent to hash 0.</para></summary>
 /// <example>
 /// <code>
-///     MultiSempahoreSet&lt;string&gt; set = new(32, 1);
+///     MultiSemaphoreSet&lt;string&gt; set = new(32, 1);
 ///     string myStr = "some text";
 ///     lock (set.GetLock(myStr))
 ///     {
@@ -22,18 +22,18 @@ namespace FreneticUtilities.FreneticToolkit;
 ///     }
 /// </code>
 /// </example>
-public class MultiSempahoreSet<T>
+public class MultiSemaphoreSet<T>
 {
     /// <summary>The internal set of actual <see cref="SemaphoreSlim"/> used to lock against.</summary>
     public SemaphoreSlim[] InternalLocks;
 
     /// <summary>Constructs a new <see cref="MultiLockSet{T}"/> with the specified size.</summary>
-    public MultiSempahoreSet(int size, int sempahoreUsageCount = 1)
+    public MultiSemaphoreSet(int size, int semaphoreUsageCount = 1)
     {
         InternalLocks = new SemaphoreSlim[size];
         for (int i = 0; i < size; i++)
         {
-            InternalLocks[i] = new(sempahoreUsageCount);
+            InternalLocks[i] = new(semaphoreUsageCount);
         }
     }
 

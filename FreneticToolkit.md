@@ -27,4 +27,3 @@ Frenetic Toolkit is a collection of general utilities for use a variety of cases
 - **MultiSemaphoreSet**: same as `MultiLockSet` but for `SemaphoreSlim` objects.
 - **SingleCacheAsync**: caches a single value based on a current lookup key, in a tiny fast async-safe way.
 - **SingleValueExperingCacheAsync**: similar to `SingleCacheAsync`, but with a stable expiration time.
-
