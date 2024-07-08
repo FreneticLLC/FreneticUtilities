@@ -13,12 +13,12 @@ namespace FreneticUtilities.FreneticToolkit;
 /// <para>Handles nulls as equivalent to hash 0.</para></summary>
 /// <example>
 /// <code>
-/// MultiLockSet<string> set = new(32);
-/// string myStr = "some text";
-/// lock (set.GetLock(myStr))
-/// {
-///     // something unique to myStr
-/// }
+///     MultiLockSet&lt;string&gt; set = new(32);
+///     string myStr = "some text";
+///     lock (set.GetLock(myStr))
+///     {
+///         // something unique to myStr
+///     }
 /// </code>
 /// </example>
 public class MultiLockSet<T>

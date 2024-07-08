@@ -44,7 +44,7 @@ public static class MathHelper
         return onlyMSB << 1;
     }
 
-    /// <summary>Steps a value towards a goal by a specified amount, automatically moving the correct direction (positive or negative) and preventing going past the goal.</summary>
+    /// <summary>Steps (lerps) a value towards a goal by a specified amount, automatically moving the correct direction (positive or negative) and preventing going past the goal.</summary>
     /// <param name="start">The initial value.</param>
     /// <param name="target">The goal value.</param>
     /// <param name="stepAmount">The amount to step by.</param>

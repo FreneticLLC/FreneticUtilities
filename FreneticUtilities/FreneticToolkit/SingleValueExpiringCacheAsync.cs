@@ -25,6 +25,7 @@ namespace FreneticUtilities.FreneticToolkit;
 /// except with async safety, and being self-contained.
 /// <para>Note that due to volatile handling, only Object types are supported.
 /// ValueTypes are supportable in theory, but in practice require unique codepaths dependent on bitwidth, and therefore are currently excluded from this implementation.</para>
+/// <para>Note the expiration duration is calculated based on <see cref="Environment.TickCount64"/>, a stable system timer unaffected by real date/time.</para>
 /// </summary>
 /// <param name="calculateValueFunc">Function that defines the current value.</param>
 /// <param name="expireTime">After how much time delay should the value be considered expired.</param>
