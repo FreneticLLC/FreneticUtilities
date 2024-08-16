@@ -59,6 +59,10 @@ public class FDSData : IEquatable<FDSData>
             {
                 return str;
             }
+            else if (Internal is bool bval)
+            {
+                return bval ? "true" : "false";
+            }
             else
             {
                 return Internal.ToString();
