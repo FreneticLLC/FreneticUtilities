@@ -560,6 +560,10 @@ public static class AutoConfigurationCodeGenerator
     public static object Duplicate(object origObj)
     {
         // This method is dirty, but only has to be called once per field per AutoConfig, during startup, so isn't *too* perf relevant.
+        if (origObj is null)
+        {
+            return null;
+        }
         Type t = origObj.GetType();
         if (StandardTypes.Contains(t))
         {
