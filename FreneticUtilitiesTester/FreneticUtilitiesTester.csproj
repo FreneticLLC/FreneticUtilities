@@ -9,8 +9,8 @@
     <DocumentationFile>bin\Release\FreneticUtilitiesTester.xml</DocumentationFile>
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilities</Product>
-    <Copyright>Copyright (C) Frenetic LLC 2016-2024</Copyright>
-    <Version>1.0.34</Version>
+    <Copyright>Copyright (C) Frenetic LLC 2016-2025</Copyright>
+    <Version>1.0.35</Version>
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
