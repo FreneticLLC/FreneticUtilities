@@ -44,14 +44,8 @@ public class SingleValueExpiringCacheAsync<TValue>(Func<TValue> calculateValueFu
     /// <summary>Function that calculates the new value.</summary>
     public Func<TValue> CalculateValueFunc = calculateValueFunc;
 
-    /// <summary>Maximum number of readers allowed at once.</summary>
-    public int MaxReaders = maxReaders;
-
-    /// <summary>Read semaphore to limit reading from happening at the same time as writing, but allow parallel reads.</summary>
-    public SemaphoreSlim ReadSemaphore = new(maxReaders, maxReaders);
-
-    /// <summary>Write semaphore to limit writes from overlapping.</summary>
-    public SemaphoreSlim WriteSemaphore = new(1, 1);
+    /// <summary>The backing complex lock to ensure stable access.</summary>
+    public ManyReadOneWriteLock Lock = new(maxReaders);
 
     /// <summary>Forces the value to immediately be considered expired.</summary>
     public void ForceExpire()
@@ -62,44 +56,27 @@ public class SingleValueExpiringCacheAsync<TValue>(Func<TValue> calculateValueFu
     /// <summary>Get the current value, either from cache or a fresh calculation.</summary>
     public TValue GetValue()
     {
-        ReadSemaphore.Wait();
-        try
+        // Try a direct read to get
+        using (ManyReadOneWriteLock.ReadClaim claim = Lock.LockRead())
         {
             long read = Interlocked.Read(ref TimeValueUpdated);
             if (read != 0 && Environment.TickCount64 - read < ExpireTime.TotalMilliseconds)
             {
                 return Value;
             }
-            ReadSemaphore.Release();
-            WriteSemaphore.Wait();
-            for (int i = 0; i < MaxReaders; i++) // We need to write, so block all reads (excluding self)
+        }
+        // But if the direct read is a cache miss, need to potentially write
+        using (ManyReadOneWriteLock.WriteClaim claim = Lock.LockWrite())
+        {
+            // Re-check key inside the lock to avoid unwanted recalculation
+            long read = Interlocked.Read(ref TimeValueUpdated);
+            if (read != 0 && Environment.TickCount64 - read < ExpireTime.TotalMilliseconds)
             {
-                ReadSemaphore.Wait();
-            }
-            try
-            {
-                // Double-check to avoid multi-call of the calc func
-                read = Interlocked.Read(ref TimeValueUpdated);
-                if (read != 0 && Environment.TickCount64 - read < ExpireTime.TotalMilliseconds)
-                {
-                    return Value;
-                }
-                Interlocked.Exchange(ref TimeValueUpdated, Environment.TickCount64);
-                Value = CalculateValueFunc();
                 return Value;
             }
-            finally
-            {
-                WriteSemaphore.Release();
-                for (int i = 0; i < MaxReaders - 1; i++)
-                {
-                    ReadSemaphore.Release();
-                }
-            }
-        }
-        finally
-        {
-            ReadSemaphore.Release();
+            Interlocked.Exchange(ref TimeValueUpdated, Environment.TickCount64);
+            Value = CalculateValueFunc();
+            return Value;
         }
     }
 }

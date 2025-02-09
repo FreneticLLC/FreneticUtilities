@@ -23,7 +23,8 @@ Frenetic Toolkit is a collection of general utilities for use a variety of cases
 
 - **AsyncAutoResetEvent**: like `AutoResetEvent` but awaitable. I don't know why this isn't built into .NET itself.
 - **LockObject**: just a handy tiny little empty object class to use with C# `lock` syntax.
+- **ManyReadOneWriteLock**: a special lock helper that enables you to lock data such that many callers may read the data in parallel, but writing updates to the data grants an exclusive claim.
 - **MultiLockSet**: tracks a set of `LockObject`s within a simple static table with hash based lookups for any hashable data type. Useful for preventing async overlap of a complex set without dynamic tracking.
 - **MultiSemaphoreSet**: same as `MultiLockSet` but for `SemaphoreSlim` objects.
 - **SingleCacheAsync**: caches a single value based on a current lookup key, in a tiny fast async-safe way.
-- **SingleValueExperingCacheAsync**: similar to `SingleCacheAsync`, but with a stable expiration time.
+- **SingleValueExpiringCacheAsync**: similar to `SingleCacheAsync`, but with a stable expiration time.

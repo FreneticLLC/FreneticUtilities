@@ -39,54 +39,31 @@ public class SingleCacheAsync<TKey, TValue>(Func<TKey, TValue> calculateValueFun
     /// <summary>Function that calculates a value for a given key.</summary>
     public Func<TKey, TValue> CalculateValueFunc = calculateValueFunc;
 
-    /// <summary>Maximum number of readers allowed at once.</summary>
-    public int MaxReaders = maxReaders;
-
-    /// <summary>Read semaphore to limit reading from happening at the same time as writing, but allow parallel reads.</summary>
-    public SemaphoreSlim ReadSemaphore = new(maxReaders, maxReaders);
-
-    /// <summary>Write semaphore to limit writes from overlapping.</summary>
-    public SemaphoreSlim WriteSemaphore = new(1, 1);
+    /// <summary>The backing complex lock to ensure stable access.</summary>
+    public ManyReadOneWriteLock Lock = new(maxReaders);
 
     /// <summary>Get the value for the given key, either from cache or a fresh calculation.</summary>
     public TValue GetValue(TKey key)
     {
-        ReadSemaphore.Wait();
-        try
+        // Try a direct read to get
+        using (ManyReadOneWriteLock.ReadClaim claim = Lock.LockRead())
         {
             if (key == Key)
             {
                 return Value;
             }
-            ReadSemaphore.Release();
-            WriteSemaphore.Wait();
-            // TODO: Do a key check before grabbing read semaphores to avoid pile-ups
-            for (int i = 0; i < MaxReaders; i++) // We need to write, so block all reads (excluding self)
+        }
+        // But if the direct read is a cache miss, need to potentially write
+        using (ManyReadOneWriteLock.WriteClaim claim = Lock.LockWrite())
+        {
+            // Re-check key inside the lock to avoid unwanted recalculation
+            if (key == Key)
             {
-                ReadSemaphore.Wait();
-            }
-            try
-            {
-                if (key == Key) // Double-check to avoid multi-call of the calc func
-                {
-                    return Value;
-                }
-                Key = key;
-                Value = CalculateValueFunc(key);
                 return Value;
             }
-            finally
-            {
-                WriteSemaphore.Release();
-                for (int i = 0; i < MaxReaders - 1; i++)
-                {
-                    ReadSemaphore.Release();
-                }
-            }
-        }
-        finally
-        {
-            ReadSemaphore.Release();
+            Key = key;
+            Value = CalculateValueFunc(key);
+            return Value;
         }
     }
 }
