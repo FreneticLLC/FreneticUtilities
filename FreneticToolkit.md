@@ -9,6 +9,7 @@ Frenetic Toolkit is a collection of general utilities for use a variety of cases
 - **FreneticEvent**: an event handler system, including special helpers for things like synchronous pausable firings and other handy 'script-like' features.
 - **ILGeneratorTracker**: helper to replace .NET's `ILGenerator` with one that's capable of input tracking and error checking.
 - **ResizableArray**: special optimization hack, essentially a `List<T>` that allows direct access to the underlying array.
+- **SimpleRateLimiter**: implements a simple multi-user rate limiter, async safe, keeps memory somewhat clean.
 
 ## Broad Helpers
 
