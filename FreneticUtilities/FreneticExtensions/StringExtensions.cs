@@ -527,7 +527,7 @@ public static class StringExtensions
             for (int i = 0; i < len; i++)
             {
                 uint c = chrs[i];
-                if (c - 'A' <= 'Z' - 'A')
+                if (c - 'a' <= 'z' - 'a')
                 {
                     first = i;
                     goto mustchange;
