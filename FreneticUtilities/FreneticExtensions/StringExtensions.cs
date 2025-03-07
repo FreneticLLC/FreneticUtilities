@@ -17,26 +17,44 @@ namespace FreneticUtilities.FreneticExtensions;
 public static class StringExtensions
 {
     /// <summary>
-    /// Rapidly converts an ASCII string to a lowercase representation.
-    /// <para>Does not work with non-ASCII text (no support for unicode/multi-language/etc).</para>
+    /// Rapidly converts an ASCII string to a lowercase representation, in an explicitly consistent and reliable manner.
+    /// <para>Does not work with non-ASCII text (intentionally no support for unicode/multi-language/etc).</para>
     /// <para>Operates explicitly on the ASCII 'a-z' and 'A-Z' range.</para>
-    /// <para>Can be slow if the string is already lowercase (Consider using <see cref="IsAllLowerFast(string)"/> if that is likely).</para>
+    /// <para>This is intended for "technical text" processing, not for general "user displayed text" which should use base dotnet methods (ToLower/ToLowerInvariant) for language support.</para>
     /// </summary>
     /// <param name="input">The original string.</param>
     /// <returns>A lowercase version.</returns>
-    public static string ToLowerFast(this string input)
+    public static unsafe string ToLowerFast(this string input)
     {
-        char[] finalString = input.ToCharArray();
-        for (int i = 0; i < finalString.Length; i++)
+        int first = -1;
+        int len = input.Length;
+        fixed (char* chrs = input)
         {
-            char c = finalString[i];
-            // NOTE: these bit patterns are defined as part of ASCII - uppercase letters start 010(..), the difference between upper and lower is at 001(..)
-            if ((c & 0b11100000) == 0b01000000 && c >= 'A' && c <= 'Z')
+            for (int i = 0; i < len; i++)
             {
-                finalString[i] = (char)(c ^ 0b00100000);
+                uint c = chrs[i];
+                if (c - 'A' <= 'Z' - 'A')
+                {
+                    first = i;
+                    goto mustchange;
+                }
             }
+            return input;
+        mustchange:
+            string dup = new(chrs, 0, len);
+            fixed (char* chrs2 = dup)
+            {
+                for (int i = first; i < len; i++)
+                {
+                    uint c = chrs2[i];
+                    if (c - 'A' <= 'Z' - 'A')
+                    {
+                        chrs2[i] = (char)(c ^ 0b00100000);
+                    }
+                }
+            }
+            return dup;
         }
-        return new string(finalString);
     }
 
     /// <summary>
@@ -59,15 +77,15 @@ public static class StringExtensions
         }
         for (int i = 0; i < first.Length; i++)
         {
-            char a = first[i];
-            char b = second[i];
-            if ((a & 0b11100000) == 0b01000000 && a >= 'A' && a <= 'Z')
+            uint a = first[i];
+            uint b = second[i];
+            if (a - 'A' <= 'Z' - 'A')
             {
-                a = (char)(a ^ 0b00100000);
+                a ^= 0b00100000;
             }
-            if ((b & 0b11100000) == 0b01000000 && b >= 'A' && b <= 'Z')
+            if (b - 'A' <= 'Z' - 'A')
             {
-                b = (char)(b ^ 0b00100000);
+                b ^= 0b00100000;
             }
             if (a != b)
             {
@@ -483,8 +501,8 @@ public static class StringExtensions
     {
         for (int i = 0; i < input.Length; i++)
         {
-            char c = input[i];
-            if ((c & 0b11100000) == 0b01000000 && c >= 'A' && c <= 'Z')
+            uint c = input[i];
+            if (c - 'A' <= 'Z' - 'A')
             {
                 return false;
             }
@@ -493,29 +511,48 @@ public static class StringExtensions
     }
 
     /// <summary>
-    /// Rapidly converts an ASCII string to a uppercase representation.
-    /// <para>Does not work with non-ASCII text (no support for unicode/multi-language/etc).</para>
+    /// Rapidly converts an ASCII string to a uppercase representation, in an explicitly consistent and reliable manner.
+    /// <para>Does not work with non-ASCII text (intentionally no support for unicode/multi-language/etc).</para>
     /// <para>Operates explicitly on the ASCII 'a-z' and 'A-Z' range.</para>
-    /// <para>Can be slow if the string is already uppercase (Consider using <see cref="IsAllUpperFast(string)"/> if that is likely).</para>
+    /// <para>This is intended for "technical text" processing, not for general "user displayed text" which should use base dotnet methods (ToLower/ToLowerInvariant) for language support.</para>
     /// </summary>
     /// <param name="input">The original string.</param>
     /// <returns>An uppercase version.</returns>
-    public static string ToUpperFast(this string input)
+    public static unsafe string ToUpperFast(this string input)
     {
-        char[] finalString = input.ToCharArray();
-        for (int i = 0; i < finalString.Length; i++)
+        int first = -1;
+        int len = input.Length;
+        fixed (char* chrs = input)
         {
-            char c = finalString[i];
-            if ((c & 0b11100000) == 0b01100000 && c >= 'a' && c <= 'z')
+            for (int i = 0; i < len; i++)
             {
-                finalString[i] = (char)(c ^ 0b00100000);
+                uint c = chrs[i];
+                if (c - 'A' <= 'Z' - 'A')
+                {
+                    first = i;
+                    goto mustchange;
+                }
             }
+            return input;
+        mustchange:
+            string dup = new(chrs, 0, len);
+            fixed (char* chrs2 = dup)
+            {
+                for (int i = first; i < len; i++)
+                {
+                    uint c = chrs2[i];
+                    if (c - 'a' <= 'z' - 'a')
+                    {
+                        chrs2[i] = (char)(c ^ 0b00100000);
+                    }
+                }
+            }
+            return dup;
         }
-        return new string(finalString);
     }
 
     /// <summary>
-    /// Returns whether the string contains only uppercase ASCII letters (or more specifically: that it does not contain uppercase ASCII letters).
+    /// Returns whether the string contains only uppercase ASCII letters (or more specifically: that it does not contain lowercase ASCII letters).
     /// <para>Does not work with non-ASCII text (no support for unicode/multi-language/etc).</para>
     /// <para>Operates explicitly on the ASCII 'a-z' and 'A-Z' range.</para>
     /// </summary>
@@ -525,7 +562,8 @@ public static class StringExtensions
     {
         for (int i = 0; i < input.Length; i++)
         {
-            if (input[i] >= 'a' && input[i] <= 'z')
+            uint c = input[i];
+            if (c - 'a' <= 'z' - 'a')
             {
                 return false;
             }
@@ -550,7 +588,7 @@ public static class StringExtensions
         return finalCount;
     }
 
-    /// <summary>Quickly split a string around a splitter character, with an optional max split count.</summary>
+    /// <summary>Quickly split a string around a splitter character, with an optional max split count, in a consistent and reliable manner.</summary>
     /// <param name="input">The original string.</param>
     /// <param name="splitChar">What to split it by.</param>
     /// <returns>The split string pieces.</returns>
@@ -573,7 +611,7 @@ public static class StringExtensions
         return resultArray;
     }
 
-    /// <summary>Quickly split a string around a splitter character, with a max split count.</summary>
+    /// <summary>Quickly split a string around a splitter character, with a max split count, in a consistent and reliable manner.</summary>
     /// <param name="input">The original string.</param>
     /// <param name="splitChar">What to split it by.</param>
     /// <param name="maxCount">The maximum number of times to split it.
@@ -582,7 +620,7 @@ public static class StringExtensions
     public static string[] SplitFast(this string input, char splitChar, int maxCount)
     {
         int count = CountCharacter(input, splitChar);
-        count = ((count > maxCount) ? maxCount : count);
+        count = (count > maxCount) ? maxCount : count;
         string[] resultArray = new string[count + 1];
         int startIndex = 0;
         int currentResultIndex = 0;
