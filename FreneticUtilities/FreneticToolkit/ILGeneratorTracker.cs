@@ -28,7 +28,7 @@ public class ILGeneratorTracker
     public ILGeneratorTracker(ILGenerator _internal, MethodInfo _method, string _name = null)
     {
         Internal = _internal;
-        Parameters = _method.GetParameters().Select(p => p.ParameterType).ToArray();
+        Parameters = [.. _method.GetParameters().Select(p => p.ParameterType)];
         if (!_method.IsStatic)
         {
             Parameters = new Type[1] { _method.DeclaringType }.JoinWith(Parameters);
@@ -41,7 +41,7 @@ public class ILGeneratorTracker
     public ILGeneratorTracker(ILGenerator _internal, ConstructorInfo _method, string _name = null)
     {
         Internal = _internal;
-        Parameters = new Type[1] { _method.DeclaringType }.JoinWith(_method.GetParameters().Select(p => p.ParameterType).ToArray());
+        Parameters = new Type[1] { _method.DeclaringType }.JoinWith([.. _method.GetParameters().Select(p => p.ParameterType)]);
         Name = _name ?? $"Constructor_{_method.DeclaringType.Name}";
         PostInit();
     }

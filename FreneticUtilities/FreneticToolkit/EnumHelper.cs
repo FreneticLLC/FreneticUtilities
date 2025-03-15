@@ -91,9 +91,9 @@ public static class EnumHelper<T> where T : Enum
     static EnumHelper()
     {
         Names = Enum.GetNames(typeof(T));
-        NameSet = new HashSet<string>(Names);
+        NameSet = [.. Names];
         Values = Enum.GetValues(typeof(T)) as T[];
-        ValueSet = new HashSet<T>(Values);
+        ValueSet = [.. Values];
         NameValueMap = Names.ToDictionaryWithNoDup(Values);
         LoweredNameValueMap = Names.Select(StringExtensions.ToLowerFast).ToList().ToDictionaryWith(Values);
         ValueNameMap = Values.ToDictionaryWith(Names);
