@@ -1,3 +1,6 @@
 dotnet pack --configuration release
 
-# And then eg: dotnet nuget push .\FreneticUtilities\bin\Release\FreneticLLC.FreneticUtilities.1.0.38.nupkg --source https://api.nuget.org/v3/index.json
+echo "Packed, verify then press enter to push"
+pause
+
+dotnet nuget push .\FreneticUtilities\bin\Release\FreneticLLC.FreneticUtilities.1.1.1.nupkg --source https://api.nuget.org/v3/index.json
