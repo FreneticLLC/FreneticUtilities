@@ -10,7 +10,7 @@
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilities</Product>
     <Copyright>Copyright (C) Frenetic LLC 2016-2025</Copyright>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

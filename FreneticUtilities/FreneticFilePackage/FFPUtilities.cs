@@ -50,7 +50,7 @@ public static class FFPUtilities
                     return outputStream.ToArray();
                 }
             default:
-                throw new NotSupportedException("Cannot decode from encoding: " + encoding);
+                throw new NotSupportedException($"Cannot decode from encoding: {encoding}");
         }
     }
 
@@ -77,7 +77,7 @@ public static class FFPUtilities
         {
             FFPEncoding.RAW => input,
             FFPEncoding.GZIP => CompressGZip(input),
-            _ => throw new NotSupportedException("Cannot decode from encoding: " + encoding),
+            _ => throw new NotSupportedException($"Cannot decode from encoding: {encoding}"),
         };
     }
     /// <summary>Provides a decoding stream for data stored with a specified encoding.</summary>
@@ -90,7 +90,7 @@ public static class FFPUtilities
         {
             FFPEncoding.RAW => input,
             FFPEncoding.GZIP => new GZipStream(input, CompressionMode.Decompress),
-            _ => throw new NotSupportedException("Cannot decode from encoding: " + encoding),
+            _ => throw new NotSupportedException($"Cannot decode from encoding: {encoding}"),
         };
     }
 
@@ -112,7 +112,7 @@ public static class FFPUtilities
                 }
                 return outputStream;
             default:
-                throw new NotSupportedException("Cannot decode from encoding: " + encoding);
+                throw new NotSupportedException($"Cannot decode from encoding: {encoding}");
         }
     }
 
@@ -129,7 +129,7 @@ public static class FFPUtilities
             int justRead = input.Read(outputArray, totalRead, length - totalRead);
             if (justRead < 0)
             {
-                throw new InvalidOperationException("Stream refused to continue reading, with " + (length - totalRead) + " bytes still required.");
+                throw new InvalidOperationException($"Stream refused to continue reading, with {length - totalRead} bytes still required.");
             }
             totalRead += justRead;
         }

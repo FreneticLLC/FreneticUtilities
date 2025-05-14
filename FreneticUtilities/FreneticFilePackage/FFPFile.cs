@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticFilePackage;
 
@@ -45,15 +44,12 @@ public class FFPFile
     /// <summary>The simple name of the file (path data removed).</summary>
     public string SimpleName;
 
-    /// <summary>Locker used to prevent overlapping file reads across multiple threads.</summary>
-    public LockObject Locker = new();
-
     /// <summary>Returns a byte array of the actual file data.</summary>
     /// <returns>The actual file data.</returns>
     public byte[] ReadFileData()
     {
         byte[] output = new byte[Internal.FileLength];
-        lock (Locker)
+        lock (Package.Internal.AccessLock)
         {
             Package.FileStream.Seek(Internal.StartPosition, SeekOrigin.Begin);
             FFPUtilities.ReadBytesGuaranteed(Package.FileStream, output, (int)Internal.FileLength);
