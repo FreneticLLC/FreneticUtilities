@@ -45,6 +45,31 @@ public static class TesterProgram
         string command = args.Length < 1 ? "" : args[0].ToLowerFast();
         switch (command)
         {
+            case "pack-sub-folders":
+                if (args.Length < 2)
+                {
+                    Console.WriteLine("Usage: pack-sub-folders [folder]");
+                    break;
+                }
+                try
+                {
+                    foreach (string dir in Directory.EnumerateDirectories(args[1]))
+                    {
+                        string name = Path.GetFileName(dir);
+                        if (name.StartsWith('.'))
+                        {
+                            continue;
+                        }
+                        Console.WriteLine($"Packing {name}...");
+                        FFPBuilder.CreateFromFolder(dir, dir + ".ffp", new FFPBuilder.Options());
+                    }
+                    Console.WriteLine("Packing complete.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Packing failed: " + ex.ToString());
+                }
+                break;
             case "pack-folder":
                 if (args.Length < 3)
                 {
@@ -124,6 +149,7 @@ public static class TesterProgram
             default:
                 Console.WriteLine("Frenetic Utilities Tester Program");
                 Console.WriteLine("Sub-commands available:");
+                Console.WriteLine("  pack-sub-folders [folder]                | Packages all sub-folders using FFP");
                 Console.WriteLine("  pack-folder [folder] [output file]       | Packages a folder using FFP");
                 Console.WriteLine("  pack-show [input file]                   | Shows the contents of a package");
                 Console.WriteLine("  pack-dump [package file] [output folder] | Dumps the contents of a package");
