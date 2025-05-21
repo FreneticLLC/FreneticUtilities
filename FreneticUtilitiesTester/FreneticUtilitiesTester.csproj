@@ -26,6 +26,9 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\FreneticUtilities\FreneticUtilities.csproj" />
   </ItemGroup>
 </Project>

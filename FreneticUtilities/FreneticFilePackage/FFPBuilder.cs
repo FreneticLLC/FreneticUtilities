@@ -125,37 +125,7 @@ public static class FFPBuilder
         {
             if (files[i].FileObject is string fileName)
             {
-                headers[i].Position = position;
-                using FileStream stream = File.OpenRead(fileName);
-                headers[i].ActualLength = stream.Length;
-                if (options.MayGZip && stream.Length > options.MinimumCompression && stream.Length < options.MaximumCompression && !options.ExcludeCompressionExtensions.Contains(fileName.AfterLast('.')))
-                {
-                    byte[] raw = new byte[stream.Length];
-                    FFPUtilities.ReadBytesGuaranteed(stream, raw, (int)stream.Length);
-                    byte[] compressed = FFPUtilities.CompressGZip(raw);
-                    byte[] toWrite;
-                    int ratio = (int)((compressed.Length / (double)raw.Length) * 100);
-                    if (ratio < options.RequiredCompressionPercentage)
-                    {
-                        headers[i].Encoding = (byte)FFPEncoding.GZIP;
-                        toWrite = compressed;
-                    }
-                    else
-                    {
-                        headers[i].Encoding = (byte)FFPEncoding.RAW;
-                        toWrite = raw;
-                    }
-                    headers[i].FileLength = toWrite.Length;
-                    output.Write(toWrite, 0, toWrite.Length);
-                    position += toWrite.Length;
-                }
-                else
-                {
-                    headers[i].Encoding = (byte)FFPEncoding.RAW;
-                    headers[i].FileLength = stream.Length;
-                    position += stream.Length;
-                    stream.CopyTo(output);
-                }
+                InternalData.WriteFileDataToStream(headers[i], ref position, output, fileName, options);
             }
         }
         for (int i = 0; i < files.Length; i++)
@@ -171,6 +141,43 @@ public static class FFPBuilder
     /// <summary>Internal data for the <see cref="FFPackage"/>.</summary>
     public class InternalData
     {
+        /// <summary>Internal handler to write data from a file to a stream, automatically handling any required conversions.</summary>
+        public static void WriteFileDataToStream(FileHeaderInfo header, ref long position, Stream output, string fileName, Options options)
+        {
+            header.Position = position;
+            string extension = fileName.AfterLast('.');
+            using FileStream stream = File.OpenRead(fileName);
+            header.ActualLength = stream.Length;
+            if (options.MayGZip && stream.Length > options.MinimumCompression && stream.Length < options.MaximumCompression && !options.ExcludeCompressionExtensions.Contains(extension))
+            {
+                byte[] raw = new byte[stream.Length];
+                FFPUtilities.ReadBytesGuaranteed(stream, raw, (int)stream.Length);
+                byte[] compressed = FFPUtilities.CompressGZip(raw);
+                byte[] toWrite;
+                int ratio = (int)((compressed.Length / (double)raw.Length) * 100);
+                if (ratio < options.RequiredCompressionPercentage)
+                {
+                    header.Encoding = (byte)FFPEncoding.GZIP;
+                    toWrite = compressed;
+                }
+                else
+                {
+                    header.Encoding = (byte)FFPEncoding.RAW;
+                    toWrite = raw;
+                }
+                header.FileLength = toWrite.Length;
+                output.Write(toWrite, 0, toWrite.Length);
+                position += toWrite.Length;
+            }
+            else
+            {
+                header.Encoding = (byte)FFPEncoding.RAW;
+                header.FileLength = stream.Length;
+                position += stream.Length;
+                stream.CopyTo(output);
+            }
+        }
+
         /// <summary>Gets <see cref="FFPBuilderFile"/> instances for every file in a given folder and sub-folders.</summary>
         public static FFPBuilderFile[] GetFilesIn(string folder)
         {
