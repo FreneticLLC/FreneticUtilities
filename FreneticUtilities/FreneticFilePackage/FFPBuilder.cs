@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
 
 namespace FreneticUtilities.FreneticFilePackage;
@@ -55,6 +56,11 @@ public static class FFPBuilder
         /// The default value is 70, meaning the compressed size must be 70% or less of the raw size.
         /// </summary>
         public int RequiredCompressionPercentage = 70;
+
+        /// <summary>
+        /// File extensions to exclude from compression (because they are already compressed or can't be reasonably compressed), eg "png", "jpg", etc.
+        /// </summary>
+        public HashSet<string> ExcludeCompressionExtensions = ["png", "jpg", "webp", "webm", "mp4", "mkv"];
     }
 
     private static FFPBuilderFile[] GetFilesIn(string folder)
@@ -137,7 +143,7 @@ public static class FFPBuilder
                 headers[i].Position = position;
                 using FileStream stream = File.OpenRead(fileName);
                 headers[i].ActualLength = stream.Length;
-                if (options.MayGZip && stream.Length > options.MinimumCompression && stream.Length < options.MaximumCompression)
+                if (options.MayGZip && stream.Length > options.MinimumCompression && stream.Length < options.MaximumCompression && !options.ExcludeCompressionExtensions.Contains(fileName.AfterLast('.')))
                 {
                     byte[] raw = new byte[stream.Length];
                     FFPUtilities.ReadBytesGuaranteed(stream, raw, (int)stream.Length);
