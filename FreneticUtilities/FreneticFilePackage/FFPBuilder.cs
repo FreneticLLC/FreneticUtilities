@@ -63,28 +63,13 @@ public static class FFPBuilder
         public HashSet<string> ExcludeCompressionExtensions = ["png", "jpg", "webp", "webm", "mp4", "mkv"];
     }
 
-    private static FFPBuilderFile[] GetFilesIn(string folder)
-    {
-        folder = Path.GetFullPath(folder);
-        List<FFPBuilderFile> filesOutput = [];
-        foreach (string file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories))
-        {
-            filesOutput.Add(new FFPBuilderFile()
-            {
-                Name = file[folder.Length..],
-                FileObject = file
-            });
-        }
-        return [.. filesOutput];
-    }
-
     /// <summary>Creates a <see cref="FFPackage"/> from a file system folder and saves it to a new file.</summary>
     /// <param name="folder">The file system folder.</param>
     /// <param name="outputFile">The file to output to.</param>
     /// <param name="options">The building options.</param>
     public static void CreateFromFolder(string folder, string outputFile, Options options)
     {
-        FFPBuilderFile[] inputFiles = GetFilesIn(folder);
+        FFPBuilderFile[] inputFiles = InternalData.GetFilesIn(folder);
         using FileStream output = File.OpenWrite(outputFile);
         CreateFromFiles(inputFiles, output, options);
         output.Flush(true);
@@ -95,7 +80,7 @@ public static class FFPBuilder
     /// <param name="options">The building options.</param>
     public static void CreateFromFolder(string folder, Stream output, Options options)
     {
-        CreateFromFiles(GetFilesIn(folder), output, options);
+        CreateFromFiles(InternalData.GetFilesIn(folder), output, options);
     }
 
     /// <summary>Creates a <see cref="FFPackage"/> from an array of on-disk files, in-memory files, and stream-backed files.</summary>
@@ -120,18 +105,18 @@ public static class FFPBuilder
         }
         long position = 0;
         byte[] helper = new byte[8];
-        output.Write(HEADER, 0, HEADER.Length);
-        position += HEADER.Length;
-        WriteInt(files.Length, helper, output);
+        output.Write(InternalData.HEADER, 0, InternalData.HEADER.Length);
+        position += InternalData.HEADER.Length;
+        InternalData.WriteInt(files.Length, helper, output);
         position += 4;
-        FileHeaderInfo[] headers = new FileHeaderInfo[files.Length];
+        InternalData.FileHeaderInfo[] headers = new InternalData.FileHeaderInfo[files.Length];
         for (int i = 0; i < files.Length; i++)
         {
             headers[i].HeaderPosition = position;
-            output.Write(PLACEHOLDER_FILEDATA, 0, PLACEHOLDER_FILEDATA.Length);
-            position += PLACEHOLDER_FILEDATA.Length;
+            output.Write(InternalData.PLACEHOLDER_FILEDATA, 0, InternalData.PLACEHOLDER_FILEDATA.Length);
+            position += InternalData.PLACEHOLDER_FILEDATA.Length;
             byte[] fileNameBytes = StringConversionHelper.UTF8Encoding.GetBytes(files[i].Name);
-            WriteInt(fileNameBytes.Length, helper, output);
+            InternalData.WriteInt(fileNameBytes.Length, helper, output);
             position += 4;
             output.Write(fileNameBytes, 0, fileNameBytes.Length);
             position += fileNameBytes.Length;
@@ -176,35 +161,65 @@ public static class FFPBuilder
         for (int i = 0; i < files.Length; i++)
         {
             output.Seek(headers[i].HeaderPosition, SeekOrigin.Begin);
-            WriteLong(headers[i].Position, helper, output);
-            WriteLong(headers[i].FileLength, helper, output);
+            InternalData.WriteLong(headers[i].Position, helper, output);
+            InternalData.WriteLong(headers[i].FileLength, helper, output);
             output.WriteByte(headers[i].Encoding);
-            WriteLong(headers[i].ActualLength, helper, output);
+            InternalData.WriteLong(headers[i].ActualLength, helper, output);
         }
     }
 
-    private struct FileHeaderInfo
+    /// <summary>Internal data for the <see cref="FFPackage"/>.</summary>
+    public class InternalData
     {
-        public long HeaderPosition;
-        public long Position;
-        public long FileLength;
-        public byte Encoding;
-        public long ActualLength;
-    }
+        /// <summary>Gets <see cref="FFPBuilderFile"/> instances for every file in a given folder and sub-folders.</summary>
+        public static FFPBuilderFile[] GetFilesIn(string folder)
+        {
+            folder = Path.GetFullPath(folder);
+            List<FFPBuilderFile> filesOutput = [];
+            foreach (string file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories))
+            {
+                filesOutput.Add(new FFPBuilderFile()
+                {
+                    Name = file[folder.Length..],
+                    FileObject = file
+                });
+            }
+            return [.. filesOutput];
+        }
 
-    private readonly static byte[] HEADER = "FFP001"u8.ToArray();
+        /// <summary>Info for a file header.</summary>
+        public struct FileHeaderInfo
+        {
+            /// <summary>The position of the header itself in the file.</summary>
+            public long HeaderPosition;
+            /// <summary>The position of the file data in the file.</summary>
+            public long Position;
+            /// <summary>The encoded length of the file data in the file (eg after compression).</summary>
+            public long FileLength;
+            /// <summary>The encoding ID for the file data (raw vs compressed).</summary>
+            public byte Encoding;
+            /// <summary>The true length of the file data.</summary>
+            public long ActualLength;
+        }
 
-    private readonly static byte[] PLACEHOLDER_FILEDATA = new byte[8 + 8 + 1 + 8];
+        /// <summary>The header for a <see cref="FFPackage"/>, "FFP001".</summary>
+        public readonly static byte[] HEADER = "FFP001"u8.ToArray();
 
-    private static void WriteInt(int value, byte[] helper, Stream output)
-    {
-        PrimitiveConversionHelper.Int32ToBytes(value, helper, 0);
-        output.Write(helper, 0, 4);
-    }
+        /// <summary>The placeholder file data for a header - empty bytes of the same length as <see cref="FileHeaderInfo"/>.</summary>
+        public readonly static byte[] PLACEHOLDER_FILEDATA = new byte[8 + 8 + 1 + 8];
 
-    private static void WriteLong(long value, byte[] helper, Stream output)
-    {
-        PrimitiveConversionHelper.Long64ToBytes(value, helper, 0);
-        output.Write(helper, 0, 8);
+        /// <summary>Writes an int32 to a stream.</summary>
+        public static void WriteInt(int value, byte[] helper, Stream output)
+        {
+            PrimitiveConversionHelper.Int32ToBytes(value, helper, 0);
+            output.Write(helper, 0, 4);
+        }
+
+        /// <summary>Writes an int64 to a stream.</summary>
+        public static void WriteLong(long value, byte[] helper, Stream output)
+        {
+            PrimitiveConversionHelper.Long64ToBytes(value, helper, 0);
+            output.Write(helper, 0, 8);
+        }
     }
 }
