@@ -125,7 +125,7 @@ public static class FFPBuilder
         {
             if (files[i].FileObject is string fileName)
             {
-                InternalData.WriteFileDataToStream(headers[i], ref position, output, fileName, options);
+                InternalData.WriteFileDataToStream(ref headers[i], ref position, output, fileName, options);
             }
         }
         for (int i = 0; i < files.Length; i++)
@@ -142,7 +142,7 @@ public static class FFPBuilder
     public class InternalData
     {
         /// <summary>Internal handler to write data from a file to a stream, automatically handling any required conversions.</summary>
-        public static void WriteFileDataToStream(FileHeaderInfo header, ref long position, Stream output, string fileName, Options options)
+        public static void WriteFileDataToStream(ref FileHeaderInfo header, ref long position, Stream output, string fileName, Options options)
         {
             header.Position = position;
             string extension = fileName.AfterLast('.');
