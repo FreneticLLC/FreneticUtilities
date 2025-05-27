@@ -53,16 +53,16 @@ public static class TesterProgram
                 }
                 try
                 {
-                    foreach (string dir in Directory.EnumerateDirectories(args[1]))
+                    Parallel.ForEach(Directory.EnumerateDirectories(args[1]), new ParallelOptions() { MaxDegreeOfParallelism = 10 }, dir =>
                     {
                         string name = Path.GetFileName(dir);
                         if (name.StartsWith('.'))
                         {
-                            continue;
+                            return;
                         }
                         Console.WriteLine($"Packing {name}...");
                         FFPBuilder.CreateFromFolder(dir, dir + ".ffp", new FFPBuilder.Options());
-                    }
+                    });
                     Console.WriteLine("Packing complete.");
                 }
                 catch (Exception ex)
@@ -78,18 +78,18 @@ public static class TesterProgram
                 }
                 try
                 {
-                    foreach (string dir in Directory.EnumerateDirectories(args[1]))
+                    Parallel.ForEach(Directory.EnumerateDirectories(args[1]), new ParallelOptions() { MaxDegreeOfParallelism = 10 }, dir =>
                     {
                         string name = Path.GetFileName(dir);
                         if (name.StartsWith('.'))
                         {
-                            continue;
+                            return;
                         }
                         Console.WriteLine($"Scanning for enhancements to {name}...");
                         FGEEnhancements.RunNow(dir);
                         Console.WriteLine($"Packing {name}...");
                         FFPBuilder.CreateFromFolder(dir, dir + ".ffp", new FFPBuilder.Options());
-                    }
+                    });
                     Console.WriteLine("Packing complete.");
                 }
                 catch (Exception ex)
