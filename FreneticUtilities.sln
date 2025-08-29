@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreneticUtilities", "Frenet
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreneticUtilitiesTester", "FreneticUtilitiesTester\FreneticUtilitiesTester.csproj", "{1DB47D6A-4225-4F25-4259-2C6292496953}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreneticUtilitiesUnitTests", "FreneticUtilitiesUnitTests\FreneticUtilitiesUnitTests.csproj", "{BC791A53-E852-4E99-90F9-4E9CF3138C14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1DB47D6A-4225-4F25-4259-2C6292496953}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DB47D6A-4225-4F25-4259-2C6292496953}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DB47D6A-4225-4F25-4259-2C6292496953}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC791A53-E852-4E99-90F9-4E9CF3138C14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC791A53-E852-4E99-90F9-4E9CF3138C14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC791A53-E852-4E99-90F9-4E9CF3138C14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC791A53-E852-4E99-90F9-4E9CF3138C14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
