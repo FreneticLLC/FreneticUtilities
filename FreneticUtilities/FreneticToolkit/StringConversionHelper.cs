@@ -434,4 +434,70 @@ public static class StringConversionHelper
         result.Append(taggedText[start..]);
         return result.ToString();
     }
+
+    /// <summary>
+    /// Simple function to parse CLI args like "--key value --flag --otherkey=othervalue" into a dictionary with (key, value), (flag, ""), (otherkey, othervalue).
+    /// <br/>Does not do '-c' character flags. Does not allow the same key to be used twice (throws exception).
+    /// <br/>Does not handle quotes (assumes handled by calling shell). Does do do escaping (assumes handled by calling shell).
+    /// <br/>Does not do linear args before the key list.
+    /// <br/>If an arg does not start with '--', it is considered a value for the previous key.
+    /// <br/>If the first arg does not start with '--', an exception is thrown.
+    /// <br/>Keys retain user input casing, but have case-insensitive lookup in the dictionary.
+    /// </summary>
+    /// <exception cref="ArgumentException">If input is unparseable for any reason.</exception>
+    /// <param name="args">The args. You can grab this from <see cref="Environment.GetCommandLineArgs"/>, or feed from an alternate source.</param>
+    /// <returns>Key/value pair map dict.</returns>
+    public static Dictionary<string, string> SimpleCliArgsParser(string[] args)
+    {
+        Dictionary<string, string> output = new(StringComparer.OrdinalIgnoreCase);
+        string key = null, currentValue = null;
+        foreach (string arg in args)
+        {
+            if (key is null)
+            {
+                if (string.IsNullOrWhiteSpace(arg))
+                {
+                    continue;
+                }
+                if (!arg.StartsWith("--"))
+                {
+                    throw new ArgumentException($"Argument '{arg}' was expected to be a key ('--') but was not. Cannot parse arguments.");
+                }
+            }
+            if (arg.StartsWith("--"))
+            {
+                key = arg[2..];
+                string value = "";
+                int equals = key.IndexOf('=');
+                if (equals != -1)
+                {
+                    value = key[(equals + 1)..];
+                    key = key[..equals];
+                }
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    throw new ArgumentException($"Argument '{arg}' was expected to have a key before the '=' but did not. Cannot parse arguments.");
+                }
+                if (output.ContainsKey(key))
+                {
+                    throw new ArgumentException($"Argument '{arg}' was expected to have a unique key, but the key '{key}' was already used. Cannot parse arguments.");
+                }
+                output[key] = value;
+                currentValue = value;
+            }
+            else
+            {
+                if (currentValue.Length == 0)
+                {
+                    currentValue = arg;
+                }
+                else
+                {
+                    currentValue += $" {arg}";
+                }
+                output[key] = currentValue;
+            }
+        }
+        return output;
+    }
 }
