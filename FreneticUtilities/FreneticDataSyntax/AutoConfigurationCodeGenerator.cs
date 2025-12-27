@@ -660,6 +660,8 @@ public static class AutoConfigurationCodeGenerator
             {
                 return null;
             }
+            result = new AutoConfiguration.Internal.AutoConfigData();
+            TypeMap[type] = result;
             AutoConfiguration referenceDefaults;
             try
             {
@@ -670,8 +672,6 @@ public static class AutoConfigurationCodeGenerator
             {
                 AntiDuplicate = false;
             }
-            result = new AutoConfiguration.Internal.AutoConfigData();
-            TypeMap[type] = result;
             // FDSSection Save(AutoConfiguration config) {
             DynamicMethod saveMethod = new("Save", typeof(FDSSection), SaveMethodInputTypeArray, typeof(AutoConfiguration).Module, true);
             ILGeneratorTracker saveILGen = new(saveMethod.GetILGenerator(), saveMethod, $"Save_{type.Name}");
