@@ -445,7 +445,7 @@ public static class StringConversionHelper
     /// <br/>Keys retain user input casing, but have case-insensitive lookup in the dictionary.
     /// </summary>
     /// <exception cref="ArgumentException">If input is unparseable for any reason.</exception>
-    /// <param name="args">The args. You can grab this from <see cref="Environment.GetCommandLineArgs"/>, or feed from an alternate source.</param>
+    /// <param name="args">The args. You can grab this from <see cref="Environment.GetCommandLineArgs"/>[1..], or feed from an alternate source.</param>
     /// <returns>Key/value pair map dict.</returns>
     public static Dictionary<string, string> SimpleCliArgsParser(string[] args)
     {

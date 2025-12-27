@@ -85,10 +85,18 @@ public static class TesterProgram
                         {
                             return;
                         }
-                        Console.WriteLine($"Scanning for enhancements to {name}...");
-                        FGEEnhancements.RunNow(dir);
-                        Console.WriteLine($"Packing {name}...");
-                        FFPBuilder.CreateFromFolder(dir, dir + ".ffp", new FFPBuilder.Options());
+                        try
+                        {
+                            Console.WriteLine($"Scanning for enhancements to {name}...");
+                            FGEEnhancements.RunNow(dir);
+                            Console.WriteLine($"Packing {name}...");
+                            FFPBuilder.CreateFromFolder(dir, dir + ".ffp", new FFPBuilder.Options());
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error processing {name}: " + ex.ToString());
+                            Environment.Exit(1);
+                        }
                     });
                     Console.WriteLine("Packing complete.");
                 }
