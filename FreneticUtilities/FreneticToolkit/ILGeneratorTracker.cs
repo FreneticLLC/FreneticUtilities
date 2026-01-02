@@ -24,6 +24,20 @@ namespace FreneticUtilities.FreneticToolkit;
 /// <summary>Tracks generated IL.</summary>
 public class ILGeneratorTracker
 {
+    /// <summary>Simple tiny helper, creates a delegate that constructs an object via the given constructor.</summary>
+    public static Delegate CreateConstructorFunc(ConstructorInfo ctor, Type[] inTypes)
+    {
+        DynamicMethod dm = new(ctor.DeclaringType.Name + "_Ctor", ctor.DeclaringType, inTypes, true);
+        ILGenerator il = dm.GetILGenerator();
+        for (int i = 0; i < inTypes.Length; i++)
+        {
+            il.Emit(OpCodes.Ldarg, i);
+        }
+        il.Emit(OpCodes.Newobj, ctor);
+        il.Emit(OpCodes.Ret);
+        return dm.CreateDelegate(ctor.DeclaringType);
+    }
+
     /// <summary>Creates the instance to wrap an MS base object.</summary>
     public ILGeneratorTracker(ILGenerator _internal, MethodInfo _method, string _name = null)
     {
