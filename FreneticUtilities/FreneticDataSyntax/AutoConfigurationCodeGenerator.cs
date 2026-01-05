@@ -643,7 +643,7 @@ public static class AutoConfigurationCodeGenerator
     }
 
     /// <summary>Special helper bool tracker to avoid duplicate generation calls.</summary>
-    public static bool AntiDuplicate;
+    public static Type GeneratingNow;
 
     /// <summary>Generate the raw internal data for the specific config class type.</summary>
     /// <param name="type">The config class type.</param>
@@ -656,7 +656,7 @@ public static class AutoConfigurationCodeGenerator
             {
                 return result;
             }
-            if (AntiDuplicate)
+            if (GeneratingNow == type)
             {
                 return null;
             }
@@ -665,21 +665,21 @@ public static class AutoConfigurationCodeGenerator
             AutoConfiguration referenceDefaults;
             try
             {
-                AntiDuplicate = true;
+                GeneratingNow = type;
                 referenceDefaults = type.GetConstructor([]).Invoke([]) as AutoConfiguration;
             }
             finally
             {
-                AntiDuplicate = false;
+                GeneratingNow = null;
             }
             // FDSSection Save(AutoConfiguration config) {
-            DynamicMethod saveMethod = new("Save", typeof(FDSSection), SaveMethodInputTypeArray, typeof(AutoConfiguration).Module, true);
+            DynamicMethod saveMethod = new($"AutoConf_Generated_Save_{type.Name}", typeof(FDSSection), SaveMethodInputTypeArray, typeof(AutoConfiguration).Module, true);
             ILGeneratorTracker saveILGen = new(saveMethod.GetILGenerator(), saveMethod, $"Save_{type.Name}");
             LocalBuilder saveOutputLocal = saveILGen.DeclareLocal(typeof(FDSSection)); // FDSSection output;
             saveILGen.Emit(OpCodes.Newobj, SectionConstructor); // output = new FDSSection();
             saveILGen.Emit(OpCodes.Stloc, saveOutputLocal);
             // void Load(AutoConfiguration config, FDSSection section) {
-            DynamicMethod loadMethod = new("Load", typeof(void), LoadMethodInputTypeArray, typeof(AutoConfiguration).Module, true);
+            DynamicMethod loadMethod = new($"AutoConf_Generated_Load_{type.Name}", typeof(void), LoadMethodInputTypeArray, typeof(AutoConfiguration).Module, true);
             ILGeneratorTracker loadILGen = new(loadMethod.GetILGenerator(), loadMethod, $"Load_{type.Name}");
             LocalBuilder loadgen_SectionLocal = loadILGen.DeclareLocal(typeof(FDSSection));
             LocalBuilder loadgen_DataLocal = loadILGen.DeclareLocal(typeof(FDSData));
@@ -782,6 +782,7 @@ public static class AutoConfigurationCodeGenerator
             loadILGen.Emit(OpCodes.Ret);
             result.SaveSection = saveMethod.CreateDelegate<Func<AutoConfiguration, bool, FDSSection>>();
             result.LoadSection = loadMethod.CreateDelegate<Action<AutoConfiguration, FDSSection>>();
+            result.Generated = true;
             return result;
         }
     }

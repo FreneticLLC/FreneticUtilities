@@ -29,7 +29,7 @@ public class ILGeneratorTracker
     {
         DynamicMethod dm = new(typeof(T).Name + "_Ctor", typeof(T), inTypes, true);
         ILGenerator il = dm.GetILGenerator();
-        for (int i = 0; i < inTypes.Length; i++)
+        for (int i = 0; i < inTypes.Length; i++) // TODO: This part doesn't make sense if it doesn't have params on the func. Maybe take the typeof(Func) as input too?
         {
             il.Emit(OpCodes.Ldarg, i);
         }

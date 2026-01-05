@@ -41,6 +41,9 @@ public abstract class AutoConfiguration
 
             /// <summary>All fields for this instance, mapped from Name.ToLowerFast() to full field data.</summary>
             public Dictionary<string, SingleFieldData> Fields = [];
+
+            /// <summary>If true, this data is ready. If it is false, it is still generating.</summary>
+            public bool Generated;
         }
 
         /// <summary>Container for important data about a single field in an <see cref="AutoConfiguration"/> class.</summary>
@@ -89,6 +92,10 @@ public abstract class AutoConfiguration
     public AutoConfiguration()
     {
         Type type = GetType();
+        if (AutoConfigurationCodeGenerator.GeneratingNow == type)
+        {
+            return;
+        }
         if (!AutoConfigurationCodeGenerator.TypeMap.TryGetValue(type, out InternalData.SharedData))
         {
             InternalData.SharedData = AutoConfigurationCodeGenerator.GenerateData(type);
@@ -96,6 +103,16 @@ public abstract class AutoConfiguration
         if (InternalData.SharedData is null)
         {
             return;
+        }
+        if (!InternalData.SharedData.Generated)
+        {
+            lock (AutoConfigurationCodeGenerator.GenerationLock)
+            {
+                if (!InternalData.SharedData.Generated)
+                {
+                    throw new Exception($"AutoConfiguration data for type '{type.FullName}' was not properly generated.");
+                }
+            }
         }
         InternalData.IsFieldModified = new bool[InternalData.SharedData.Fields.Count];
     }
