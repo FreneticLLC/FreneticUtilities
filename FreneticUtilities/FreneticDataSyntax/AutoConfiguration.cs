@@ -94,7 +94,13 @@ public abstract class AutoConfiguration
         Type type = GetType();
         if (AutoConfigurationCodeGenerator.GeneratingNow == type)
         {
-            return;
+            lock (AutoConfigurationCodeGenerator.GenerationLock)
+            {
+                if (AutoConfigurationCodeGenerator.GeneratingNow == type)
+                {
+                    return;
+                }
+            }
         }
         if (!AutoConfigurationCodeGenerator.TypeMap.TryGetValue(type, out InternalData.SharedData))
         {
