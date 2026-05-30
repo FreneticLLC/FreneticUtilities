@@ -84,6 +84,18 @@ public class FGEEnhancements
         public EnhancementsConfig Enhancements = new();
     }
 
+    /// <summary>Private (non-published) data for a package.</summary>
+    public class FGEPrivateConfig : AutoConfiguration
+    {
+        /// <summary>Private description of the package.</summary>
+        [ConfigComment("Private description of the package.")]
+        public string PrivateDescription = "";
+
+        /// <summary>Private indicator of the package release status. Common values include 'NO', 'PUBLIC', 'EXPERIMENTAL', etc.</summary>
+        [ConfigComment("Private indicator of the package release status. Common values include 'NO', 'PUBLIC', 'EXPERIMENTAL', etc.")]
+        public string ReleaseStatus = "Undetermined";
+    }
+
     /// <summary>Runs the full sweep of potential enhancements over a given folder.</summary>
     public static void RunNow(string folder)
     {
@@ -103,6 +115,11 @@ public class FGEEnhancements
             config.Enhancements.EnhancementsVersionRan = EnhancementsVersion;
         }
         config.Save(true).SaveToFile(configFileName);
+        string privateFileName = $"{folder}/package_private.fds";
+        FDSSection privateFileData = File.Exists(privateFileName) ? FDSUtility.ReadFile(privateFileName) : new();
+        FGEPrivateConfig privateConfig = new();
+        privateConfig.Load(privateFileData);
+        privateConfig.Save(true).SaveToFile(privateFileName);
         foreach (string file in Directory.EnumerateFiles(folder, "*.thumb.jpg", SearchOption.AllDirectories).ToArray())
         {
             if (mustRerun)

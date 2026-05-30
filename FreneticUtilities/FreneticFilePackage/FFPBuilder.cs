@@ -39,6 +39,9 @@ public static class FFPBuilder
         /// <summary>Whether GZip compression is allowed.</summary>
         public bool MayGZip = true;
 
+        /// <summary>If true, files or folders prefixed with '.' should be excluded. Also '__MACOSX' files.</summary>
+        public bool ExcludeDotFiles = true;
+
         /// <summary>
         /// Minimum length before compression is considered.
         /// The default value is 1024 (1 kilobyte).
@@ -69,7 +72,7 @@ public static class FFPBuilder
     /// <param name="options">The building options.</param>
     public static void CreateFromFolder(string folder, string outputFile, Options options)
     {
-        FFPBuilderFile[] inputFiles = InternalData.GetFilesIn(folder);
+        FFPBuilderFile[] inputFiles = InternalData.GetFilesIn(folder, options.ExcludeDotFiles);
         using FileStream output = File.OpenWrite(outputFile);
         CreateFromFiles(inputFiles, output, options);
         output.Flush(true);
@@ -80,7 +83,7 @@ public static class FFPBuilder
     /// <param name="options">The building options.</param>
     public static void CreateFromFolder(string folder, Stream output, Options options)
     {
-        CreateFromFiles(InternalData.GetFilesIn(folder), output, options);
+        CreateFromFiles(InternalData.GetFilesIn(folder, options.ExcludeDotFiles), output, options);
     }
 
     /// <summary>Creates a <see cref="FFPackage"/> from an array of on-disk files, in-memory files, and stream-backed files.</summary>
@@ -179,12 +182,25 @@ public static class FFPBuilder
         }
 
         /// <summary>Gets <see cref="FFPBuilderFile"/> instances for every file in a given folder and sub-folders.</summary>
-        public static FFPBuilderFile[] GetFilesIn(string folder)
+        public static FFPBuilderFile[] GetFilesIn(string folder, bool excludeDotFiles)
         {
             folder = Path.GetFullPath(folder);
             List<FFPBuilderFile> filesOutput = [];
-            foreach (string file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories))
+            foreach (string fileRaw in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories))
             {
+                string file = fileRaw.Replace('\\', '/');
+                if (excludeDotFiles)
+                {
+                    string[] parts = file.Split('/');
+                    if (parts.Any(part => part.StartsWith('.') || part == "__MACOSX"))
+                    {
+                        continue;
+                    }
+                }
+                if (file.AfterLast('/') == "package_private.fds")
+                {
+                    continue;
+                }
                 filesOutput.Add(new FFPBuilderFile()
                 {
                     Name = file[folder.Length..],
