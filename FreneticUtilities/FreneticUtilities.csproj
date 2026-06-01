@@ -9,8 +9,8 @@
     <DocumentationFile>bin\Release\FreneticUtilities.xml</DocumentationFile>
     <Company>Frenetic LLC</Company>
     <Product>FreneticUtilities</Product>
-    <Copyright>Copyright (C) Frenetic LLC 2016-2025</Copyright>
-    <Version>1.1.6</Version>
+    <Copyright>Copyright (C) Frenetic LLC 2016-2026</Copyright>
+    <Version>1.1.7</Version>
     <ProjectGuid>{1DB47D6A-4225-4F25-8559-2C6292496953}</ProjectGuid>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <TargetFramework>net8.0</TargetFramework>
